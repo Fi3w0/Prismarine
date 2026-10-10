@@ -40,7 +40,8 @@ still planned.
 
 ### Notes
 
-- Prism Launcher handles Microsoft sign-in, game downloads and game launching.
+- Prismarine is a UI and feature add-on, not a standalone launcher: both apps must
+  be installed. Prism Launcher handles Microsoft sign-in, game downloads and launching.
 - Windows builds are unsigned, and macOS builds are not notarised.
 - Gentoo, Nix and Void recipes are provided here; they are not in the official
   distribution repositories. FreeBSD and additional Linux packages are built in CI.

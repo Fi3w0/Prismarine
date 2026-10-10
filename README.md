@@ -32,9 +32,14 @@ Prismarine is a native Minecraft launcher for the instances you already have in
 your library organised, follow your game's live log and hardware use, and get help
 when something crashes, all in one deep-sea themed interface.
 
-Prism still does the hard part: Microsoft sign-in, downloading the game and launching
-it. Prismarine reads and writes the same instance folders, so you can switch between
-the two at any time and nothing gets converted or locked in.
+**Prism Launcher is required.** Prismarine is a UI and feature add-on rather than
+a standalone launcher, so you need both installed. Prismarine provides the interface
+and library tools; Prism handles Microsoft sign-in, downloading Minecraft and launching
+games. I consider Prismarine a Minecraft launcher because it is where you browse,
+manage and launch your games.
+
+Both apps read and write the same instance folders, so you can switch between
+them at any time and nothing gets converted or locked in.
 
 > **Beta.** It works, but it still needs improvements. Everything below works today on
 > Linux, where it is used daily. Windows, macOS and FreeBSD builds come from CI and see
