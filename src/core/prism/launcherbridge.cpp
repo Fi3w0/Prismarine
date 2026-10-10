@@ -13,14 +13,17 @@ qint64 startedLauncher = 0;
 
 #ifdef Q_OS_LINUX
 const QStringList snapNames{"prismlauncher-alpo", "prismlauncher"};
+bool snapExecutable(const QString &program);
 
 QString snapProgram(const QString &name)
 {
     for (const QString &command : {name + ".prismlauncher", name}) {
-        const QString onPath = QStandardPaths::findExecutable(command);
-        if (!onPath.isEmpty()) return onPath;
         const QString absolute = "/snap/bin/" + command;
         if (QFileInfo(absolute).isExecutable()) return absolute;
+        const QString alternate = "/var/lib/snapd/snap/bin/" + command;
+        if (QFileInfo(alternate).isExecutable()) return alternate;
+        const QString onPath = QStandardPaths::findExecutable(command);
+        if (!onPath.isEmpty() && (command != "prismlauncher" || snapExecutable(onPath))) return onPath;
     }
     return {};
 }
@@ -43,7 +46,8 @@ bool flatpakInstalled(const QString &program)
 bool snapExecutable(const QString &program)
 {
     return program.startsWith("/snap/bin/") || program.startsWith("/var/lib/snapd/snap/bin/")
-        || QFileInfo(program).fileName().startsWith("prismlauncher-alpo");
+        || QFileInfo(program).fileName().startsWith("prismlauncher-alpo")
+        || QFileInfo(program).symLinkTarget().endsWith("/snap");
 }
 #endif
 }
