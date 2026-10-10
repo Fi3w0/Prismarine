@@ -252,6 +252,7 @@ jobs:
       VERSION: ${{ needs.version.outputs.version }}
     steps:
       - name: Install build tools and create the builder
+        shell: sh
         run: |
           xbps-install -Syu xbps
           xbps-install -yu

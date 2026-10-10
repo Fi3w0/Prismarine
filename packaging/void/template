@@ -2,7 +2,7 @@
 pkgname=prismarine
 version=0.4.0
 revision=1
-_commit=72d2c4e
+_commit=f5e9febe4b5504d8a8d54894fd62990171e4ce01
 wrksrc="Prismarine-${_commit}"
 build_style=cmake
 configure_args="-DBUILD_TESTING=OFF -DPRISMARINE_KEYCHAIN=OFF"
@@ -15,7 +15,7 @@ maintainer="Fi3w0 <98111375+Fi3w0@users.noreply.github.com>"
 license="GPL-3.0-only, CC-BY-NC-ND-4.0, OFL-1.1"
 homepage="https://github.com/Fi3w0/Prismarine"
 distfiles="https://codeload.github.com/Fi3w0/Prismarine/tar.gz/${_commit}"
-checksum=7e7f0906441b241f3479fec285c9cb97700c33d06f360c7688dfce4fe1698d89
+checksum=93553ffd138d8d6344eccd5696c629e31db58c8ffc744ddb8fe0f1b08ad1e82f
 
 post_install() {
 	vlicense assets/logos/LICENSE LOGO-LICENSE

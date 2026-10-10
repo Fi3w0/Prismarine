@@ -138,7 +138,9 @@ run cmake -S "$repo_dir" -B "$build_dir" -G Ninja -DCMAKE_BUILD_TYPE=Release \
 run cmake --build "$build_dir" --parallel "$jobs"
 run cmake --install "$build_dir"
 if ! $dry_run; then
-    command -v update-desktop-database >/dev/null && update-desktop-database "$prefix/share/applications" || true
+    if command -v update-desktop-database >/dev/null; then
+        update-desktop-database "$prefix/share/applications" || true
+    fi
     echo "Installed: $prefix/bin/prismarine"
 fi
 echo 'Sign in once in Prism Launcher. Start Prismarine from your application menu or its installed path.'
