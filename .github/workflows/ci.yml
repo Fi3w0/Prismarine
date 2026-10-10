@@ -337,9 +337,25 @@ jobs:
         env:
           QT_QPA_PLATFORM: ""
         run: |
-          $shot = "$env:RUNNER_TEMP\installed.png"
-          $p = Start-Process stage/prismarine.exe -ArgumentList "--page", "home", "--prism-data", "$env:RUNNER_TEMP\prism", "--screenshot", $shot -PassThru -Wait
-          if ($p.ExitCode -ne 0 -or -not (Test-Path $shot)) { exit 1 }
+          $portable = "$env:RUNNER_TEMP\portable-check"
+          $installed = "$env:RUNNER_TEMP\installer-check"
+          Expand-Archive "dist/Prismarine-$env:VERSION-windows-x64-portable.zip" $portable
+          $setup = Start-Process "dist/Prismarine-$env:VERSION-windows-x64-setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=$installed" -PassThru -Wait
+          if ($setup.ExitCode -ne 0) { throw "Installer failed: $($setup.ExitCode)" }
+          # A developer Qt on PATH previously hid missing DLLs in the release.
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          foreach ($variable in @("QT_PLUGIN_PATH", "QT_QPA_PLATFORM_PLUGIN_PATH", "QML_IMPORT_PATH", "QML2_IMPORT_PATH")) {
+            Remove-Item "Env:$variable" -ErrorAction SilentlyContinue
+          }
+          foreach ($folder in @($portable, $installed)) {
+            foreach ($dll in @("Qt6Core.dll", "Qt6Gui.dll", "Qt6Quick.dll", "Qt6QuickControls2.dll")) {
+              if (-not (Test-Path "$folder\$dll")) { throw "Missing packaged runtime: $folder\$dll" }
+            }
+            $shot = "$folder\smoke.png"
+            $p = Start-Process "$folder\prismarine.exe" -WorkingDirectory $env:RUNNER_TEMP -ArgumentList "--page", "home", "--prism-data", "$env:RUNNER_TEMP\prism", "--screenshot", $shot -PassThru
+            if (-not $p.WaitForExit(60000)) { $p.Kill(); throw "Packaged app did not finish its startup check" }
+            if ($p.ExitCode -ne 0 -or -not (Test-Path $shot)) { throw "Packaged app failed to start: $folder" }
+          }
       - uses: actions/upload-artifact@v7
         with:
           name: windows

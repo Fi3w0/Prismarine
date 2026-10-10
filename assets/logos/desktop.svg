@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Prismarine desktop icon">
+  <g transform="translate(128 128) scale(1.4) translate(-128 -128)">
+    <polygon points="128.0,51.0 194.7,89.5 158.0,110.7 128.0,93.3" fill="#c9f5ec" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="194.7,89.5 194.7,166.5 158.0,145.3 158.0,110.7" fill="#8fe8d9" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="194.7,166.5 128.0,205.0 128.0,162.7 158.0,145.3" fill="#46d1bb" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="128.0,205.0 61.3,166.5 98.0,145.3 128.0,162.7" fill="#2b8a80" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="61.3,166.5 61.3,89.5 98.0,110.7 98.0,145.3" fill="#174e49" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="61.3,89.5 128.0,51.0 128.0,93.3 98.0,110.7" fill="#46d1bb" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="128.0,93.3 158.0,110.7 158.0,145.3 128.0,162.7 98.0,145.3 98.0,110.7" fill="#8fe8d9" stroke="none" stroke-width="0" stroke-linejoin="round" />
+    <polygon points="128.0,93.35 158.0077802411308,110.675 128,128" fill="#c9f5ec" stroke="none" stroke-width="0" stroke-linejoin="round" />
+  </g>
+</svg>

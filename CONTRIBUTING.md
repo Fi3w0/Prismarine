@@ -29,6 +29,10 @@ packaging changes, install the package and confirm the app opens, QML loads,
 and Prism Launcher can be found. Include your OS, desktop, Qt version, and
 whether you tested Wayland or X11 when relevant.
 
+Desktop icons use `assets/logos/desktop.svg`; the decorative in-app logos are
+separate. After changing the desktop SVG, regenerate PNG, ICO and ICNS files
+with `python3 scripts/generate-icons.py` (requires librsvg's `rsvg-convert` and Pillow).
+
 ## Pull requests
 
 - Keep one fix or feature per PR and explain what users will see.

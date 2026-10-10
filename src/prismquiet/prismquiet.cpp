@@ -26,7 +26,19 @@ public:
         // Show reaches the widget before its window is mapped, so it can still stay off screen.
         if (event->type() != QEvent::Show || !object->isWidgetType()) return false;
         auto *widget = static_cast<QWidget *>(object);
-        if (!widget->isWindow() || mainWindowVisible()) return false;
+        if (!widget->isWindow()) return false;
+        if (widget->inherits("MainWindow")) {
+            // Older Prism versions create a minimized main window for CLI launches.
+            // Keep it hidden, while allowing a later explicit Open Prism to show it.
+            if (widget->isMinimized()) {
+                widget->setAttribute(Qt::WA_DontShowOnScreen);
+                QTimer::singleShot(0, widget, [window = QPointer<QWidget>(widget)] { if (window && window->isMinimized()) window->hide(); });
+            } else {
+                widget->setAttribute(Qt::WA_DontShowOnScreen, false);
+            }
+            return false;
+        }
+        if (mainWindowVisible()) return false;
         if (widget->inherits("ProgressDialog")) {
             // "Please wait…" while signing in and preparing: the dialog keeps running its task
             // (closing it would cancel the launch), it is just never put on screen.

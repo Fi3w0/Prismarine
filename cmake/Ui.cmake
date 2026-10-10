@@ -67,7 +67,7 @@ foreach(file IN LISTS QML_SOURCES)
 endforeach()
 set_source_files_properties(qml/theme/Colors.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(prismarine URI Prismarine VERSION 1.0 QML_FILES ${QML_SOURCES})
-set(LOGO_ASSETS assets/logos/shard-o.svg assets/logos/shard-k.svg)
+set(LOGO_ASSETS assets/logos/shard-o.svg assets/logos/shard-k.svg assets/logos/desktop.svg)
 # Outfit ships as static weights: Qt registers the variable font only as "Outfit Thin".
 set(FONT_ASSETS assets/fonts/Outfit-Regular.ttf assets/fonts/Outfit-Medium.ttf
     assets/fonts/Outfit-SemiBold.ttf assets/fonts/Outfit-Bold.ttf

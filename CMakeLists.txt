@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.21)
 project(Prismarine VERSION 0.4.0 LANGUAGES CXX)
 
+# Qt captures GNUInstallDirs when it creates its deployment support script.
+# Windows uses a flat folder; define this before finding Qt so DLLs and qt.conf
+# are deployed beside prismarine.exe rather than into a separate bin folder.
+if(WIN32)
+    set(CMAKE_INSTALL_BINDIR ".")
+    set(CMAKE_INSTALL_LIBDIR ".")
+endif()
+
 find_package(Qt6 6.6 REQUIRED COMPONENTS Gui Quick QuickControls2 Quick3D Concurrent Network)
 find_package(LibArchive REQUIRED)
 find_package(OpenSSL 3 REQUIRED COMPONENTS Crypto)

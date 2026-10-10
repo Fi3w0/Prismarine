@@ -44,7 +44,7 @@ else()
     # Reverse-DNS application ID: desktop file, icon, AppStream and the window's app ID agree.
     set(app_id io.github.fi3w0.Prismarine)
     install(FILES packaging/linux/${app_id}.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
-    install(FILES assets/logos/shard-o.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps RENAME ${app_id}.svg)
+    install(FILES assets/logos/desktop.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps RENAME ${app_id}.svg)
     foreach(size 16 24 32 48 64 128 256 512)
         install(FILES assets/logos/icons/prismarine-${size}.png
                 DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/${size}x${size}/apps RENAME ${app_id}.png)
@@ -54,7 +54,15 @@ else()
 endif()
 
 if(PRISMARINE_DEPLOY_QT)
-    qt_generate_deploy_qml_app_script(TARGET prismarine OUTPUT_SCRIPT deploy_script NO_UNSUPPORTED_PLATFORM_ERROR)
+    if(APPLE AND TARGET prismarinequiet)
+        # Our generic plugin is loaded by Prism rather than by our QML engine,
+        # so explicitly include it when macdeployqt rewrites framework references.
+        qt_generate_deploy_qml_app_script(TARGET prismarine OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR DEPLOY_TOOL_OPTIONS
+            "-executable=Prismarine.app/Contents/PlugIns/prismarine/generic/$<TARGET_FILE_NAME:prismarinequiet>")
+    else()
+        qt_generate_deploy_qml_app_script(TARGET prismarine OUTPUT_SCRIPT deploy_script NO_UNSUPPORTED_PLATFORM_ERROR)
+    endif()
     install(SCRIPT ${deploy_script})
 endif()
 

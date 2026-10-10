@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     parser.addOption({"dialog", "Open a dialog for checking its layout, e.g. new-instance, import, rename, drop, group, storage.", "name"});
     parser.addOption({"section", "Settings section to open.", "name"});
     parser.process(app);
-    app.setWindowIcon(QIcon(":/assets/logos/shard-o.svg"));
+    app.setWindowIcon(QIcon(":/assets/logos/desktop.svg"));
     for (const QString &name : QDir(":/assets/fonts").entryList({"*.ttf"})) {
         if (QFontDatabase::addApplicationFont(":/assets/fonts/" + name) < 0)
             qWarning() << "Could not load bundled font" << name;

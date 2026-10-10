@@ -113,8 +113,9 @@ QString Prism::launcherProgram()
 QString Prism::quietPluginDir()
 {
     const QString app = QCoreApplication::applicationDirPath();
-    // Build tree and Windows: beside the executable; macOS app bundle: Contents/PlugIns; installs: lib/.
-    for (const QString &dir : {app + "/plugins", app + "/../PlugIns", app + "/../lib/prismarine/plugins"}) {
+    // Only the quiet plugin belongs on Prism's search path. Sharing our whole
+    // Qt plugin folder can replace Prism's TLS/platform plugins with incompatible ones.
+    for (const QString &dir : {app + "/prism-plugins", app + "/../PlugIns/prismarine", app + "/../lib/prismarine/plugins"}) {
         if (!QDir(dir + "/generic").entryList({"*prismarinequiet*"}, QDir::Files).isEmpty())
             return QDir(dir).canonicalPath();
     }
@@ -153,17 +154,20 @@ bool Prism::startLauncher(const QString &dataDir, const QStringList &arguments, 
     QProcess process;
     process.setProgram(executable);
     process.setArguments(args);
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    // Prism must discover the plugins and QML modules shipped with its own Qt.
+    // These overrides commonly come from an AppImage or development environment.
+    for (const char *variable : {"QT_PLUGIN_PATH", "QT_QPA_PLATFORM_PLUGIN_PATH", "QML_IMPORT_PATH", "QML2_IMPORT_PATH"})
+        env.remove(variable);
     const QString plugins = quietPluginDir();
     // Explicit editing/importing must show Prism's windows. Only game launches are quiet.
     if (!sandboxed && arguments.contains("--launch") && !arguments.contains("--show-window") && !plugins.isEmpty()) {
-        // Added to whatever the user already set; Prism keeps these out of the game's environment.
-        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-        const QString pluginPath = env.value("QT_PLUGIN_PATH");
-        env.insert("QT_PLUGIN_PATH", pluginPath.isEmpty() ? plugins : plugins + QDir::listSeparator() + pluginPath);
+        // Prism keeps the isolated plugin path out of the game's environment.
+        env.insert("QT_PLUGIN_PATH", plugins);
         const QString generic = env.value("QT_QPA_GENERIC_PLUGINS");
         env.insert("QT_QPA_GENERIC_PLUGINS", generic.isEmpty() ? "prismarinequiet" : generic + ",prismarinequiet");
-        process.setProcessEnvironment(env);
     }
+    process.setProcessEnvironment(env);
     // Prism writes its own log; its console output would only clutter Prismarine's.
     process.setStandardOutputFile(QProcess::nullDevice());
     process.setStandardErrorFile(QProcess::nullDevice());
