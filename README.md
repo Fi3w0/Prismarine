@@ -10,6 +10,8 @@
 [![Release](https://img.shields.io/github/v/release/Fi3w0/Prismarine?include_prereleases&label=Release)](https://github.com/Fi3w0/Prismarine/releases)
 [![Code license](https://img.shields.io/badge/code-GPL--3.0-blue)](LICENSE)
 ![Status](https://img.shields.io/badge/status-beta-orange)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/Fi3w0)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-fi3w0-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/fi3w0)
 
 ![Linux](https://img.shields.io/badge/Linux-✓-FCC624?logo=linux&logoColor=black)
 ![Windows](https://img.shields.io/badge/Windows-✓-0078D6)
@@ -65,9 +67,13 @@ the two at any time and nothing gets converted or locked in.
     </td>
   </tr>
   <tr>
-    <td colspan="2" align="center">
-      <img src="docs/screenshots/Accounts-Page.png" alt="Accounts with a 3D skin and cape preview" width="50%">
+    <td width="50%" align="center">
+      <img src="docs/screenshots/Accounts-Page.png" alt="Accounts with a 3D skin and cape preview" width="100%">
       <br><sub>Accounts: skins and capes on a 3D model</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/Storage.png" alt="Storage usage, shared content and cleanup by instance" width="100%">
+      <br><sub>Storage: disk usage, shared content and safe cleanup</sub>
     </td>
   </tr>
 </table>
@@ -115,6 +121,14 @@ the two at any time and nothing gets converted or locked in.
 You need **[Prism Launcher](https://prismlauncher.org/download/)** installed and signed in
 once. Prismarine finds it and its instances on its own.
 
+Detection covers native packages (including AUR and Gentoo/GURU builds), Nix
+profiles, Flatpak, the `prismlauncher-alpo` Snap, common AppImage/portable
+folders, Windows installer/Scoop locations, and macOS application bundles.
+Use `./install/detect-prism.sh` to see what the installers find. If you keep
+Prism somewhere else, select its executable in Settings and use `--prism-data`
+for a custom data folder. Flatpak and Snap use their own data folders and run
+without Prismarine's quiet-window plugin; their sandbox permissions still apply.
+
 Grab the file for your system from the [latest release](https://github.com/Fi3w0/Prismarine/releases):
 
 | System | Download | Notes |
@@ -123,13 +137,19 @@ Grab the file for your system from the [latest release](https://github.com/Fi3w0
 | **Debian 13, Ubuntu 25.04+** | `prismarine_*_amd64.deb` | `sudo apt install ./prismarine_*.deb` |
 | **Fedora** | `prismarine-*.x86_64.rpm` | `sudo dnf install ./prismarine-*.rpm` |
 | **Arch Linux** | `prismarine-*.pkg.tar.zst` | `sudo pacman -U prismarine-*.pkg.tar.zst` |
+| **Gentoo** | [Live ebuild / local overlay](packaging/README.md#gentoo) | Builds `main`; optional `keychain` USE flag. |
+| **Nix / NixOS** | [Flake, module, and Nix closure](packaging/README.md#nix) | Qt and QML runtime paths are wrapped. |
+| **Void Linux** | [XBPS template / package](packaging/README.md#void-linux) | `x86_64` glibc binary; build locally for musl. QtKeychain disabled. |
 | **Windows 10/11** | `Prismarine-*-windows-x64-setup.exe` | Or the portable `.zip`. No administrator rights needed. |
 | **macOS 12+** | `Prismarine-*-macos-arm64.dmg` / `-x86_64.dmg` | Not notarised yet: right-click → Open the first time. |
 | **FreeBSD 14** | `prismarine-*.pkg` | `sudo pkg add prismarine-*.pkg` |
 
 A `SHA256SUMS.txt` comes with every release. Want the newest changes? The
-[Nightly](https://github.com/Fi3w0/Prismarine/releases/tag/nightly) pre-release is rebuilt
+[Nightly](https://github.com/Fi3w0/Prismarine/releases) pre-release is rebuilt
 from `main` on every push.
+
+Packages appear after all required CI builds pass. The Gentoo, Nix, and Void
+recipes live here; they are not yet in the official distribution repositories.
 
 ---
 
@@ -138,6 +158,22 @@ from `main` on every push.
 Requirements: **Qt 6.6+** (Base, Declarative, Quick3D, ShaderTools, Svg), **libarchive**,
 **OpenSSL 3**, **CMake 3.21+** and a **C++17** compiler. **QtKeychain** is optional: it
 enables the Friends feature and remembered CurseForge API keys.
+
+The [source installers](install/README.md) check for missing dependencies and
+install them with your distro's package manager, then build into `~/.local`:
+
+```bash
+git clone https://github.com/Fi3w0/Prismarine.git
+cd Prismarine
+./install/install.sh --dry-run
+./install/install.sh
+```
+
+There are separate entry points for Arch, Debian, Ubuntu, Fedora, Gentoo, Void,
+FreeBSD, Nix, and NixOS. Use `--check` to check dependencies without changing
+anything, or `--deps-only` to install dependencies without installing Prismarine.
+See [native package recipes](packaging/README.md) for Portage, NixOS configuration,
+and XBPS builds.
 
 ```bash
 # Arch
@@ -150,7 +186,13 @@ sudo dnf install cmake ninja-build gcc-c++ qt6-qtbase-devel qt6-qtdeclarative-de
 sudo apt install cmake ninja-build g++ qt6-base-dev qt6-declarative-dev qt6-quick3d-dev qt6-shadertools-dev qt6-svg-dev libarchive-dev libssl-dev qtkeychain-qt6-dev
 
 # Gentoo
-sudo emerge --ask dev-build/cmake dev-build/ninja dev-qt/qtbase dev-qt/qtdeclarative dev-qt/qtquick3d dev-qt/qtshadertools dev-qt/qtsvg app-arch/libarchive dev-libs/openssl dev-libs/qtkeychain
+./install/gentoo.sh --deps-only
+
+# Void Linux (QtKeychain is unavailable; configure with -DPRISMARINE_KEYCHAIN=OFF)
+./install/void.sh --deps-only
+
+# Nix / NixOS (includes the pinned build dependencies)
+NIXPKGS_ALLOW_UNFREE=1 nix develop --impure
 
 # FreeBSD
 sudo pkg install cmake ninja qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive
@@ -212,6 +254,17 @@ system and what you were doing.
 
 More from me: Minecraft mods on [Modrinth](https://modrinth.com/user/Fi3w0) and other
 projects on [GitHub](https://github.com/Fi3w0).
+
+## Contributing and support
+
+Bug reports, packaging fixes, and pull requests are welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for build checks and contribution rules, or
+[open an issue](https://github.com/Fi3w0/Prismarine/issues/new/choose) using the
+bug or feature form. Report vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md).
+
+If you want to support my work, there's [GitHub Sponsors](https://github.com/sponsors/Fi3w0)
+and [Ko-fi](https://ko-fi.com/fi3w0). Testing and useful bug reports help too.
 
 ---
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Installation and build instructions
+    url: https://github.com/Fi3w0/Prismarine/blob/main/README.md#install
+    about: Packages, dependencies, and source builds for your system.
+  - name: Report a security vulnerability privately
+    url: https://github.com/Fi3w0/Prismarine/security/advisories/new
+    about: Follow SECURITY.md; keep exploit details and credentials out of public issues.

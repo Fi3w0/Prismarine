@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a workflow or improvement to Prismarine.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd want
+      description: Describe how it should work. Examples from other tools are welcome.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Library / instances / worlds
+        - Mods / modpacks / content updates
+        - Launching / accounts / Prism integration
+        - Logs / crash help / hardware monitoring
+        - Interface / themes / shortcuts
+        - Packaging / platform support
+        - Something else
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you've tried

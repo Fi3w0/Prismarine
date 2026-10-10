@@ -1,0 +1,73 @@
+name: Bug report
+description: Something broke, crashed, or behaved wrong in Prismarine.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Prismarine is still in beta. Reports from different systems help a lot.
+        Remove account tokens, API keys, server addresses, and private paths from logs before posting.
+        For security problems, use the private reporting link instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened
+      description: What you expected and what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: List the steps, or say if it only happened once.
+      placeholder: |
+        1. Open Prismarine...
+        2. Select an instance...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Prismarine version or commit
+      placeholder: "0.4.0, Nightly commit abc1234, or a local build"
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System and desktop
+      placeholder: "Gentoo, KDE Plasma, Wayland, NVIDIA; or Windows 11 / macOS 15"
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation method
+      options:
+        - AppImage
+        - Debian / Ubuntu package
+        - Fedora RPM
+        - Arch package
+        - Gentoo ebuild
+        - Nix / NixOS
+        - Void XBPS
+        - Windows installer / portable ZIP
+        - macOS DMG
+        - FreeBSD package
+        - Source build / other
+    validations:
+      required: true
+  - type: input
+    id: prism
+    attributes:
+      label: Prism Launcher version and installation
+      description: Especially useful for launch, account, and instance problems.
+      placeholder: "Prism 11.1, native package / Flatpak / portable"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Run prismarine from a terminal for startup errors. For game crashes, include the relevant game log and loader/version.
+      render: text
