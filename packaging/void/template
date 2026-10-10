@@ -14,7 +14,7 @@ short_desc="Minecraft library and instance manager for Prism Launcher"
 maintainer="Fi3w0 <98111375+Fi3w0@users.noreply.github.com>"
 license="GPL-3.0-only, CC-BY-NC-ND-4.0, OFL-1.1"
 homepage="https://github.com/Fi3w0/Prismarine"
-distfiles="https://codeload.github.com/Fi3w0/Prismarine/tar.gz/${_commit}"
+distfiles="https://codeload.github.com/Fi3w0/Prismarine/tar.gz/${_commit}>prismarine-${_commit}.tar.gz"
 checksum=93553ffd138d8d6344eccd5696c629e31db58c8ffc744ddb8fe0f1b08ad1e82f
 
 post_install() {
