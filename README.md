@@ -19,7 +19,7 @@
 ![FreeBSD](https://img.shields.io/badge/FreeBSD-✓-AB2B28?logo=freebsd&logoColor=white)
 ![Qt](https://img.shields.io/badge/Built_with-Qt_6_·_QML-41CD52?logo=qt&logoColor=white)
 
-[Screenshots](#screenshots) · [Features](#features) · [Install](#install) · [Build](#build-from-source) · [How it works](#how-it-works-with-prism) · [License](#license)
+[Screenshots](#screenshots) · [Features](#features) · [Install](#install) · [Build](#build-from-source) · [How it works](#how-it-works-with-prism) · [Changelog](CHANGELOG.md) · [License](#license)
 
 </div>
 
@@ -130,7 +130,9 @@ Prism somewhere else, select its executable in Settings and use `--prism-data`
 for a custom data folder. Flatpak and Snap use their own data folders and run
 without Prismarine's quiet-window plugin; their sandbox permissions still apply.
 
-Grab the file for your system from the [latest release](https://github.com/Fi3w0/Prismarine/releases):
+The first public beta is **[0.4.0 — Beryllium](https://github.com/Fi3w0/Prismarine/releases/tag/v0.4.0)**.
+See the [changelog](CHANGELOG.md) for release details, and grab the file for your
+system from [GitHub Releases](https://github.com/Fi3w0/Prismarine/releases):
 
 | System | Download | Notes |
 | --- | --- | --- |
