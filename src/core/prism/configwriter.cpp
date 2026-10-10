@@ -55,6 +55,8 @@ bool Prism::writeConfig(const QString &path, const QVariantMap &updates, QString
     QFile check(path);
     if (check.exists() != existed || (existed && (!check.open(QIODevice::ReadOnly) || check.readAll() != previous)))
         return fail("Settings changed while saving. Reload and try again.");
+    // Windows cannot replace a file while our validation reader still holds it open.
+    check.close();
     const QByteArray bytes = lines.join('\n').toUtf8();
     QSaveFile output(path);
     if (!output.open(QIODevice::WriteOnly) || output.write(bytes) != bytes.size() || !output.commit())

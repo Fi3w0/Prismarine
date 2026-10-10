@@ -8,7 +8,7 @@
 AppId={{6F0C2B52-7A1E-4C8E-9F43-5D2B9A61E0F7}
 AppName=Prismarine
 AppVersion={#Version}
-AppPublisher=Fi3w0
+AppPublisher=Fiw Labs
 AppPublisherURL=https://github.com/Fi3w0
 DefaultDirName={autopf}\Prismarine
 DefaultGroupName=Prismarine

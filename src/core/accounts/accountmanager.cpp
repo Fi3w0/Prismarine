@@ -66,6 +66,7 @@ bool AccountManager::editAccounts(const std::function<bool(QJsonArray &)> &edit)
     // Prism may have refreshed tokens meanwhile; never overwrite a file that changed under us.
     QFile check(path);
     if (!check.open(QIODevice::ReadOnly) || check.readAll() != original) return fail("Accounts changed while saving. Try again.");
+    check.close();
     const QByteArray bytes = QJsonDocument(root).toJson();
     QSaveFile output(path);
     if (!output.open(QIODevice::WriteOnly) || output.write(bytes) != bytes.size() || !output.commit()) return fail("Cannot save the account list.");

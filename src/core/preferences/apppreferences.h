@@ -54,6 +54,7 @@ public:
     QString fileName() const { return m_settings.fileName(); }
     QString prismProgram() const;
     void setPrismProgram(const QString &value);
+    Q_INVOKABLE void setPrismProgramFromUrl(const QUrl &url);
     bool prismConsole() const;
     void setPrismConsole(bool value);
     QString whilePlaying() const;

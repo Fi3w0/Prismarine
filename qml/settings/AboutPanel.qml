@@ -79,6 +79,7 @@ ColumnLayout {
             anchors { fill: parent; margins: 24 }
             spacing: 24
             Image {
+                objectName: "aboutLogo"
                 source: "qrc:/assets/logos/" + about.controller.logoFile
                 Layout.preferredWidth: 96
                 Layout.preferredHeight: 96
@@ -160,7 +161,7 @@ ColumnLayout {
                 spacing: 3
                 RowLayout {
                     spacing: 8
-                    Text { text: "Fi3w0"; color: Colors.text; font.pixelSize: 18; font.weight: Font.DemiBold }
+                    Text { text: "Fi3w0 · Fiw Labs"; color: Colors.text; font.pixelSize: 18; font.weight: Font.DemiBold }
                 }
                 Text {
                     Layout.fillWidth: true

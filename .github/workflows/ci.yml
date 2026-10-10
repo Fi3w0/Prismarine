@@ -319,7 +319,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static-md `
-            -DCMAKE_INSTALL_PREFIX="$PWD/stage"
+            -DCMAKE_INSTALL_PREFIX="$PWD/stage" -DPRISMARINE_PACKAGE_CHECK=ON
           cmake --build build
           if (Test-Path tests) { ctest --test-dir build --output-on-failure --timeout 300 }
       - name: Install with Qt and package
@@ -340,6 +340,7 @@ jobs:
           $portable = "$env:RUNNER_TEMP\portable-check"
           $installed = "$env:RUNNER_TEMP\installer-check"
           Expand-Archive "dist/Prismarine-$env:VERSION-windows-x64-portable.zip" $portable
+          Copy-Item build/prismarine_package_check.exe $portable
           $setup = Start-Process "dist/Prismarine-$env:VERSION-windows-x64-setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=$installed" -PassThru -Wait
           if ($setup.ExitCode -ne 0) { throw "Installer failed: $($setup.ExitCode)" }
           # A developer Qt on PATH previously hid missing DLLs in the release.
@@ -347,6 +348,8 @@ jobs:
           foreach ($variable in @("QT_PLUGIN_PATH", "QT_QPA_PLATFORM_PLUGIN_PATH", "QML_IMPORT_PATH", "QML2_IMPORT_PATH")) {
             Remove-Item "Env:$variable" -ErrorAction SilentlyContinue
           }
+          & "$portable\prismarine_package_check.exe"
+          if ($LASTEXITCODE -ne 0) { throw "Packaged settings and Prism integration checks failed" }
           foreach ($folder in @($portable, $installed)) {
             foreach ($dll in @("Qt6Core.dll", "Qt6Gui.dll", "Qt6Quick.dll", "Qt6QuickControls2.dll")) {
               if (-not (Test-Path "$folder\$dll")) { throw "Missing packaged runtime: $folder\$dll" }
@@ -441,6 +444,8 @@ jobs:
         run: |
           stage/Prismarine.app/Contents/MacOS/Prismarine --page home --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/bundle.png"
           test -s "$RUNNER_TEMP/bundle.png"
+          stage/Prismarine.app/Contents/MacOS/Prismarine --page settings --section About --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/about.png"
+          test -s "$RUNNER_TEMP/about.png"
       - uses: actions/upload-artifact@v7
         with:
           name: macos-${{ matrix.arch }}

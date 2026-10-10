@@ -224,3 +224,7 @@ void AppPreferences::setPrismConsole(bool v) { save("launch/prismConsole", v); }
 
 QString AppPreferences::prismProgram() const { return m_settings.value("launch/prismProgram").toString(); }
 void AppPreferences::setPrismProgram(const QString &v) { save("launch/prismProgram", v.trimmed()); }
+void AppPreferences::setPrismProgramFromUrl(const QUrl &url)
+{
+    if (url.isLocalFile()) setPrismProgram(url.toLocalFile());
+}

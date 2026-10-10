@@ -148,7 +148,7 @@ Item {
                     FileDialog {
                         id: prismPicker
                         title: "Choose the Prism Launcher program"
-                        onAccepted: settings.controller.preferences.prismProgram = decodeURIComponent(selectedFile.toString().replace(/^file:\/\//, ""))
+                        onAccepted: settings.controller.preferences.setPrismProgramFromUrl(selectedFile)
                     }
                 }
                 RowLayout {

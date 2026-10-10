@@ -51,6 +51,7 @@ bool LaunchSettings::save(const QVariantMap &v)
     const QString path = m_id.isEmpty() ? m_model->dataDir() + "/prismlauncher.cfg" : m_model->instancePath(m_id) + "/instance.cfg";
     QFile current(path);
     if (!current.open(QIODevice::ReadOnly) || current.readAll() != m_baseline) { emit errorOccurred("Settings changed while this form was open. Reopen it before saving."); return false; }
+    current.close();
     const int min = v.value("minMemory").toInt(), max = v.value("maxMemory").toInt();
     if (min < 256 || max < min || max > 262144 || v.value("width").toInt() < 320 || v.value("height").toInt() < 240 || v.value("width").toInt() > 16384 || v.value("height").toInt() > 16384) {
         emit errorOccurred("Check the memory range and window size."); return false;

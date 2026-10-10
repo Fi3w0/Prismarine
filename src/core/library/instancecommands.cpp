@@ -64,7 +64,9 @@ bool InstanceModel::openFolder(const QString &instanceId)
 
 bool InstanceModel::openPrism()
 {
-    return startPrism({"--show-window"});
+    // Normal startup also opens an existing Prism window, and works on versions
+    // predating the --show-window option added for command-line game launches.
+    return startPrism({});
 }
 
 bool InstanceModel::launchWorld(const QString &id, const QString &world)

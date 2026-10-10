@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QStandardPaths>
 #include <QSysInfo>
+#include <QSvgRenderer>
 
 #include "core/library/instancemodel.h"
 #include "core/preferences/apppreferences.h"
@@ -62,6 +63,10 @@ int main(int argc, char *argv[])
     parser.addOption({"dialog", "Open a dialog for checking its layout, e.g. new-instance, import, rename, drop, group, storage.", "name"});
     parser.addOption({"section", "Settings section to open.", "name"});
     parser.process(app);
+    // Keep a real QtSvg dependency so macdeployqt/windeployqt include SVG support.
+    // Vector logos require QtSvg to be shipped with the app.
+    const QSvgRenderer logo(QStringLiteral(":/assets/logos/shard-o.svg"));
+    if (!logo.isValid()) qWarning() << "Could not render the bundled SVG logo";
     app.setWindowIcon(QIcon(":/assets/logos/desktop.svg"));
     for (const QString &name : QDir(":/assets/fonts").entryList({"*.ttf"})) {
         if (QFontDatabase::addApplicationFont(":/assets/fonts/" + name) < 0)
@@ -186,7 +191,16 @@ int main(int argc, char *argv[])
     // --screenshot <file.png>: save the window once it has rendered, then quit.
     if (parser.isSet("screenshot")) {
         const QString file = parser.value("screenshot");
-        QTimer::singleShot(1500, &app, [window, file] {
+        const bool checkLogo = parser.value("page") == "settings" && parser.value("section") == "About";
+        QTimer::singleShot(1500, &app, [window, file, checkLogo] {
+            if (checkLogo) {
+                const QObject *image = window->findChild<QObject *>("aboutLogo");
+                if (!image || image->property("status").toInt() != 1) {
+                    qCritical() << "The About SVG logo did not load";
+                    QCoreApplication::exit(1);
+                    return;
+                }
+            }
             if (!window->grabWindow().save(file)) {
                 qCritical() << "Could not save screenshot to" << file;
                 QCoreApplication::exit(1);

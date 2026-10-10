@@ -4,6 +4,8 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QSettings>
+#include <QUrl>
 
 #include "paths.h"
 
@@ -60,6 +62,13 @@ qint64 Prism::lastStartedLauncher()
 void Prism::setLauncherProgram(const QString &path)
 {
     chosenProgram = path.trimmed();
+    if (const QUrl url(chosenProgram); url.isLocalFile()) chosenProgram = url.toLocalFile();
+#ifdef Q_OS_WIN
+    chosenProgram = QDir::fromNativeSeparators(chosenProgram);
+    // Repair paths stored by the old QML file picker (/C:/... instead of C:/...).
+    if (chosenProgram.size() > 3 && chosenProgram[0] == '/' && chosenProgram[1].isLetter() && chosenProgram[2] == ':')
+        chosenProgram.remove(0, 1);
+#endif
 }
 
 QString Prism::launcherProgram()
@@ -75,6 +84,13 @@ QString Prism::launcherProgram()
     // Where Prism's own installers put it.
 #if defined(Q_OS_WIN)
     const auto env = [](const char *name) { return QDir::fromNativeSeparators(qEnvironmentVariable(name)); };
+    // Prism's installer remembers custom locations here, even when it is not on PATH.
+    for (const QString &root : {QString("HKEY_CURRENT_USER\\Software\\PrismLauncher"),
+                               QString("HKEY_LOCAL_MACHINE\\Software\\PrismLauncher"),
+                               QString("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\PrismLauncher")}) {
+        const QString directory = QSettings(root, QSettings::NativeFormat).value("InstallDir").toString();
+        if (!directory.isEmpty()) candidates << QDir::fromNativeSeparators(directory) + "/prismlauncher.exe";
+    }
     candidates << env("LOCALAPPDATA") + "/Programs/PrismLauncher/prismlauncher.exe"
                << env("ProgramFiles") + "/PrismLauncher/prismlauncher.exe"
                << env("ProgramFiles(x86)") + "/PrismLauncher/prismlauncher.exe"
