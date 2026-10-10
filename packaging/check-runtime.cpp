@@ -62,13 +62,18 @@ int main(int argc, char **argv)
     if (!model.openPrism()) return fail("Open Prism failed to start");
     QElapsedTimer timer;
     timer.start();
-    while (QFileInfo(log).size() == 0 && timer.elapsed() < 5000) {
+    // A first executable launch on a hosted Windows runner may take longer
+    // while security software scans the file. Keep a bounded startup deadline.
+    while (QFileInfo(log).size() == 0 && timer.elapsed() < 30000) {
         app.processEvents();
         QThread::msleep(10);
     }
     QFile arguments(log);
-    if (!arguments.open(QIODevice::ReadOnly) || arguments.readAll() != QString("--dir\n" + root.path()).toUtf8())
-        return fail("Open Prism used unsupported startup arguments");
+    if (!arguments.open(QIODevice::ReadOnly))
+        return fail("Prism test process did not report startup within 30 seconds: " + arguments.errorString());
+    const QByteArray actual = arguments.readAll();
+    if (actual != QString("--dir\n" + root.path()).toUtf8())
+        return fail("Open Prism used unexpected startup arguments: " + QString::fromUtf8(actual));
     qInfo("Packaged settings, accounts, preferences and Prism startup checks passed");
     return 0;
 }

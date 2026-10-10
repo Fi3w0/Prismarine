@@ -33,6 +33,8 @@ include(cmake/Packaging.cmake)
 option(PRISMARINE_PACKAGE_CHECK "Build the packaged runtime verification helper" OFF)
 if(PRISMARINE_PACKAGE_CHECK)
     qt_add_executable(prismarine_package_check packaging/check-runtime.cpp)
+    # CI needs stdout/stderr and an unambiguous process exit code on Windows.
+    set_target_properties(prismarine_package_check PROPERTIES WIN32_EXECUTABLE FALSE)
     target_link_libraries(prismarine_package_check PRIVATE prismarine_core)
 endif()
 
