@@ -408,7 +408,17 @@ jobs:
           mkdir -p dmg dist
           cp -R stage/Prismarine.app dmg/
           ln -s /Applications dmg/Applications
-          hdiutil create -volname Prismarine -srcfolder dmg -ov -format UDZO "dist/Prismarine-$VERSION-macos-${{ matrix.arch }}.dmg"
+          image="dist/Prismarine-$VERSION-macos-${{ matrix.arch }}.dmg"
+          # DiskImages can briefly report EBUSY on hosted macOS runners.
+          for attempt in 1 2 3 4; do
+            sync
+            if hdiutil create -volname Prismarine -srcfolder dmg -fs HFS+ -ov -format UDZO "$image"; then
+              break
+            fi
+            if [ "$attempt" -eq 4 ]; then exit 1; fi
+            rm -f "$image"
+            sleep "$((attempt * 5))"
+          done
       - name: Check the bundled app starts and draws its window
         env:
           QT_QPA_PLATFORM: ""
