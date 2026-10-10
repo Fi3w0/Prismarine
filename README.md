@@ -4,7 +4,7 @@
 
 # Prismarine
 
-**A modern home for your Prism Launcher library.**
+**A native Minecraft launcher powered by Prism Launcher.**
 
 [![CI](https://github.com/Fi3w0/Prismarine/actions/workflows/ci.yml/badge.svg)](https://github.com/Fi3w0/Prismarine/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Fi3w0/Prismarine?include_prereleases&label=Release)](https://github.com/Fi3w0/Prismarine/releases)
@@ -27,7 +27,7 @@
 
 ## Overview
 
-Prismarine is a native desktop app for the instances you already have in
+Prismarine is a native Minecraft launcher for the instances you already have in
 [Prism Launcher](https://prismlauncher.org). Browse and install mods and modpacks, keep
 your library organised, follow your game's live log and hardware use, and get help
 when something crashes, all in one deep-sea themed interface.

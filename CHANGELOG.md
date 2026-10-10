@@ -5,7 +5,7 @@ Each release has a version and a name; beta releases remain marked as prerelease
 
 ## [0.4.0] — Beryllium (Beta) — 2026-10-11
 
-First public beta. A native Qt 6 home for your existing Prism Launcher library,
+First public beta. A native Qt 6 Minecraft launcher powered by Prism Launcher,
 with a deep-sea interface. Works on Linux, macOS and Windows; improvements are
 still planned.
 
