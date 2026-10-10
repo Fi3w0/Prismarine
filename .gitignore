@@ -1,0 +1,35 @@
+# Build output
+build/
+build-*/
+cmake-build-*/
+Testing/
+compile_commands.json
+CMakeUserPresets.json
+.cache/
+
+# Packaging output (CI and local)
+AppDir/
+stage/
+dist/
+dmg/
+*.AppImage
+*.deb
+*.rpm
+*.pkg
+*.pkg.tar.zst
+*.dmg
+*.zip
+
+# Private: tests and agent notes stay on this machine
+tests/
+Agent/
+
+# Editors and systems
+.vscode/
+.idea/
+*.user
+*.swp
+*~
+.DS_Store
+Thumbs.db
+.claude/

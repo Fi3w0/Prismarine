@@ -1,0 +1,34 @@
+Prismarine
+Copyright (C) 2026 Fi3w0 <https://github.com/Fi3w0>
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 only (SPDX: GPL-3.0-only). See LICENSE.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+What is covered by what
+-----------------------
+- Source code, build files, QML, tests and documentation: GPL-3.0-only (LICENSE).
+- Prismarine logos (assets/logos/): NOT covered by the GPL. Licensed under
+  CC BY-NC-ND 4.0 (assets/logos/LICENSE); the name and logos are also subject
+  to TRADEMARKS.md.
+- Fonts (assets/fonts/): Outfit, Marcellus SC and Silkscreen, each under the
+  SIL Open Font License 1.1 (assets/fonts/OFL.txt) by their respective authors.
+
+Attribution
+-----------
+Modified versions must keep this notice and the copyright lines above, state
+that they were changed and when (GPL-3.0 section 5), and must not use the
+Prismarine name or logos (see TRADEMARKS.md).
+
+Third-party software used, not included in this repository
+-----------------------------------------------------------
+- Prism Launcher (GPL-3.0): run as a separate program for sign-in and launching.
+- Qt 6 (LGPL-3.0), libarchive (BSD-2-Clause), OpenSSL (Apache-2.0),
+  QtKeychain (BSD-3-Clause, optional).
+
+Not an official Minecraft product. Not approved by or associated with Mojang or
+Microsoft. Not affiliated with the Prism Launcher project.
