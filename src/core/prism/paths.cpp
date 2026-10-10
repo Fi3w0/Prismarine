@@ -23,6 +23,13 @@ QString findDataDir()
     candidates.append(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/PrismLauncher");
 #if defined(Q_OS_LINUX)
     candidates.append(QDir::homePath() + "/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher");
+    for (const QString &name : {QString("prismlauncher-alpo"), QString("prismlauncher")}) {
+        const QString base = QDir::homePath() + "/snap/" + name;
+        for (const QString &revision : {QString("current"), QString("common")}) {
+            candidates << base + "/" + revision + "/.local/share/PrismLauncher"
+                       << base + "/" + revision + "/PrismLauncher";
+        }
+    }
 #endif
     for (const QString &dir : candidates) {
         if (QFileInfo::exists(dir + "/prismlauncher.cfg"))

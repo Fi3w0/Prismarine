@@ -6,7 +6,8 @@ bool startLauncher(const QString &dataDir, const QStringList &arguments, QString
 // launches free of Prism's progress windows. Empty restores the automatic choice.
 void setLauncherProgram(const QString &path);
 // The program startLauncher will run: the chosen one, a prismlauncher next to
-// Prismarine's own executable (bundled builds), then prismlauncher on PATH.
+// Prismarine's own executable (bundled builds), then PATH, common native/Nix/Snap
+// locations and Linux portable/AppImage directories. Flatpak uses startLauncher.
 QString launcherProgram();
 // Folder holding generic/<prismarinequiet plugin> (see src/prismquiet), or empty. Prism
 // started by Prismarine loads it so launches show none of Prism's windows unless its main

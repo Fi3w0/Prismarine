@@ -27,7 +27,7 @@ QString arguments(pid_t pid)
     size_t size = sizeof(argmax);
     int mibMax[2] = {CTL_KERN, KERN_ARGMAX};
     if (sysctl(mibMax, 2, &argmax, &size, nullptr, 0) != 0 || argmax <= 0) return {};
-    std::vector<char> buffer(size_t(argmax));
+    std::vector<char> buffer(static_cast<size_t>(argmax));
     int mib[3] = {CTL_KERN, KERN_PROCARGS2, int(pid)};
     size = buffer.size();
     if (sysctl(mib, 3, buffer.data(), &size, nullptr, 0) != 0 || size <= sizeof(int)) return {};
