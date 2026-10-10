@@ -1,0 +1,23 @@
+# Template file for 'prismarine'
+pkgname=prismarine
+version=0.4.0
+revision=1
+_commit=72d2c4e
+wrksrc="Prismarine-${_commit}"
+build_style=cmake
+configure_args="-DBUILD_TESTING=OFF -DPRISMARINE_KEYCHAIN=OFF"
+hostmakedepends="pkg-config qt6-base qt6-declarative-tools qt6-shadertools"
+makedepends="qt6-base-devel qt6-declarative-devel qt6-quick3d-devel
+ qt6-shadertools-devel qt6-svg-devel libarchive-devel openssl-devel"
+depends="qt6-declarative qt6-quick3d qt6-svg"
+short_desc="Minecraft library and instance manager for Prism Launcher"
+maintainer="Fi3w0 <98111375+Fi3w0@users.noreply.github.com>"
+license="GPL-3.0-only, CC-BY-NC-ND-4.0, OFL-1.1"
+homepage="https://github.com/Fi3w0/Prismarine"
+distfiles="https://codeload.github.com/Fi3w0/Prismarine/tar.gz/${_commit}"
+checksum=7e7f0906441b241f3479fec285c9cb97700c33d06f360c7688dfce4fe1698d89
+
+post_install() {
+	vlicense assets/logos/LICENSE LOGO-LICENSE
+	vlicense assets/fonts/OFL.txt OFL.txt
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>98111375+Fi3w0@users.noreply.github.com</email>
+    <name>Fi3w0</name>
+  </maintainer>
+  <use>
+    <flag name="keychain">Store the Friends identity and API keys with QtKeychain</flag>
+  </use>
+  <upstream>
+    <remote-id type="github">Fi3w0/Prismarine</remote-id>
+  </upstream>
+</pkgmetadata>

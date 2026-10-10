@@ -9,6 +9,10 @@
 # Tests run when the tests folder is part of the checkout.
 name: CI
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 permissions:
   contents: read
 
@@ -28,12 +32,25 @@ env:
   QT_MODULES: "qtquick3d qtshadertools qtquicktimeline"
 
 jobs:
+  repository-checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate links and shell scripts
+        run: |
+          python3 scripts/check-links.py
+          python3 scripts/check-installers.py
+          for script in install/*.sh; do bash -n "$script"; done
+          bash -n packaging/void/template packaging/gentoo/games-util/prismarine/prismarine-9999.ebuild
+          shellcheck install/*.sh
+          git diff --check
+
   version:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: v
         name: Work out the version
         run: |
@@ -53,7 +70,7 @@ jobs:
       QT_QPA_PLATFORM: offscreen
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -88,7 +105,7 @@ jobs:
           QT_QPA_PLATFORM=xcb xvfb-run -a dist/Prismarine-$VERSION-linux-x86_64.AppImage --appimage-extract-and-run \
             --page home --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/appimage.png"
           test -s "$RUNNER_TEMP/appimage.png"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux-appimage
           path: dist/*
@@ -102,7 +119,7 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install build dependencies and the QML modules the package depends on
         run: |
           apt-get update
@@ -119,7 +136,7 @@ jobs:
         run: |
           cd build && cpack -G DEB -D CPACK_PACKAGE_VERSION=$VERSION
           mkdir -p ../dist && mv *.deb ../dist/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux-deb
           path: dist/*
@@ -132,7 +149,7 @@ jobs:
       QT_QPA_PLATFORM: offscreen
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install build dependencies
         run: |
           dnf install -y gcc-c++ cmake ninja-build rpm-build file \
@@ -148,7 +165,7 @@ jobs:
           # RPM versions cannot contain "-".
           cd build && cpack -G RPM -D CPACK_PACKAGE_VERSION=${VERSION//-/\~}
           mkdir -p ../dist && mv *.rpm ../dist/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux-rpm
           path: dist/*
@@ -164,7 +181,7 @@ jobs:
         run: |
           pacman -Syu --noconfirm --needed base-devel git cmake ninja qt6-base qt6-declarative qt6-quick3d \
             qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build, test and package with makepkg
         run: |
           # makepkg refuses to run as root.
@@ -174,10 +191,95 @@ jobs:
           sed -i "s/^pkgver=.*/pkgver=${VERSION//-/_}/" PKGBUILD
           su builder -c "makepkg --nodeps --noconfirm"
           mkdir -p "$GITHUB_WORKSPACE/dist" && mv *.pkg.tar.zst "$GITHUB_WORKSPACE/dist/"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux-arch
           path: dist/*
+
+  gentoo:
+    needs: version
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Package the Gentoo overlay
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          bash -n packaging/gentoo/games-util/prismarine/prismarine-9999.ebuild
+          mkdir -p dist
+          tar -czf "dist/Prismarine-$VERSION-gentoo-overlay.tar.gz" -C packaging/gentoo .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gentoo-overlay
+          path: dist/*
+          if-no-files-found: error
+
+  nix:
+    needs: version
+    runs-on: ubuntu-24.04
+    env:
+      NIXPKGS_ALLOW_UNFREE: "1"
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Validate the flake and build the package
+        run: |
+          nix flake check --impure --no-build
+          nix build --impure --print-build-logs
+          QT_QPA_PLATFORM=offscreen result/bin/prismarine --page home --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/nix.png"
+          test -s "$RUNNER_TEMP/nix.png"
+      - name: Export the runtime closure
+        run: |
+          mkdir -p dist
+          nix-store --export $(nix-store -qR result) | xz -T2 > "dist/Prismarine-$VERSION-nix-x86_64-linux.nar.xz"
+          readlink -f result > "dist/Prismarine-$VERSION-nix-x86_64-linux.store-path.txt"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nix-x86_64-linux
+          path: dist/*
+          if-no-files-found: error
+
+  void:
+    needs: version
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/void-linux/void-glibc-full
+      options: --privileged
+      volumes:
+        - /dev:/dev
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - name: Install build tools and create the builder
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -yu
+          xbps-install -y sudo bash curl git
+          useradd -G xbuilder -m builder
+      - uses: actions/checkout@v7
+      - name: Build the XBPS package
+        run: |
+          git clone --depth 1 https://github.com/void-linux/void-packages.git "$RUNNER_TEMP/void-packages"
+          vp="$RUNNER_TEMP/void-packages"
+          mkdir -p "$vp/srcpkgs/prismarine"
+          cp packaging/void/template "$vp/srcpkgs/prismarine/template"
+          curl -fsSL "https://codeload.github.com/$GITHUB_REPOSITORY/tar.gz/$GITHUB_SHA" -o "$RUNNER_TEMP/source.tar.gz"
+          source_hash=$(sha256sum "$RUNNER_TEMP/source.tar.gz" | cut -d' ' -f1)
+          sed -i "s/^_commit=.*/_commit=$GITHUB_SHA/; s/^checksum=.*/checksum=$source_hash/; s/^version=.*/version=${VERSION//-/_}/" "$vp/srcpkgs/prismarine/template"
+          echo XBPS_CHROOT_CMD=uchroot >> "$vp/etc/conf"
+          echo XBPS_ALLOW_RESTRICTED=yes >> "$vp/etc/conf"
+          chown -R builder:builder "$vp"
+          cd "$vp"
+          sudo -Eu builder ./xbps-src binary-bootstrap
+          sudo -Eu builder ./xbps-src pkg prismarine
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp hostdir/binpkgs/prismarine-*.xbps "$GITHUB_WORKSPACE/dist/"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: void-x86_64
+          path: dist/*.xbps
+          if-no-files-found: error
 
   windows:
     needs: version
@@ -185,8 +287,9 @@ jobs:
     env:
       QT_QPA_PLATFORM: offscreen
       VERSION: ${{ needs.version.outputs.version }}
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.cache/vcpkg
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -194,9 +297,14 @@ jobs:
           modules: ${{ env.QT_MODULES }}
           cache: true
       - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/cache@v6
+        with:
+          path: .cache/vcpkg
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v1
       - name: Install libraries (static, so no extra DLLs ship)
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
           vcpkg install libarchive openssl --triplet x64-windows-static-md
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" >> $env:GITHUB_ENV
       - name: Build and test
@@ -225,7 +333,7 @@ jobs:
           $shot = "$env:RUNNER_TEMP\installed.png"
           $p = Start-Process stage/prismarine.exe -ArgumentList "--page", "home", "--prism-data", "$env:RUNNER_TEMP\prism", "--screenshot", $shot -PassThru -Wait
           if ($p.ExitCode -ne 0 -or -not (Test-Path $shot)) { exit 1 }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: dist/*
@@ -247,17 +355,23 @@ jobs:
       QT_QPA_PLATFORM: offscreen
       VERSION: ${{ needs.version.outputs.version }}
       # Qt 6.8 supports macOS 12; libraries are built for the same minimum.
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.cache/vcpkg
       MACOSX_DEPLOYMENT_TARGET: "12.0"
       VCPKG_KEEP_ENV_VARS: MACOSX_DEPLOYMENT_TARGET
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           modules: ${{ env.QT_MODULES }}
           cache: true
+      - uses: actions/cache@v6
+        with:
+          path: .cache/vcpkg
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v1
       - name: Install libraries (static, built for macOS 12)
         run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
           brew install ninja
           if [ -z "${VCPKG_INSTALLATION_ROOT:-}" ]; then
             git clone --depth 1 https://github.com/microsoft/vcpkg "$RUNNER_TEMP/vcpkg"
@@ -288,7 +402,7 @@ jobs:
         run: |
           stage/Prismarine.app/Contents/MacOS/Prismarine --page home --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/bundle.png"
           test -s "$RUNNER_TEMP/bundle.png"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: macos-${{ matrix.arch }}
           path: dist/*
@@ -299,7 +413,7 @@ jobs:
     env:
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build, test and package on FreeBSD
         uses: vmactions/freebsd-vm@v1
         with:
@@ -317,7 +431,7 @@ jobs:
             if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
             DESTDIR="$PWD/stage" cmake --install build
             sh packaging/freebsd/make-package.sh "$PWD/stage" "$VERSION" "$PWD/dist"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: freebsd
           path: dist/*.pkg
@@ -325,7 +439,7 @@ jobs:
 
   release:
     if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
-    needs: [version, appimage, deb, rpm, arch, windows, macos, freebsd]
+    needs: [repository-checks, version, appimage, deb, rpm, arch, gentoo, nix, void, windows, macos, freebsd]
     runs-on: ubuntu-24.04
     concurrency:
       group: release-${{ github.ref }}
@@ -337,7 +451,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
