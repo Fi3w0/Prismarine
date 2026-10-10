@@ -154,7 +154,8 @@ bool Prism::startLauncher(const QString &dataDir, const QStringList &arguments, 
     process.setProgram(executable);
     process.setArguments(args);
     const QString plugins = quietPluginDir();
-    if (!sandboxed && !plugins.isEmpty()) {
+    // Explicit editing/importing must show Prism's windows. Only game launches are quiet.
+    if (!sandboxed && arguments.contains("--launch") && !arguments.contains("--show-window") && !plugins.isEmpty()) {
         // Added to whatever the user already set; Prism keeps these out of the game's environment.
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
         const QString pluginPath = env.value("QT_PLUGIN_PATH");
@@ -175,6 +176,6 @@ bool Prism::startLauncher(const QString &dataDir, const QStringList &arguments, 
         return false;
     }
     // A Flatpak Prism runs behind `flatpak run`, whose process id is not Prism's.
-    if (!alreadyRunning && !sandboxed) startedLauncher = pid;
+    if (!alreadyRunning && !sandboxed && arguments.contains("--launch")) startedLauncher = pid;
     return true;
 }

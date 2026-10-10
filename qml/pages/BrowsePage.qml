@@ -151,6 +151,11 @@ Item {
                     selectedProject: browse.selectedProject
                     targetId: browse.targetId
                     contentType: browse.contentType
+                    onApiKeyRequested: keyDialog.open()
+                    onPrismInstallRequested: {
+                        if (browse.packs) browse.controller.instances.openPrism();
+                        else browse.controller.instances.editInPrism(browse.targetId);
+                    }
                     onProjectSelected: project => {
                         browse.selectedProject = project;
                         controller.catalog.loadVersions(project.project_id, browse.packs ? "" : browse.targetInfo.version || "", browse.contentType === "mod" ? browse.targetInfo.loader || "" : browse.contentType === "datapack" ? "datapack" : "");

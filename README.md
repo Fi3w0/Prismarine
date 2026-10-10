@@ -91,6 +91,7 @@ the two at any time and nothing gets converted or locked in.
 
 ### Content
 - **Browse Modrinth and CurseForge** for mods, resource packs, shaders, datapacks and full modpacks, filtered to your instance's version and loader.
+- **CurseForge without your own API key**: use **Install with Prism Launcher** to open Prism's instance editor or modpack browser. Prism handles its own CurseForge access. Add your own key to browse directly inside Prismarine.
 - **Dependencies resolved** before anything installs, and every download is hash-verified.
 - **Drag and drop** jars, packs and modpack archives onto the window or onto an instance.
 - **Updates** for mods, resource packs, shaders and per-world datapacks.

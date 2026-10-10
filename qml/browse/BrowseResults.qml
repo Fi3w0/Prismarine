@@ -4,12 +4,16 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 Rectangle {
+    id: panel
     required property var controller
     property real preferredPanelWidth: 400
     property var selectedProject: ({})
     property string targetId: ""
     property string contentType: "mod"
     signal projectSelected(var project)
+    signal apiKeyRequested()
+    signal prismInstallRequested()
+    readonly property bool needsApiKey: controller.catalog.provider === "curseforge" && !controller.catalog.curseForgeReady
 
     Layout.preferredWidth: preferredPanelWidth
     Layout.fillHeight: true
@@ -74,15 +78,55 @@ Rectangle {
             running: controller.catalog.loading
             visible: running
         }
-        Text {
+        ColumnLayout {
             anchors.centerIn: parent
             width: parent.width - 24
             visible: !controller.catalog.loading && !controller.catalog.results.length
-            text: controller.catalog.error || "No matching projects. Try another search."
-            color: Colors.subtext
-            font.pixelSize: 14
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.Wrap
+            spacing: 16
+            Text {
+                Layout.fillWidth: true
+                text: panel.needsApiKey ? "Install CurseForge content through Prism Launcher without adding an API key here, or add a key to browse in Prismarine."
+                                       : controller.catalog.error || "No matching projects. Try another search."
+                color: Colors.subtext
+                font.pixelSize: 14
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+            }
+            ActionButton {
+                objectName: "browseInstallCurseForgeInPrism"
+                Layout.alignment: Qt.AlignHCenter
+                visible: panel.needsApiKey && panel.contentType !== "datapack"
+                enabled: panel.contentType === "modpack" || !!panel.targetId
+                primary: true
+                text: "Install with Prism Launcher…"
+                onClicked: panel.prismInstallRequested()
+            }
+            Text {
+                Layout.fillWidth: true
+                visible: panel.needsApiKey
+                text: panel.contentType === "modpack" ? "In Prism: Add Instance → CurseForge."
+                    : panel.contentType === "datapack" ? "Download datapacks from CurseForge's website, then drop the file into Prismarine."
+                    : !panel.targetId ? "Select an instance first to install content with Prism."
+                    : "In Prism: " + ({mod: "Mods", resourcepack: "Resource packs", shader: "Shader packs"})[panel.contentType]
+                      + " → Download → CurseForge."
+                color: Colors.subtext
+                font.pixelSize: 12
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+            }
+            TextLink {
+                Layout.alignment: Qt.AlignHCenter
+                visible: panel.needsApiKey && panel.contentType === "datapack"
+                text: "Browse CurseForge datapacks"
+                onClicked: Qt.openUrlExternally("https://www.curseforge.com/minecraft/search?class=data-packs")
+            }
+            ActionButton {
+                objectName: "browseAddCurseForgeKey"
+                Layout.alignment: Qt.AlignHCenter
+                visible: panel.needsApiKey
+                text: "Add API key…"
+                onClicked: panel.apiKeyRequested()
+            }
         }
     }
 }
