@@ -1,0 +1,325 @@
+# Builds Prismarine on every system, runs all tests, and packages it:
+#   Linux    AppImage (bundled Qt), .deb (Debian 13 / Ubuntu 25.04+), .rpm (Fedora), Arch .pkg.tar.zst
+#   Windows  installer (.exe) and portable .zip
+#   macOS    .dmg for Apple silicon and for Intel
+#   FreeBSD  .pkg
+# Every package is published on GitHub Releases:
+#   a tag such as v0.4.0  ->  the "Prismarine 0.4.0" release
+#   a push to main        ->  the rolling "Nightly" pre-release, replaced each time
+# Tests run when the tests folder is part of the checkout.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  QT_VERSION: "6.8.3"
+  QT_MODULES: "qtquick3d qtshadertools qtquicktimeline"
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        name: Work out the version
+        run: |
+          base=$(sed -n 's/^project(Prismarine VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            tag=${GITHUB_REF#refs/tags/v}
+            [ "$tag" = "$base" ] || { echo "::error::Tag v$tag does not match CMakeLists.txt version $base"; exit 1; }
+            echo "version=$base" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$base-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+
+  appimage:
+    needs: version
+    runs-on: ubuntu-22.04 # oldest supported glibc, so the AppImage runs on more systems
+    env:
+      QT_QPA_PLATFORM: offscreen
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          modules: ${{ env.QT_MODULES }}
+          cache: true
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libarchive-dev libssl-dev libgl1-mesa-dev libxkbcommon-dev \
+            libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libfuse2 file xvfb
+      - name: Build and test
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DPRISMARINE_KEYCHAIN=OFF
+          cmake --build build
+          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+      - name: Make the AppImage
+        run: |
+          DESTDIR=$PWD/AppDir cmake --install build
+          base=https://github.com/linuxdeploy
+          wget -q $base/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q $base/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy*.AppImage
+          export APPIMAGE_EXTRACT_AND_RUN=1 QML_SOURCES_PATHS=$PWD/qml LINUXDEPLOY_OUTPUT_VERSION=$VERSION
+          # The logo is an SVG, loaded through Qt's image plugin.
+          export EXTRA_QT_MODULES="svg" EXTRA_QT_PLUGINS="svg"
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin qt --output appimage \
+            --desktop-file AppDir/usr/share/applications/io.github.fi3w0.Prismarine.desktop \
+            --icon-file AppDir/usr/share/icons/hicolor/256x256/apps/io.github.fi3w0.Prismarine.png
+          mkdir -p dist && mv Prismarine*.AppImage dist/Prismarine-$VERSION-linux-x86_64.AppImage
+      - name: Check the AppImage starts and draws its window
+        run: |
+          QT_QPA_PLATFORM=xcb xvfb-run -a dist/Prismarine-$VERSION-linux-x86_64.AppImage --appimage-extract-and-run \
+            --page home --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/appimage.png"
+          test -s "$RUNNER_TEMP/appimage.png"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-appimage
+          path: dist/*
+
+  deb:
+    needs: version
+    runs-on: ubuntu-24.04
+    container: debian:trixie
+    env:
+      QT_QPA_PLATFORM: offscreen
+      DEBIAN_FRONTEND: noninteractive
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies and the QML modules the package depends on
+        run: |
+          apt-get update
+          apt-get install -y build-essential cmake ninja-build dpkg-dev file \
+            qt6-base-dev qt6-declarative-dev qt6-quick3d-dev qt6-shadertools-dev qt6-svg-dev \
+            qtkeychain-qt6-dev libarchive-dev libssl-dev \
+            $(grep -v '^#' packaging/linux/debian-runtime-depends.txt)
+      - name: Build and test
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build
+          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+      - name: Package
+        run: |
+          cd build && cpack -G DEB -D CPACK_PACKAGE_VERSION=$VERSION
+          mkdir -p ../dist && mv *.deb ../dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: dist/*
+
+  rpm:
+    needs: version
+    runs-on: ubuntu-24.04
+    container: fedora:42
+    env:
+      QT_QPA_PLATFORM: offscreen
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          dnf install -y gcc-c++ cmake ninja-build rpm-build file \
+            qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtquick3d-devel qt6-qtshadertools-devel qt6-qtsvg-devel \
+            qtkeychain-qt6-devel libarchive-devel openssl-devel
+      - name: Build and test
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build
+          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+      - name: Package
+        run: |
+          # RPM versions cannot contain "-".
+          cd build && cpack -G RPM -D CPACK_PACKAGE_VERSION=${VERSION//-/\~}
+          mkdir -p ../dist && mv *.rpm ../dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-rpm
+          path: dist/*
+
+  arch:
+    needs: version
+    runs-on: ubuntu-24.04
+    container: archlinux:latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - name: Install build dependencies
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git cmake ninja qt6-base qt6-declarative qt6-quick3d \
+            qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6
+      - uses: actions/checkout@v4
+      - name: Build, test and package with makepkg
+        run: |
+          # makepkg refuses to run as root.
+          useradd -m builder
+          chown -R builder "$GITHUB_WORKSPACE"
+          cd packaging/arch
+          sed -i "s/^pkgver=.*/pkgver=${VERSION//-/_}/" PKGBUILD
+          su builder -c "makepkg --nodeps --noconfirm"
+          mkdir -p "$GITHUB_WORKSPACE/dist" && mv *.pkg.tar.zst "$GITHUB_WORKSPACE/dist/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-arch
+          path: dist/*
+
+  windows:
+    needs: version
+    runs-on: windows-2022
+    env:
+      QT_QPA_PLATFORM: offscreen
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          modules: ${{ env.QT_MODULES }}
+          cache: true
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Install libraries (static, so no extra DLLs ship)
+        shell: pwsh
+        run: |
+          vcpkg install libarchive openssl --triplet x64-windows-static-md
+          "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" >> $env:GITHUB_ENV
+      - name: Build and test
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static-md `
+            -DCMAKE_INSTALL_PREFIX="$PWD/stage"
+          cmake --build build
+          if (Test-Path tests) { ctest --test-dir build --output-on-failure --timeout 300 }
+      - name: Install with Qt and package
+        shell: pwsh
+        run: |
+          cmake --install build
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path stage/* -DestinationPath "dist/Prismarine-$env:VERSION-windows-x64-portable.zip"
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup --no-progress -y }
+          $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DVersion=$env:VERSION" "/DSource=$PWD\stage" "/DOutput=$PWD\dist" packaging\windows\prismarine.iss
+      - name: Check the installed app starts and draws its window
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: ""
+        run: |
+          $shot = "$env:RUNNER_TEMP\installed.png"
+          $p = Start-Process stage/prismarine.exe -ArgumentList "--page", "home", "--prism-data", "$env:RUNNER_TEMP\prism", "--screenshot", $shot -PassThru -Wait
+          if ($p.ExitCode -ne 0 -or -not (Test-Path $shot)) { exit 1 }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*
+
+  macos:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+            triplet: arm64-osx
+          - runner: macos-15-intel
+            arch: x86_64
+            triplet: x64-osx
+    runs-on: ${{ matrix.runner }}
+    env:
+      QT_QPA_PLATFORM: offscreen
+      VERSION: ${{ needs.version.outputs.version }}
+      # Qt 6.8 supports macOS 12; libraries are built for the same minimum.
+      MACOSX_DEPLOYMENT_TARGET: "12.0"
+      VCPKG_KEEP_ENV_VARS: MACOSX_DEPLOYMENT_TARGET
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          modules: ${{ env.QT_MODULES }}
+          cache: true
+      - name: Install libraries (static, built for macOS 12)
+        run: |
+          brew install ninja
+          if [ -z "${VCPKG_INSTALLATION_ROOT:-}" ]; then
+            git clone --depth 1 https://github.com/microsoft/vcpkg "$RUNNER_TEMP/vcpkg"
+            "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+            VCPKG_INSTALLATION_ROOT="$RUNNER_TEMP/vcpkg"
+          fi
+          "$VCPKG_INSTALLATION_ROOT/vcpkg" install libarchive openssl --triplet ${{ matrix.triplet }}
+          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+      - name: Build and test
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET -DCMAKE_INSTALL_PREFIX="$PWD/stage"
+          cmake --build build
+          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+      - name: Bundle Qt and make the disk image
+        run: |
+          cmake --install build
+          # Not notarised: sign ad hoc so Apple silicon runs it (users confirm it the first time).
+          codesign --force --deep --sign - stage/Prismarine.app
+          mkdir -p dmg dist
+          cp -R stage/Prismarine.app dmg/
+          ln -s /Applications dmg/Applications
+          hdiutil create -volname Prismarine -srcfolder dmg -ov -format UDZO "dist/Prismarine-$VERSION-macos-${{ matrix.arch }}.dmg"
+      - name: Check the bundled app starts and draws its window
+        env:
+          QT_QPA_PLATFORM: ""
+        run: |
+          stage/Prismarine.app/Contents/MacOS/Prismarine --page home --prism-data "$RUNNER_TEMP/prism" --screenshot "$RUNNER_TEMP/bundle.png"
+          test -s "$RUNNER_TEMP/bundle.png"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: dist/*
+
+  freebsd:
+    needs: version
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, test and package on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release:
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'
+    needs: [version, appimage, deb, rpm, arch, windows, macos, freebsd]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS.txt
+      - name: Publish the tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --title "Prismarine $VERSION" --generate-notes --verify-tag
+      - name: Replace the nightly pre-release
+        if: github.ref == 'refs/heads/main'
+        run: |
+          gh release delete nightly --cleanup-tag --yes || true
+          gh release create nightly dist/* --target "$GITHUB_SHA" --prerelease --title "Nightly ($VERSION)" \
+            --notes "Built automatically from \`main\` at $GITHUB_SHA. Untested between releases: use a tagged release for everyday play."

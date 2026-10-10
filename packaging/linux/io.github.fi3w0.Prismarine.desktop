@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Prismarine
+Comment=Minecraft library and instance manager for Prism Launcher
+Exec=prismarine
+Icon=io.github.fi3w0.Prismarine
+Terminal=false
+Categories=Game;
+StartupNotify=true

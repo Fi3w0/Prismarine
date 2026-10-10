@@ -1,0 +1,28 @@
+// Windows resources: the executable's icon and its file properties (filled in by CMake).
+#include <winver.h>
+IDI_ICON1 ICON "@PROJECT_SOURCE_DIR@/assets/logos/icons/prismarine.ico"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION @PRISMARINE_VERSION_COMMA@
+PRODUCTVERSION @PRISMARINE_VERSION_COMMA@
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "Fi3w0"
+            VALUE "FileDescription", "Prismarine"
+            VALUE "FileVersion", "@PROJECT_VERSION@"
+            VALUE "LegalCopyright", "Copyright (C) Fi3w0. GPL-3.0-only."
+            VALUE "OriginalFilename", "prismarine.exe"
+            VALUE "ProductName", "Prismarine"
+            VALUE "ProductVersion", "@PROJECT_VERSION@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

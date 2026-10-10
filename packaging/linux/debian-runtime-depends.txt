@@ -1,0 +1,16 @@
+# What Prismarine loads at run time that shared-library scanning cannot see (Debian/Ubuntu
+# package names): its QML modules and the SVG image plugin for the logo. The .deb depends
+# on these; CI installs them to run the tests in Debian, so a wrong name fails the build.
+qml6-module-qtquick
+qml6-module-qtquick-controls
+qml6-module-qtquick-templates
+qml6-module-qtquick-dialogs
+qml6-module-qtquick-effects
+qml6-module-qtquick-layouts
+qml6-module-qtquick-shapes
+qml6-module-qtquick-window
+qml6-module-qtquick3d
+qml6-module-qtquick3d-helpers
+qml6-module-qtqml-workerscript
+qml6-module-qtcore
+qt6-svg-plugins

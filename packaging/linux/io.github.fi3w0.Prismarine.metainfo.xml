@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream data: lets software centres (and AppImage tools) describe Prismarine. -->
+<component type="desktop-application">
+  <id>io.github.fi3w0.Prismarine</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>Prismarine</name>
+  <summary>Minecraft library and instance manager for Prism Launcher</summary>
+  <developer id="io.github.fi3w0">
+    <name>Fi3w0</name>
+  </developer>
+  <description>
+    <p>
+      Prismarine is a modern home for your Prism Launcher instances: browse and install mods,
+      resource packs and modpacks, follow your game's live log and hardware use, and keep
+      your library organised. Prism Launcher does the launching.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.fi3w0.Prismarine.desktop</launchable>
+  <url type="homepage">https://github.com/Fi3w0</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="@PROJECT_VERSION@" date="2026-10-10"/>
+  </releases>
+</component>

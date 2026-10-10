@@ -1,0 +1,29 @@
+# Arch Linux package, built by CI from the checked-out source (makepkg in packaging/arch).
+# For the AUR, replace `source` with a release tarball and add its checksum.
+pkgname=prismarine
+pkgver=0.4.0
+pkgrel=1
+pkgdesc="Minecraft library and instance manager for Prism Launcher"
+arch=('x86_64' 'aarch64')
+url="https://github.com/Fi3w0"
+license=('GPL-3.0-only' 'CC-BY-NC-ND-4.0')
+depends=('qt6-base' 'qt6-declarative' 'qt6-quick3d' 'qt6-shadertools' 'qt6-svg' 'libarchive' 'openssl' 'qtkeychain-qt6')
+makedepends=('cmake' 'ninja')
+optdepends=('prismlauncher: launches the games')
+source=()
+sha256sums=()
+
+build() {
+    cmake -S "$startdir/../.." -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build build
+}
+
+check() {
+    # Only when the source includes the tests folder.
+    [ -d "$startdir/../../tests" ] || return 0
+    QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure --timeout 300
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}
