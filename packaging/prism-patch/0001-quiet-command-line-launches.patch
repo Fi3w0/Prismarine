@@ -1,0 +1,110 @@
+diff --git a/launcher/Application.cpp b/launcher/Application.cpp
+index d855268..0006fc8 100644
+--- a/launcher/Application.cpp
++++ b/launcher/Application.cpp
+@@ -1548,7 +1548,13 @@ bool Application::launch(BaseInstance* instance,
+         QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
+         return true;
+     } else if (instance->isRunning()) {
+-        showInstanceWindow(instance, "console");
++        // Prismarine: a repeated command-line launch must not pop up the console unless the
++        // classic launcher window is open; the running game is left as it is.
++        if (isMainWindowVisible()) {
++            showInstanceWindow(instance, "console");
++        } else {
++            qDebug() << "Instance" << instance->id() << "is already running; not opening its console without the main window.";
++        }
+         return true;
+     } else if (instance->canEdit()) {
+         showInstanceWindow(instance);
+@@ -1656,6 +1662,11 @@ void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
+     }
+ }
+ 
++bool Application::isMainWindowVisible() const
++{
++    return m_mainWindow && m_mainWindow->isVisible();
++}
++
+ MainWindow* Application::showMainWindow(bool minimized)
+ {
+     if (m_mainWindow) {
+diff --git a/launcher/Application.h b/launcher/Application.h
+index 936e13d..7d67620 100644
+--- a/launcher/Application.h
++++ b/launcher/Application.h
+@@ -189,6 +189,9 @@ class Application : public QApplication {
+ 
+     InstanceWindow* showInstanceWindow(BaseInstance* instance, QString page = QString());
+     MainWindow* showMainWindow(bool minimized = false);
++    // Prismarine: true while the classic launcher window is open. Launches started from the
++    // command line (for example by Prismarine) run without progress dialogs otherwise.
++    bool isMainWindowVisible() const;
+     ViewLogWindow* showLogWindow();
+ 
+     void updateIsRunning(bool running);
+diff --git a/launcher/LaunchController.cpp b/launcher/LaunchController.cpp
+index 2b88233..cf2a680 100644
+--- a/launcher/LaunchController.cpp
++++ b/launcher/LaunchController.cpp
+@@ -48,6 +48,32 @@
+ #include "ui/dialogs/ProfileSetupDialog.h"
+ #include "ui/dialogs/ProgressDialog.h"
+ 
++#include <QEventLoop>
++
++namespace {
++// Prismarine: shows a progress dialog only while the classic launcher window is open.
++// Without it, the task runs to completion without a window and the result is the same;
++// failures still reach the normal error handling below.
++void runLaunchTask(QWidget* parent, Task* task)
++{
++    if (!task) {
++        return;
++    }
++    if (APPLICATION->isMainWindowVisible()) {
++        ProgressDialog progDialog(parent);
++        progDialog.setSkipButton(true, QObject::tr("Abort"));
++        progDialog.execWithTask(task);
++        return;
++    }
++    if (task->isFinished()) {
++        return;
++    }
++    QEventLoop loop;
++    QObject::connect(task, &Task::finished, &loop, &QEventLoop::quit);
++    loop.exec();
++}
++}  // namespace
++
+ #include <QInputDialog>
+ #include <QList>
+ #include <QPushButton>
+@@ -165,14 +191,11 @@ LaunchDecision LaunchController::decideLaunchMode()
+ 
+     if (state == AccountState::Working) {
+         // refresh is in progress, we need to wait for it to finish to proceed.
+-        ProgressDialog progDialog(m_parentWidget);
+-        progDialog.setSkipButton(true, tr("Abort"));
+-
+         // TODO: this relies on tasks' synchronous signal dispatching nature
+         // TODO: meaning currentTask can't complete and become null while this code is running
+         // TODO: this code will produce a race condition when tasks become fully async
+         auto task = accountToCheck->currentTask();
+-        progDialog.execWithTask(task.get());
++        runLaunchTask(m_parentWidget, task.get());
+ 
+         if (task->getState() == State::AbortedByUser) {
+             return LaunchDecision::Abort;
+@@ -473,10 +496,8 @@ void LaunchController::onFailed(QString reason)
+ 
+ void LaunchController::onProgressRequested(Task* task) const
+ {
+-    ProgressDialog progDialog(m_parentWidget);
+-    progDialog.setSkipButton(true, tr("Abort"));
+     m_launcher->proceed();
+-    progDialog.execWithTask(task);
++    runLaunchTask(m_parentWidget, task);
+ }
+ 
+ bool LaunchController::abort()
