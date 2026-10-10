@@ -23,7 +23,7 @@ void SocialManager::linkAccount(const QString &accountId)
     if (!replacing && m_links.size() >= SocialProtocol::MaxAccounts) { fail("You can link up to 16 Minecraft accounts."); return; }
     QString token = m_accounts->accessToken(accountId);
     if (token.isEmpty()) { fail("Refresh this Minecraft sign-in in Prism, then try linking again."); return; }
-    QUrl endpoint = m_api; endpoint.setPath("/player/certificates"); endpoint.setQuery({}); endpoint.setFragment({});
+    QUrl endpoint = m_api; endpoint.setPath("/player/certificates"); endpoint.setQuery(QString{}); endpoint.setFragment({});
     QNetworkRequest request(endpoint);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
     request.setTransferTimeout(20000);
