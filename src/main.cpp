@@ -105,18 +105,20 @@ int main(int argc, char *argv[])
     GameMonitor games(&instances, &session);
     QObject::connect(&app, &QCoreApplication::aboutToQuit, &preferences, &AppPreferences::sync);
     // Shown in Settings → About and copied by "Copy system info".
+#if defined(__clang__)
+    const QString compiler = QStringLiteral("Clang " __clang_version__);
+#elif defined(__GNUC__)
+    const QString compiler = QStringLiteral("GCC " __VERSION__);
+#elif defined(_MSC_VER)
+    const QString compiler = QStringLiteral("MSVC ") + QString::number(_MSC_VER);
+#else
+    const QString compiler = QStringLiteral("unknown");
+#endif
     const QVariantMap appInfo{{"qtRuntime", QString::fromLatin1(qVersion())}, {"qtBuild", QStringLiteral(QT_VERSION_STR)},
         // Some os-release files quote PRETTY_NAME with single quotes, which Qt keeps.
         {"system", QSysInfo::prettyProductName().remove('\'')}, {"kernel", QSysInfo::kernelType() + " " + QSysInfo::kernelVersion()},
-        {"architecture", QSysInfo::currentCpuArchitecture()}, {"compiler", QStringLiteral(
-#if defined(__clang__)
-            "Clang " __clang_version__
-#elif defined(__GNUC__)
-            "GCC " __VERSION__
-#else
-            "unknown"
-#endif
-        )}, {"appData", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)}};
+        {"architecture", QSysInfo::currentCpuArchitecture()}, {"compiler", compiler},
+        {"appData", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)}};
     QQmlApplicationEngine engine;
     engine.setInitialProperties({{"instances", QVariant::fromValue(&instances)}, {"javaManager", QVariant::fromValue(&javaManager)},
         {"preferences", QVariant::fromValue(&preferences)}, {"details", QVariant::fromValue(&details)},
