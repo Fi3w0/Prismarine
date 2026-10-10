@@ -267,7 +267,7 @@ jobs:
           cp packaging/void/template "$vp/srcpkgs/prismarine/template"
           curl -fsSL "https://codeload.github.com/$GITHUB_REPOSITORY/tar.gz/$GITHUB_SHA" -o "$RUNNER_TEMP/source.tar.gz"
           source_hash=$(sha256sum "$RUNNER_TEMP/source.tar.gz" | cut -d' ' -f1)
-          sed -i "s/^_commit=.*/_commit=$GITHUB_SHA/; s/^checksum=.*/checksum=$source_hash/; s/^version=.*/version=${VERSION//-/_}/" "$vp/srcpkgs/prismarine/template"
+          sed -i "s/^_commit=.*/_commit=$GITHUB_SHA/; s/^checksum=.*/checksum=$source_hash/; s/^version=.*/version=${VERSION//-/.}/" "$vp/srcpkgs/prismarine/template"
           echo XBPS_CHROOT_CMD=uchroot >> "$vp/etc/conf"
           echo XBPS_ALLOW_RESTRICTED=yes >> "$vp/etc/conf"
           chown -R builder:builder "$vp"
@@ -298,7 +298,8 @@ jobs:
           modules: ${{ env.QT_MODULES }}
           cache: true
       - uses: ilammy/msvc-dev-cmd@v1
-      - uses: actions/cache@v6
+      - uses: actions/cache/restore@v6
+        id: vcpkg-cache
         with:
           path: .cache/vcpkg
           key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v1
@@ -308,6 +309,11 @@ jobs:
           New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
           vcpkg install libarchive openssl --triplet x64-windows-static-md
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" >> $env:GITHUB_ENV
+      - uses: actions/cache/save@v6
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        with:
+          path: .cache/vcpkg
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v1
       - name: Build and test
         shell: pwsh
         run: |
@@ -366,7 +372,8 @@ jobs:
           version: ${{ env.QT_VERSION }}
           modules: ${{ env.QT_MODULES }}
           cache: true
-      - uses: actions/cache@v6
+      - uses: actions/cache/restore@v6
+        id: vcpkg-cache
         with:
           path: .cache/vcpkg
           key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v1
@@ -381,6 +388,11 @@ jobs:
           fi
           "$VCPKG_INSTALLATION_ROOT/vcpkg" install libarchive openssl --triplet ${{ matrix.triplet }}
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
+      - uses: actions/cache/save@v6
+        if: steps.vcpkg-cache.outputs.cache-hit != 'true'
+        with:
+          path: .cache/vcpkg
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v1
       - name: Build and test
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON \
