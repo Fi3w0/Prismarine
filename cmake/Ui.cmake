@@ -16,7 +16,7 @@ set(QML_SOURCES
     qml/browse/InstallReviewDialog.qml
     qml/accounts/SkinPreview.qml qml/shell/PackImportDialog.qml
     qml/Main.qml qml/theme/ColorPalette.qml qml/theme/Colors.qml qml/theme/Typography.qml
-    qml/shell/NavigationRail.qml  qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
+    qml/shell/NavigationRail.qml qml/shell/TopBar.qml qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
     qml/pages/HomePage.qml qml/pages/LibraryPage.qml qml/pages/InstancePage.qml
     qml/pages/SettingsPage.qml qml/pages/AccountsPage.qml qml/pages/BrowsePage.qml
     qml/components/ToggleSwitch.qml qml/components/InputField.qml qml/components/SelectBox.qml
@@ -69,7 +69,7 @@ set_source_files_properties(qml/theme/Colors.qml PROPERTIES QT_QML_SINGLETON_TYP
 set_source_files_properties(qml/theme/Typography.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(prismarine URI Prismarine VERSION 1.0 QML_FILES ${QML_SOURCES})
 set(LOGO_ASSETS assets/logos/shard-o.svg assets/logos/shard-k.svg assets/logos/desktop.svg)
-set(PROFILE_ASSETS  )
+set(PROFILE_ASSETS assets/icons/profile-light.svg assets/icons/profile-dark.svg)
 # Outfit ships as static weights: Qt registers the variable font only as "Outfit Thin".
 set(FONT_ASSETS assets/fonts/Outfit-Regular.ttf assets/fonts/Outfit-Medium.ttf
     assets/fonts/Outfit-SemiBold.ttf assets/fonts/Outfit-Bold.ttf

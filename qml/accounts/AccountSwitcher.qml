@@ -11,13 +11,30 @@ NavButton {
     hint: (activeProfile.name || "Accounts") + " · right-click to switch"
     checked: controller.page === "accounts"
     onClicked: controller.navigate("accounts")
-    contentItem: SkinAvatar { skin: switcher.activeProfile.skin || ""; size: 34 }
-    TapHandler { acceptedButtons: Qt.RightButton; onTapped: accountMenu.popup() }
+    leftPadding: 6
+    rightPadding: 12
+    topPadding: 0
+    bottomPadding: 0
+    implicitWidth: implicitContentWidth + leftPadding + rightPadding
+    contentItem: RowLayout {
+        spacing: 10
+        SkinAvatar { skin: switcher.activeProfile.skin || ""; size: 32 }
+        Text {
+            Layout.maximumWidth: 160
+            text: switcher.activeProfile.name || "Accounts"
+            color: Colors.text
+            font.pixelSize: Typography.control
+            font.weight: Font.Medium
+            elide: Text.ElideRight
+        }
+    }
+    function gamepadContext() { accountMenu.popup(0, switcher.height + 6); }
+    TapHandler { acceptedButtons: Qt.RightButton; onTapped: accountMenu.popup(0, switcher.height + 6) }
     Menu {
         id: accountMenu
         objectName: "accountSwitchMenu"
-        x: switcher.width + 8
-        y: Math.min(0, switcher.height - implicitHeight)
+        x: switcher.width - width
+        y: switcher.height + 6
         width: 240
         padding: 6
         background: Rectangle { radius: 12; color: Colors.surface; border.color: Colors.border }
@@ -39,14 +56,14 @@ NavButton {
                 background: Rectangle { radius: 8; color: entry.highlighted ? Colors.surfaceHi : "transparent" }
                 contentItem: RowLayout {
                     SkinAvatar { skin: entry.modelData.skin || ""; size: 32 }
-                    Text { Layout.fillWidth: true; text: entry.modelData.name; color: Colors.text; font.pixelSize: 14 }
+                    Text { Layout.fillWidth: true; text: entry.modelData.name; color: Colors.text; font.pixelSize: Typography.control }
                     Text { text: entry.modelData.active ? "✓" : ""; color: Colors.accent }
                 }
             }
         }
         MenuSeparator {}
         MenuItem { text: "Manage accounts"; onTriggered: switcher.controller.navigate("accounts") }
-        enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Colors.animations ? 200 : 0 } }
-        exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Colors.animations ? 140 : 0 } }
+        enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Colors.animations ? Colors.motionEnterDuration : 0; easing.type: Easing.OutCubic } }
+        exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Colors.animations ? Colors.motionExitDuration : 0; easing.type: Easing.InCubic } }
     }
 }
