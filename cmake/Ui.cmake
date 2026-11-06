@@ -7,7 +7,7 @@ set(QML_SOURCES
     qml/accounts/SkinAvatar.qml qml/accounts/AccountSwitcher.qml
     qml/browse/DownloadSelection.qml qml/browse/DownloadQueueBar.qml qml/browse/ProjectContent.qml
     qml/components/ContentIcon.qml qml/components/SideNavItem.qml qml/components/TextLink.qml qml/components/ConfirmDialog.qml
-    qml/pages/SessionPage.qml qml/session/MemoryGraph.qml qml/session/HardwareView.qml qml/session/LiveLog.qml qml/session/CrashHelp.qml qml/components/TickBox.qml
+    qml/pages/SessionPage.qml qml/session/MemoryGraph.qml qml/session/HardwareView.qml qml/session/LiveLog.qml qml/session/SessionTab.qml qml/session/SessionEmptyState.qml qml/session/SessionHeader.qml qml/session/SessionSidePanel.qml qml/session/CrashHelp.qml qml/components/TickBox.qml
     qml/shell/NavigationHistory.qml qml/shell/ActivityBar.qml qml/shell/ExportDialog.qml
     qml/components/MotionLoader.qml qml/components/MotionDialog.qml
     qml/components/RenameTarget.qml qml/shell/RenameInstanceDialog.qml
