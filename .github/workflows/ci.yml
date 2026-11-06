@@ -320,7 +320,10 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static-md `
             -DCMAKE_INSTALL_PREFIX="$PWD/stage" -DPRISMARINE_PACKAGE_CHECK=ON -DPRISMARINE_REQUIRE_CONTROLLER=ON
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cmake --build build
+          # PowerShell carries on after a failed program, which would bury the real error.
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ctest --test-dir build --output-on-failure --timeout 300
       - name: Install with Qt and package
         shell: pwsh
