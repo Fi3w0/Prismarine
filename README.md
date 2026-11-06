@@ -19,7 +19,7 @@
 ![FreeBSD](https://img.shields.io/badge/FreeBSD-✓-AB2B28?logo=freebsd&logoColor=white)
 ![Qt](https://img.shields.io/badge/Built_with-Qt_6_·_QML-41CD52?logo=qt&logoColor=white)
 
-[Screenshots](#screenshots) · [Features](#features) · [Install](#install) · [Build](#build-from-source) · [How it works](#how-it-works-with-prism) · [Changelog](CHANGELOG.md) · [License](#license)
+[Screenshots](#screenshots) · [Features](#features) · [Install](#install) · [Build](#build-from-source) · [How it works](#how-it-works-with-prism) · [Documentation](DOCUMENTATION.md) · [Changelog](CHANGELOG.md) · [License](#license)
 
 </div>
 
@@ -28,22 +28,16 @@
 ## Overview
 
 Prismarine is a native Minecraft launcher for the instances you already have in
-[Prism Launcher](https://prismlauncher.org). Browse and install mods and modpacks, keep
-your library organised, follow your game's live log and hardware use, and get help
-when something crashes, all in one deep-sea themed interface.
+[Prism Launcher](https://prismlauncher.org). Browse and install mods and modpacks, organise
+your library, follow your game's live log and hardware use, and get help when something
+crashes, all in one deep-sea themed interface.
 
-**Prism Launcher is required.** Prismarine is a UI and feature add-on rather than
-a standalone launcher, so you need both installed. Prismarine provides the interface
-and library tools; Prism handles Microsoft sign-in, downloading Minecraft and launching
-games. I consider Prismarine a Minecraft launcher because it is where you browse,
-manage and launch your games.
+**You need Prism Launcher too.** Prismarine provides the interface and library tools, and
+Prism handles Microsoft sign-in, downloading Minecraft and launching games. Both apps use
+the same instance folders, so you can switch between them without converting anything.
 
-Both apps read and write the same instance folders, so you can switch between
-them at any time and nothing gets converted or locked in.
-
-> **Beta.** It works, but it still needs improvements. Everything below works today on
-> Linux, where it is used daily. Windows, macOS and FreeBSD builds come from CI and see
-> less real-world use. If something breaks on your setup, please
+> **Beta.** Everything below works on Linux, where I use it daily. Windows, macOS and FreeBSD
+> builds come from CI and see less real-world use. If something breaks on your setup, please
 > [open an issue](https://github.com/Fi3w0/Prismarine/issues).
 
 ---
@@ -87,38 +81,17 @@ them at any time and nothing gets converted or locked in.
 
 ## Features
 
-### Your library
-- **Covers or rows**, search, loader filters, sorting, favourites and notes.
-- **Prism's groups**: create, rename and delete them, and drag instances (or their cards) onto a group.
-- **Card and banner art** per instance: generated artwork, any screenshot, or your own image.
-- **Quick rename** with a double-click or F2, plus a right-click menu everywhere.
-- **Ctrl+K** finds instances, worlds, servers, groups, settings and actions.
+- **Library:** covers, groups, search, favourites and notes for your Prism instances.
+- **Content:** browse Modrinth and CurseForge, resolve dependencies, update mods and packs,
+  and import or export modpacks.
+- **Playing:** launch progress, live logs, hardware graphs, crash explanations and guided
+  recovery after a failed launch.
+- **Controller:** move around every page and dialog with a game controller.
+- **Your setup:** a palette editor, interface size, library density, Java, skins, storage and
+  network settings.
 
-### Content
-- **Browse Modrinth and CurseForge** for mods, resource packs, shaders, datapacks and full modpacks, filtered to your instance's version and loader.
-- **CurseForge without your own API key**: use **Install with Prism Launcher** to open Prism's instance editor or modpack browser. Prism handles its own CurseForge access. Add your own key to browse directly inside Prismarine.
-- **Dependencies resolved** before anything installs, and every download is hash-verified.
-- **Drag and drop** jars, packs and modpack archives onto the window or onto an instance.
-- **Updates** for mods, resource packs, shaders and per-world datapacks.
-- **Mod health**: duplicate mods, missing dependencies, incompatibilities and wrong-loader jars, each with a fix.
-- **Mod profiles** to switch between saved sets of enabled mods.
-- **Import and export** `.mrpack` and Prism ZIPs. *Share with friends* turns Modrinth-hosted files into downloads instead of copying them.
-
-### Playing
-- **Prismarine's own launch screen** with real steps (sign in, game files, Java, loading) and an **Abort** button.
-- **Now playing**: a tab per running game with its live log, filters, memory and CPU, plus an **All games** view with CPU, RAM and GPU graphs.
-- **Crash helper** that reads the log and crash report and explains the likely cause: missing dependencies, mixin conflicts, wrong Java, out of memory and more.
-- **Favourite servers on Home** with live player counts and ping. Join launches straight in.
-- **While playing**, Prismarine can stay open, minimise or hide (globally or per instance).
-- **Multi-account play** *(experimental, off by default)*: run one instance with two accounts at once through a synced copy.
-
-### Housekeeping
-- **Storage** view of worlds, mods, screenshots, logs and caches per instance, with selective cleanup.
-- **Shared content** *(optional)*: identical mods and packs across instances become hard links and use the space once.
-- **Java**: find and test installed runtimes, or download a verified Eclipse Temurin.
-- **Accounts**: default account, skin library and capes, previewed on a 3D model with an elytra view.
-- **Network settings** for Prism's proxy, downloads and API overrides.
-- **Themes**: Deep sea, Light or System, with your own accent colour.
+See the [usage reference](DOCUMENTATION.md) for the feature details, shortcuts,
+command-line options, and troubleshooting.
 
 ---
 
@@ -127,17 +100,12 @@ them at any time and nothing gets converted or locked in.
 You need **[Prism Launcher](https://prismlauncher.org/download/)** installed and signed in
 once. Prismarine finds it and its instances on its own.
 
-Detection covers native packages (including AUR and Gentoo/GURU builds), Nix
-profiles, Flatpak, the `prismlauncher-alpo` Snap, common AppImage/portable
-folders, Windows installer/Scoop locations, and macOS application bundles.
-Use `./install/detect-prism.sh` to see what the installers find. If you keep
-Prism somewhere else, select its executable in Settings and use `--prism-data`
-for a custom data folder. Flatpak and Snap use their own data folders and run
-without Prismarine's quiet-window plugin; their sandbox permissions still apply.
+For custom executables, data folders, and sandboxed installations, see
+[Prism detection](DOCUMENTATION.md#prism-detection-and-data).
 
-The first public beta is **[0.4.0 — Beryllium](https://github.com/Fi3w0/Prismarine/releases/tag/v0.4.0)**.
-See the [changelog](CHANGELOG.md) for release details, and grab the file for your
-system from [GitHub Releases](https://github.com/Fi3w0/Prismarine/releases):
+The latest published beta is **[0.4.0 Beryllium](https://github.com/Fi3w0/Prismarine/releases/tag/v0.4.0)**.
+This source is **0.5.0 Boron**, which is not released yet. See the [changelog](CHANGELOG.md),
+and grab the file for your system from [GitHub Releases](https://github.com/Fi3w0/Prismarine/releases):
 
 | System | Download | Notes |
 | --- | --- | --- |
@@ -145,7 +113,7 @@ system from [GitHub Releases](https://github.com/Fi3w0/Prismarine/releases):
 | **Debian 13, Ubuntu 25.04+** | `prismarine_*_amd64.deb` | `sudo apt install ./prismarine_*.deb` |
 | **Fedora** | `prismarine-*.x86_64.rpm` | `sudo dnf install ./prismarine-*.rpm` |
 | **Arch Linux** | `prismarine-*.pkg.tar.zst` | `sudo pacman -U prismarine-*.pkg.tar.zst` |
-| **Gentoo** | [Live ebuild / local overlay](packaging/README.md#gentoo) | Builds `main`; optional `keychain` USE flag. |
+| **Gentoo** | [Live ebuild / local overlay](packaging/README.md#gentoo) | Builds `main`; optional `keychain` and `controller` USE flags. |
 | **Nix / NixOS** | [Flake, module, and Nix closure](packaging/README.md#nix) | Qt and QML runtime paths are wrapped. |
 | **Void Linux** | [XBPS template / package](packaging/README.md#void-linux) | `x86_64` glibc binary; build locally for musl. QtKeychain disabled. |
 | **Windows 10/11** | `Prismarine-*-windows-x64-setup.exe` | Or the portable `.zip`. No administrator rights needed. |
@@ -163,50 +131,12 @@ recipes live here; they are not yet in the official distribution repositories.
 
 ## Build from source
 
-Requirements: **Qt 6.6+** (Base, Declarative, Quick3D, ShaderTools, Svg), **libarchive**,
-**OpenSSL 3**, **CMake 3.21+** and a **C++17** compiler. **QtKeychain** is optional: it
-enables the Friends feature and remembered CurseForge API keys.
+Requires Qt 6.6+ with Quick3D, libarchive, OpenSSL 3, CMake 3.21+, and a C++17
+compiler. QtKeychain and SDL2 are optional. See the [technical report](TECHNICAL_REPORT.md#building)
+for platform dependencies and build options, or use the
+[source installers](install/README.md).
 
-The [source installers](install/README.md) check for missing dependencies and
-install them with your distro's package manager, then build into `~/.local`:
-
-```bash
-git clone https://github.com/Fi3w0/Prismarine.git
-cd Prismarine
-./install/install.sh --dry-run
-./install/install.sh
-```
-
-There are separate entry points for Arch, Debian, Ubuntu, Fedora, Gentoo, Void,
-FreeBSD, Nix, and NixOS. Use `--check` to check dependencies without changing
-anything, or `--deps-only` to install dependencies without installing Prismarine.
-See [native package recipes](packaging/README.md) for Portage, NixOS configuration,
-and XBPS builds.
-
-```bash
-# Arch
-sudo pacman -S cmake ninja qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6
-
-# Fedora
-sudo dnf install cmake ninja-build gcc-c++ qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtquick3d-devel qt6-qtshadertools-devel qt6-qtsvg-devel libarchive-devel openssl-devel qtkeychain-qt6-devel
-
-# Debian 13 / Ubuntu 25.04+
-sudo apt install cmake ninja-build g++ qt6-base-dev qt6-declarative-dev qt6-quick3d-dev qt6-shadertools-dev qt6-svg-dev libarchive-dev libssl-dev qtkeychain-qt6-dev
-
-# Gentoo
-./install/gentoo.sh --deps-only
-
-# Void Linux (QtKeychain is unavailable; configure with -DPRISMARINE_KEYCHAIN=OFF)
-./install/void.sh --deps-only
-
-# Nix / NixOS (includes the pinned build dependencies)
-NIXPKGS_ALLOW_UNFREE=1 nix develop --impure
-
-# FreeBSD
-sudo pkg install cmake ninja qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive
-```
-
-```bash
+```sh
 git clone https://github.com/Fi3w0/Prismarine.git
 cd Prismarine
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -214,50 +144,36 @@ cmake --build build
 ./build/prismarine
 ```
 
-Install it for your user (desktop entry and icons included) with
-`cmake --install build --prefix ~/.local`. Useful options:
-
-| Option | Default | What it does |
-| --- | --- | --- |
-| `PRISMARINE_KEYCHAIN` | `ON` | Use QtKeychain for the Friends identity and API keys |
-| `PRISMARINE_DEPLOY_QT` | `OFF` | Copy Qt next to the app on install (Windows and macOS packages) |
-
-Windows and macOS builds use Qt from the [online installer](https://www.qt.io/download-qt-installer-oss)
-and libarchive and OpenSSL from [vcpkg](https://vcpkg.io). [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
-has the exact steps for every system and package.
-
-### Handy flags
-
-```bash
-./build/prismarine --prism-data /path/to/PrismLauncher   # a different Prism folder
-./build/prismarine --preferences /tmp/test.ini           # an isolated set of settings
-./build/prismarine --page instance --instance "My Pack" --tab mods
-./build/prismarine --page session --tab all              # the hardware view
-./build/prismarine --page home --screenshot home.png     # render, save and quit
-```
+Install for your user with `cmake --install build --prefix ~/.local`.
+Contributors should also read [the validation instructions](CONTRIBUTING.md#check-your-change).
 
 ---
 
 ## How it works with Prism
 
-- **Instances stay Prism's.** Prismarine edits the same `instance.cfg`, mod folders and
-  `instgroups.json`, keeps every setting it does not understand, and writes files atomically.
-- **Prism does the launching.** Play asks Prism to start the game, and Prismarine follows
-  Prism's log and the game's own log to show progress. Microsoft sign-in also stays in Prism.
-- **No surprise windows.** When Prismarine starts Prism, it loads a small Qt plugin into
-  it (`src/prismquiet`) that keeps Prism's progress dialog and console out of sight unless
-  you have opened Prism's own window. For setups where the plugin cannot load, there is
-  also a [patch for Prism](packaging/prism-patch/README.md).
-- **Nothing hidden.** No accounts, no telemetry. Network access is for Modrinth,
-  CurseForge, Prism's news feed, server pings and, only when you ask, uploading a log to mclo.gs.
+Prismarine manages the same instances and asks Prism to launch them. Prism keeps Microsoft
+sign-in and game preparation. A small Qt plugin keeps compatible Prism launch windows out of
+the way while Prismarine shows progress.
+
+See [the technical report](TECHNICAL_REPORT.md#architecture) for the integration
+and its compatibility limits.
+
+---
+
+## Documentation
+
+- [Usage reference](DOCUMENTATION.md): library/content tools, shortcuts, and CLI.
+- [Technical report](TECHNICAL_REPORT.md): architecture, builds, and validation.
+- [Changelog](CHANGELOG.md) and [developer history](DEV_CHANGELOG.md).
+- [Plans, research, and reports](docs/README.md).
 
 ---
 
 ## About this project
 
-I'm building Prismarine solo, and it's still in beta: it works, but there is plenty left to improve. I use AI coding agents to move fast, then
-check the results on my own machine and library before I trust them. Bug reports are
-genuinely useful: [open an issue](https://github.com/Fi3w0/Prismarine/issues) with your
+I'm building Prismarine solo, and there is plenty left to improve. I use AI coding agents to
+move fast, then check the results on my own machine and library before I trust them. Bug
+reports help a lot: [open an issue](https://github.com/Fi3w0/Prismarine/issues) with your
 system and what you were doing.
 
 More from me: Minecraft mods on [Modrinth](https://modrinth.com/user/Fi3w0) and other
