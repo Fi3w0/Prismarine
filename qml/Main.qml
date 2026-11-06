@@ -138,19 +138,6 @@ ApplicationWindow {
         if (draggingId) dragGhost.Drag.drop();
         draggingId = "";
     }
-    // Settings sections with search words, shared by the Settings sidebar and Ctrl+K.
-    readonly property var settingsSections: [
-        { group: "Prismarine", name: "Interface", words: "friends hide tab scroll speed wheel mouse theme accent colour color dark light system animations motion size scale start page home sections background palette surfaces rail text contrast hue hsv hex while playing minimize hide console" },
-        { group: "Prismarine", name: "Library & covers", words: "covers rows list sort screenshots sidebar view density frames cover size badges" },
-        { group: "Launcher", name: "Launcher mode", words: "full stable mode engine update remove delete uninstall prism handheld shortcuts" },
-        { group: "Launcher", name: "Prism integration", words: "classic prism progress desktop window rule program executable" },
-        { group: "Launcher", name: "Java & game", words: "java memory ram jvm arguments runtime temurin wrapper launch command" },
-        { group: "Launcher", name: "Network", words: "proxy socks http downloads parallel timeout retries token modrinth curseforge key user agent metadata mirror" },
-        { group: "Launcher", name: "Storage", words: "disk space clean cleanup logs cache worlds trash shared duplicates hard links" },
-        { group: "Launcher", name: "Accounts", words: "account skin cape microsoft profile sign in" },
-        { group: "Other", name: "Experimental", words: "multi-account alt accounts unsafe" },
-        { group: "Other", name: "About", words: "version licence license credits" }
-    ]
     function openPalette() { dialogHost.commandPalette.openPalette(); }
     // Instance artwork per slot ("card" or "hero"); see AppPreferences::setArtwork.
     function artworkOf(id, slot) {
@@ -327,69 +314,19 @@ ApplicationWindow {
         TopBar {
             controller: appWindow
         }
-        MotionLoader {
-            backwards: history.backwards
+        PageStack {
             id: pageLoader
             objectName: "pageLoader"
+            controller: appWindow
+            backwards: history.backwards
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: appWindow.page === "home" ? homePage : appWindow.page === "instance" ? instancePage : appWindow.page === "settings" ? settingsPage : appWindow.page === "accounts" ? accountsPage : appWindow.page === "friends" ? friendsPage : appWindow.page === "browse" ? browsePage : appWindow.page === "session" && appWindow.session ? sessionPage : libraryPage
-            opacity: 1
         }
         ActivityBar {
             controller: appWindow
         }
         }
     }
-    Component {
-        id: libraryPage
-        LibraryPage {
-            controller: appWindow
-        }
-    }
-    Component {
-        id: homePage
-        HomePage {
-            controller: appWindow
-        }
-    }
-    Component {
-        id: instancePage
-        InstancePage {
-            controller: appWindow
-        }
-    }
-    Component {
-        id: settingsPage
-        SettingsPage {
-            controller: appWindow
-        }
-    }
-    Component {
-        id: friendsPage
-        FriendsPage { controller: appWindow }
-    }
-    Component {
-        id: accountsPage
-        AccountsPage {
-            controller: appWindow
-        }
-    }
-    Component {
-        id: sessionPage
-        SessionPage {
-            controller: appWindow
-            tab: appWindow.sessionTab
-        }
-    }
-    Component {
-        id: browsePage
-        BrowsePage {
-            controller: appWindow
-        }
-    }
-
-
     FirstRunScreen {
         id: firstRun
         anchors.fill: parent
@@ -400,35 +337,7 @@ ApplicationWindow {
             appWindow.showFirstRun = false;
         }
     }
-    Rectangle {
-        id: dragGhost
-        objectName: "instanceDragGhost"
-        z: 1000
-        visible: !!appWindow.draggingId
-        width: Math.min(280, ghostLabel.implicitWidth + 44)
-        height: 34
-        radius: 9
-        color: Colors.surfaceHi
-        border.color: Colors.accent
-        Drag.active: !!appWindow.draggingId
-        Drag.keys: ["prismarine/instance"]
-        Drag.hotSpot.x: 14
-        Drag.hotSpot.y: height / 2
-        Row {
-            anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-            spacing: 8
-            LineIcon { name: "folder"; tint: Colors.accent; width: 16; height: 16; anchors.verticalCenter: parent.verticalCenter }
-            Text {
-                id: ghostLabel
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, 220)
-                text: appWindow.draggingName
-                color: Colors.text
-                font.pixelSize: Typography.body
-                elide: Text.ElideRight
-            }
-        }
-    }
+    InstanceDragGhost { id: dragGhost; controller: appWindow }
     DropOverlay {
         id: dropOverlay
         active: windowDrop.containsDrag
@@ -460,6 +369,8 @@ ApplicationWindow {
     function browseDatapacks(id, world) { contentActions.browseDatapacks(id, world); }
     function browseFor(id, text) { contentActions.browseFor(id, text); }
     AppShortcuts { controller: appWindow }
+    SettingsIndex { id: settingsIndex }
+    readonly property var settingsSections: settingsIndex.sections
     AppEvents { controller: appWindow }
     AppDialogs {
         id: dialogHost
