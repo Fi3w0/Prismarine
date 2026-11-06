@@ -6,6 +6,7 @@ import QtQuick.Layouts
 Rectangle {
     id: card
     required property var controller
+    property string targetId: controller.current.instanceId || (controller.instances.allInstances[0] || {}).instanceId || ""
     readonly property var pinger: controller.homeServers
     readonly property var favorites: controller.preferences.serverFavorites.filter(it => !!controller.instances.getById(it.instanceId).instanceId)
     function refresh() {
@@ -30,7 +31,7 @@ Rectangle {
                 text: "Favourite servers"
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 20
+                font.pixelSize: Typography.sectionTitle
                 font.letterSpacing: 2
             }
             TextLink {
@@ -42,10 +43,53 @@ Rectangle {
         Text {
             visible: !card.favorites.length
             Layout.fillWidth: true
-            text: "Pin servers with the ☆ button in an instance's Servers tab to see who's online and join in one click."
+            text: "No servers pinned yet. Add one and see who is online before you launch."
             color: Colors.subtext
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
             wrapMode: Text.Wrap
+        }
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 10
+            RowLayout {
+                Layout.fillWidth: true
+                Text { text: qsTr("Join with"); color: Colors.subtext; font.pixelSize: Typography.bodySmall }
+                SelectBox {
+                    id: targetPicker
+                    objectName: "homeServerTarget"
+                    Layout.fillWidth: true
+                    model: card.controller.instances.allInstances
+                    textRole: "name"
+                    currentIndex: model.findIndex(it => it.instanceId === card.targetId)
+                    displayText: currentIndex < 0 ? qsTr("Choose an instance…") : currentText
+                    onActivated: card.targetId = model[currentIndex].instanceId
+                }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                InputField {
+                    id: address
+                    objectName: "homeServerAddress"
+                    Layout.fillWidth: true
+                    placeholderText: "play.example.net"
+                    Accessible.name: qsTr("Server address")
+                    onAccepted: addServer.clicked()
+                }
+                ActionButton {
+                    id: addServer
+                    objectName: "homeAddServer"
+                    text: qsTr("Add server")
+                    implicitWidth: 120
+                    primary: true
+                    enabled: targetPicker.currentIndex >= 0 && !!address.text.trim()
+                    onClicked: {
+                        if (!enabled || !card.controller.instances.getById(card.targetId).instanceId) return;
+                        if (card.controller.preferences.addServerFavorite(card.targetId, address.text.trim(), address.text)) {
+                            address.clear(); card.controller.notify(qsTr("Server pinned to Home"));
+                        }
+                    }
+                }
+            }
         }
         GridLayout {
             Layout.fillWidth: true
@@ -81,7 +125,7 @@ Rectangle {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 2
-                            Text { Layout.fillWidth: true; text: server.modelData.name; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                            Text { Layout.fillWidth: true; text: server.modelData.name; color: Colors.text; font.pixelSize: Typography.control; font.weight: Font.DemiBold; elide: Text.ElideRight }
                             RowLayout {
                                 spacing: 6
                                 Rectangle {
@@ -94,17 +138,18 @@ Rectangle {
                                            : server.status.state === "pinging" ? "Pinging…" : "Offline")
                                           + " · " + (server.instance.name || "")
                                     color: Colors.subtext
-                                    font.pixelSize: 12
+                                    font.pixelSize: Typography.bodySmall
                                     elide: Text.ElideRight
                                 }
                             }
                         }
                         ActionButton {
+                            objectName: "homeJoinServer_" + server.modelData.instanceId
                             text: "▶ Join"
                             primary: true
                             implicitWidth: 84
                             implicitHeight: 36
-                            font.pixelSize: 13
+                            font.pixelSize: Typography.body
                             onClicked: {
                                 if (card.controller.instances.launchServer(server.modelData.instanceId, server.modelData.address)) {
                                     card.controller.notify("Joining " + server.modelData.name + "…");

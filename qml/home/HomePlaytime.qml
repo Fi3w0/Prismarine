@@ -40,14 +40,14 @@ Rectangle {
                     text: "Playtime"
                     color: Colors.bone
                     font.family: Colors.displayFont
-                    font.pixelSize: 20
+                    font.pixelSize: Typography.sectionTitle
                     font.letterSpacing: 2
                 }
                 Text {
                     Layout.alignment: Qt.AlignBaseline
                     text: panel.history ? panel.duration(panel.history.thisWeekSecs) + " this week" : ""
                     color: Colors.text
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                     font.weight: Font.DemiBold
                 }
                 Text {
@@ -55,7 +55,7 @@ Rectangle {
                     visible: !!panel.history && panel.history.streakDays > 1
                     text: panel.history ? panel.history.streakDays + "-day streak" : ""
                     color: Colors.subtext
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                 }
                 Item {
                     Layout.fillWidth: true
@@ -63,7 +63,7 @@ Rectangle {
                 Text {
                     text: panel.history ? "Tracking since " + panel.history.trackedSince : ""
                     color: Colors.subtext
-                    font.pixelSize: 11
+                    font.pixelSize: Typography.caption
                 }
             }
             // The plot: one bar per week, current week labelled directly.
@@ -113,7 +113,7 @@ Rectangle {
                             visible: week.current && week.modelData.secs > 0
                             text: panel.duration(week.modelData.secs)
                             color: Colors.text
-                            font.pixelSize: 10
+                            font.pixelSize: Typography.badge
                             font.weight: Font.DemiBold
                         }
                         Text {
@@ -123,7 +123,7 @@ Rectangle {
                             visible: !week.modelData.tracked
                             text: "·"
                             color: Colors.border
-                            font.pixelSize: 14
+                            font.pixelSize: Typography.control
                         }
                         HoverHandler { id: hover }
                         ToolTip.visible: hover.hovered
@@ -146,7 +146,7 @@ Rectangle {
                             // Every other week keeps labels from colliding.
                             text: (panel.weeks.length - 1 - index) % 2 === 0 ? modelData.label : ""
                             color: Colors.subtext
-                            font.pixelSize: 9
+                            font.pixelSize: Typography.chartLabel
                         }
                     }
                 }
@@ -161,7 +161,7 @@ Rectangle {
             Text {
                 text: "This month"
                 color: Colors.subtext
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
             }
             Repeater {
                 model: panel.leaders
@@ -175,13 +175,13 @@ Rectangle {
                             Layout.fillWidth: true
                             text: modelData.name
                             color: Colors.text
-                            font.pixelSize: 12
+                            font.pixelSize: Typography.bodySmall
                             elide: Text.ElideRight
                         }
                         Text {
                             text: panel.duration(modelData.secs)
                             color: Colors.subtext
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                         }
                     }
                     Rectangle {
@@ -197,7 +197,7 @@ Rectangle {
                 visible: !panel.leaders.length
                 text: "Play something and it shows up here. Time is counted from Prism's totals, so launches from Prism count too."
                 color: Colors.subtext
-                font.pixelSize: 11
+                font.pixelSize: Typography.caption
                 wrapMode: Text.Wrap
             }
             Item {

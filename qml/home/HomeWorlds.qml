@@ -21,7 +21,7 @@ Rectangle {
             text: "Jump into a world"
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             font.letterSpacing: 2
         }
         ListView {
@@ -62,7 +62,7 @@ Rectangle {
                             Layout.fillWidth: true
                             text: worldEntry.modelData.name
                             color: Colors.text
-                            font.pixelSize: 13
+                            font.pixelSize: Typography.body
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
                         }
@@ -70,7 +70,7 @@ Rectangle {
                             Layout.fillWidth: true
                             text: worldEntry.modelData.instanceName
                             color: Colors.subtext
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                             elide: Text.ElideRight
                         }
                     }
@@ -82,7 +82,7 @@ Rectangle {
                         Text {
                             anchors.centerIn: parent
                             text: "▶"
-                            font.pixelSize: 9
+                            font.pixelSize: Typography.chartLabel
                             color: worldEntry.hovered ? Colors.accentInk : Colors.accent
                         }
                     }
@@ -93,7 +93,7 @@ Rectangle {
                 visible: !controller.instances.worlds.length
                 text: "Your saved worlds will appear here."
                 color: Colors.subtext
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
             }
         }
     }

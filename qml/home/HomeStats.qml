@@ -20,7 +20,7 @@ Rectangle {
             text: "Your stats"
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             font.letterSpacing: 2
         }
         GridLayout {
@@ -64,14 +64,14 @@ Rectangle {
                             width: parent.width
                             text: modelData.value
                             color: Colors.accent
-                            font.pixelSize: 23
+                            font.pixelSize: Typography.statistic
                             font.weight: Font.ExtraBold
                             elide: Text.ElideRight
                         }
                         Text {
                             text: modelData.label
                             color: Colors.subtext
-                            font.pixelSize: 12
+                            font.pixelSize: Typography.bodySmall
                         }
                     }
                 }

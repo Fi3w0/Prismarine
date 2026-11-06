@@ -3,15 +3,19 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
-Item {
+Rectangle {
     id: hero
+    radius: 20
+    color: Colors.surfaceHi
+    clip: true
     required property var controller
     property var latest: ({})
     property bool hasInstances: false
 
     Layout.fillWidth: true
-    Layout.preferredHeight: 250
+    Layout.preferredHeight: 280
     HeroBackdrop {
+        radius: 20
         anchors {
             fill: parent
             margins: 0
@@ -42,7 +46,7 @@ Item {
             Text {
                 text: hero.hasInstances ? "Continue playing" : "Welcome to Prismarine"
                 font.family: Colors.displayFont
-                font.pixelSize: 15
+                font.pixelSize: Typography.bodyLarge
                 font.letterSpacing: 3
                 color: Colors.brass
             }
@@ -50,7 +54,7 @@ Item {
                 Layout.fillWidth: true
                 text: hero.latest.name || "Your next adventure"
                 font.family: Colors.displayFont
-                font.pixelSize: 44
+                font.pixelSize: Typography.hero
                 color: Colors.bone
                 elide: Text.ElideRight
             }
@@ -72,10 +76,17 @@ Item {
                 }
             }
             Text {
-                text: hero.hasInstances ? "Played " + hero.latest.played + " · Last played " + hero.latest.lastPlayed : "Create your first instance to begin."
+                text: hero.hasInstances ? (hero.latest.playedSecs > 0 ? hero.latest.played + " played" : qsTr("Not played yet")) + (hero.latest.lastLaunchMs > 0 ? " · Last played " + hero.latest.lastPlayed : "") : "Create your first instance to begin."
                 color: Colors.subtext
-                font.pixelSize: 14
+                font.pixelSize: Typography.control
             }
+        }
+        HomeQuickWorlds {
+            Layout.preferredWidth: 260
+            Layout.maximumWidth: 300
+            visible: hero.width >= 1050 && hero.controller.preferences.homeSections.indexOf("worlds") >= 0
+            controller: hero.controller
+            instanceId: hero.latest.instanceId || ""
         }
         ColumnLayout {
             Layout.preferredWidth: 190
@@ -94,7 +105,7 @@ Item {
                     Layout.fillWidth: true
                     implicitWidth: 0
                     implicitHeight: 34
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     text: "Instance"
                     enabled: hero.hasInstances
                     onClicked: controller.openInstance(hero.latest.instanceId)
@@ -103,7 +114,7 @@ Item {
                     Layout.fillWidth: true
                     implicitWidth: 0
                     implicitHeight: 34
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     text: "Mods"
                     enabled: hero.hasInstances
                     onClicked: controller.openInstance(hero.latest.instanceId, "mods")

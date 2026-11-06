@@ -31,7 +31,7 @@ set(QML_SOURCES
     qml/instance/InstanceScreenshots.qml qml/instance/InstanceFiles.qml qml/instance/DatapackDialog.qml qml/instance/ContentUpdates.qml
     qml/instance/InstanceInfoPanel.qml qml/instance/InstanceQuickSettings.qml
     qml/instance/InstalledModsPanel.qml qml/instance/InstanceNotesPanel.qml
-    qml/home/HomeHero.qml 
+    qml/home/HomeHero.qml qml/home/HomeQuickWorlds.qml
     qml/home/HomeNews.qml
     qml/home/HomePlaytime.qml
     qml/home/HomeStats.qml
