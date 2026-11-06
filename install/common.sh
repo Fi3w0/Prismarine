@@ -74,13 +74,13 @@ keychain=ON
 case "$distro" in
     arch)
         manager=pacman
-        packages=(base-devel cmake ninja pkgconf qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6)
+        packages=(base-devel cmake ninja pkgconf qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6 sdl2-compat)
         installed() { pacman -Q "$1" >/dev/null 2>&1; }
         install_missing() { as_root pacman -Syu --needed "${missing[@]}"; }
         ;;
     debian|ubuntu)
         manager=apt-get
-        packages=(build-essential cmake ninja-build pkg-config qt6-base-dev qt6-declarative-dev qt6-quick3d-dev qt6-shadertools-dev qt6-svg-dev libarchive-dev libssl-dev qtkeychain-qt6-dev)
+        packages=(build-essential cmake ninja-build pkg-config qt6-base-dev qt6-declarative-dev qt6-quick3d-dev qt6-shadertools-dev qt6-svg-dev libarchive-dev libssl-dev libsdl2-dev qtkeychain-qt6-dev)
         # QML modules are loaded at runtime and are not all pulled in by -dev packages.
         while IFS= read -r package; do
             [[ -z $package || $package == \#* ]] || packages+=("$package")
@@ -90,27 +90,27 @@ case "$distro" in
         ;;
     fedora)
         manager=dnf
-        packages=(gcc-c++ cmake ninja-build pkgconf-pkg-config qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtquick3d-devel qt6-qtshadertools-devel qt6-qtsvg-devel libarchive-devel openssl-devel qtkeychain-qt6-devel)
+        packages=(gcc-c++ cmake ninja-build pkgconf-pkg-config qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtquick3d-devel qt6-qtshadertools-devel qt6-qtsvg-devel libarchive-devel openssl-devel SDL2-devel qtkeychain-qt6-devel)
         installed() { rpm -q "$1" >/dev/null 2>&1; }
         install_missing() { as_root dnf install "${missing[@]}"; }
         ;;
     gentoo)
         manager=emerge
-        packages=(dev-build/cmake dev-build/ninja virtual/pkgconfig sys-devel/gcc '>=dev-qt/qtbase-6.6:6[concurrent,gui,network,opengl,ssl,widgets]' '>=dev-qt/qtdeclarative-6.6:6[opengl]' '>=dev-qt/qtquick3d-6.6:6' '>=dev-qt/qtshadertools-6.6:6' '>=dev-qt/qtsvg-6.6:6' app-arch/libarchive '>=dev-libs/openssl-3' dev-libs/qtkeychain)
+        packages=(dev-build/cmake dev-build/ninja virtual/pkgconfig sys-devel/gcc '>=dev-qt/qtbase-6.6:6[concurrent,gui,network,opengl,ssl,widgets]' '>=dev-qt/qtdeclarative-6.6:6[opengl]' '>=dev-qt/qtquick3d-6.6:6' '>=dev-qt/qtshadertools-6.6:6' '>=dev-qt/qtsvg-6.6:6' app-arch/libarchive '>=dev-libs/openssl-3' dev-libs/qtkeychain 'media-libs/libsdl2[joystick]')
         installed() { portageq has_version / "$1" >/dev/null 2>&1; }
         install_missing() { as_root emerge --ask --oneshot "${missing[@]}"; }
         ;;
     void)
         manager=xbps-install
         keychain=OFF
-        packages=(base-devel cmake ninja pkg-config qt6-base-devel qt6-declarative-devel qt6-quick3d-devel qt6-shadertools-devel qt6-svg-devel libarchive-devel openssl-devel)
+        packages=(base-devel cmake ninja pkg-config qt6-base-devel qt6-declarative-devel qt6-quick3d-devel qt6-shadertools-devel qt6-svg-devel libarchive-devel openssl-devel SDL2-devel)
         installed() { [[ $(xbps-query -p state "$1" 2>/dev/null) == installed ]]; }
         install_missing() { as_root xbps-install -S "${missing[@]}"; }
         ;;
     freebsd)
         manager=pkg
         keychain=OFF
-        packages=(cmake ninja pkgconf qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl)
+        packages=(cmake ninja pkgconf qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl sdl2)
         installed() { pkg info -e "$1" >/dev/null 2>&1; }
         install_missing() { as_root pkg install "${missing[@]}"; }
         ;;

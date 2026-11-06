@@ -6,7 +6,7 @@
 # Every package is published on GitHub Releases:
 #   a tag such as v0.4.0  ->  the "Prismarine 0.4.0" release
 #   a push to main        ->  the rolling "Nightly" pre-release, replaced each time
-# Tests run when the tests folder is part of the checkout.
+# Public regression checks always run; private suites run when tests/ is present.
 name: CI
 
 concurrency:
@@ -79,13 +79,13 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build libarchive-dev libssl-dev libgl1-mesa-dev libxkbcommon-dev \
+          sudo apt-get install -y ninja-build libarchive-dev libssl-dev libsdl2-dev libgl1-mesa-dev libxkbcommon-dev \
             libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libfuse2 file xvfb
       - name: Build and test
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DPRISMARINE_KEYCHAIN=OFF
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_REQUIRE_CONTROLLER=ON
           cmake --build build
-          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+          ctest --test-dir build --output-on-failure --timeout 300
       - name: Make the AppImage
         run: |
           DESTDIR=$PWD/AppDir cmake --install build
@@ -125,13 +125,13 @@ jobs:
           apt-get update
           apt-get install -y build-essential cmake ninja-build dpkg-dev file \
             qt6-base-dev qt6-declarative-dev qt6-quick3d-dev qt6-shadertools-dev qt6-svg-dev \
-            qtkeychain-qt6-dev libarchive-dev libssl-dev \
+            qtkeychain-qt6-dev libarchive-dev libssl-dev libsdl2-dev \
             $(grep -v '^#' packaging/linux/debian-runtime-depends.txt)
       - name: Build and test
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DPRISMARINE_REQUIRE_CONTROLLER=ON
           cmake --build build
-          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+          ctest --test-dir build --output-on-failure --timeout 300
       - name: Package
         run: |
           cd build && cpack -G DEB -D CPACK_PACKAGE_VERSION=$VERSION
@@ -154,12 +154,12 @@ jobs:
         run: |
           dnf install -y gcc-c++ cmake ninja-build rpm-build file \
             qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtquick3d-devel qt6-qtshadertools-devel qt6-qtsvg-devel \
-            qtkeychain-qt6-devel libarchive-devel openssl-devel
+            qtkeychain-qt6-devel libarchive-devel openssl-devel SDL2-devel
       - name: Build and test
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DPRISMARINE_REQUIRE_CONTROLLER=ON
           cmake --build build
-          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+          ctest --test-dir build --output-on-failure --timeout 300
       - name: Package
         run: |
           # RPM versions cannot contain "-".
@@ -180,7 +180,7 @@ jobs:
       - name: Install build dependencies
         run: |
           pacman -Syu --noconfirm --needed base-devel git cmake ninja qt6-base qt6-declarative qt6-quick3d \
-            qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6
+            qt6-shadertools qt6-svg libarchive openssl qtkeychain-qt6 sdl2-compat
       - uses: actions/checkout@v7
       - name: Build, test and package with makepkg
         run: |
@@ -302,26 +302,26 @@ jobs:
         id: vcpkg-cache
         with:
           path: .cache/vcpkg
-          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v1
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v2
       - name: Install libraries (static, so no extra DLLs ship)
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
-          vcpkg install libarchive openssl --triplet x64-windows-static-md
+          vcpkg install libarchive openssl sdl2 --triplet x64-windows-static-md
           "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" >> $env:GITHUB_ENV
       - uses: actions/cache/save@v6
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
         with:
           path: .cache/vcpkg
-          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v1
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-v2
       - name: Build and test
         shell: pwsh
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static-md `
-            -DCMAKE_INSTALL_PREFIX="$PWD/stage" -DPRISMARINE_PACKAGE_CHECK=ON
+            -DCMAKE_INSTALL_PREFIX="$PWD/stage" -DPRISMARINE_PACKAGE_CHECK=ON -DPRISMARINE_REQUIRE_CONTROLLER=ON
           cmake --build build
-          if (Test-Path tests) { ctest --test-dir build --output-on-failure --timeout 300 }
+          ctest --test-dir build --output-on-failure --timeout 300
       - name: Install with Qt and package
         shell: pwsh
         run: |
@@ -395,7 +395,7 @@ jobs:
         id: vcpkg-cache
         with:
           path: .cache/vcpkg
-          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v1
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v2
       - name: Install libraries (static, built for macOS 12)
         run: |
           mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
@@ -405,20 +405,20 @@ jobs:
             "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
             VCPKG_INSTALLATION_ROOT="$RUNNER_TEMP/vcpkg"
           fi
-          "$VCPKG_INSTALLATION_ROOT/vcpkg" install libarchive openssl --triplet ${{ matrix.triplet }}
+          "$VCPKG_INSTALLATION_ROOT/vcpkg" install libarchive openssl sdl2 --triplet ${{ matrix.triplet }}
           echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> "$GITHUB_ENV"
       - uses: actions/cache/save@v6
         if: steps.vcpkg-cache.outputs.cache-hit != 'true'
         with:
           path: .cache/vcpkg
-          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v1
+          key: vcpkg-${{ runner.os }}-${{ runner.arch }}-macos12-v2
       - name: Build and test
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_DEPLOY_QT=ON \
             -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET -DCMAKE_INSTALL_PREFIX="$PWD/stage"
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET -DCMAKE_INSTALL_PREFIX="$PWD/stage" -DPRISMARINE_REQUIRE_CONTROLLER=ON
           cmake --build build
-          if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+          ctest --test-dir build --output-on-failure --timeout 300
       - name: Bundle Qt and make the disk image
         run: |
           cmake --install build
@@ -466,13 +466,13 @@ jobs:
           usesh: true
           sync: rsync
           prepare: |
-            pkg install -y cmake ninja qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl
+            pkg install -y cmake ninja qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive openssl sdl2
           run: |
             set -eu
             export QT_QPA_PLATFORM=offscreen
-            cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DPRISMARINE_KEYCHAIN=OFF
+            cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DPRISMARINE_KEYCHAIN=OFF -DPRISMARINE_REQUIRE_CONTROLLER=ON
             cmake --build build --parallel 2
-            if [ -d tests ]; then ctest --test-dir build --output-on-failure --timeout 300; fi
+            ctest --test-dir build --output-on-failure --timeout 300
             DESTDIR="$PWD/stage" cmake --install build
             sh packaging/freebsd/make-package.sh "$PWD/stage" "$VERSION" "$PWD/dist"
       - uses: actions/upload-artifact@v7

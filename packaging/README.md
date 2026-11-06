@@ -22,6 +22,7 @@ EOF
 sudo emerge --ask games-util/prismarine
 ```
 
+The `controller` USE flag adds SDL2 for controller navigation, and is on by default.
 The `keychain` USE flag is enabled by default. Disable it if you do not want
 QtKeychain support. Portage may ask you to accept the noncommercial logo license:
 `games-util/prismarine CC-BY-NC-ND-4.0` in `package.license`.

@@ -6,6 +6,7 @@
     <name>Fi3w0</name>
   </maintainer>
   <use>
+    <flag name="controller">Navigate with a game controller through SDL2</flag>
     <flag name="keychain">Store the Friends identity and API keys with QtKeychain</flag>
   </use>
   <upstream>

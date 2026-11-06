@@ -11,7 +11,7 @@ EGIT_BRANCH="main"
 
 LICENSE="GPL-3 CC-BY-NC-ND-4.0 OFL-1.1"
 SLOT="0"
-IUSE="+keychain"
+IUSE="+controller +keychain"
 # The public source tree does not contain the private test suites.
 RESTRICT="test"
 
@@ -23,6 +23,7 @@ DEPEND="
 	>=dev-qt/qtsvg-6.6:6
 	app-arch/libarchive:=
 	>=dev-libs/openssl-3:0=
+	controller? ( media-libs/libsdl2[joystick] )
 	keychain? ( dev-libs/qtkeychain:= )
 "
 RDEPEND="${DEPEND}"
@@ -33,6 +34,7 @@ DOCS=( README.md NOTICE TRADEMARKS.md )
 src_configure() {
 	local mycmakeargs=(
 		-DBUILD_TESTING=OFF
+		-DPRISMARINE_CONTROLLER=$(usex controller)
 		-DPRISMARINE_KEYCHAIN=$(usex keychain)
 	)
 	cmake_src_configure

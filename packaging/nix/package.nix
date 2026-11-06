@@ -1,4 +1,4 @@
-{ lib, stdenv, cmake, ninja, pkg-config, qt6, kdePackages, libarchive, openssl }:
+{ lib, stdenv, cmake, ninja, pkg-config, qt6, kdePackages, libarchive, openssl, SDL2 }:
 
 stdenv.mkDerivation {
   pname = "prismarine";
@@ -15,6 +15,7 @@ stdenv.mkDerivation {
     kdePackages.qtkeychain
     libarchive
     openssl
+    SDL2
   ];
 
   cmakeFlags = [ "-DBUILD_TESTING=OFF" "-DPRISMARINE_KEYCHAIN=ON" ];

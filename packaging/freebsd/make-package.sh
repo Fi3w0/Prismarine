@@ -5,7 +5,7 @@ set -eu
 stage=$1 version=$2 out=$3
 manifest=$(mktemp)
 deps=""
-for name in qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive; do
+for name in qt6-base qt6-declarative qt6-quick3d qt6-shadertools qt6-svg libarchive sdl2; do
     origin=$(pkg query %o "$name")
     ver=$(pkg query %v "$name")
     deps="$deps  \"$name\": { origin: \"$origin\", version: \"$ver\" },

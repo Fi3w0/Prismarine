@@ -27,6 +27,7 @@ Prismarine name or logos (see TRADEMARKS.md).
 Third-party software used, not included in this repository
 -----------------------------------------------------------
 - Prism Launcher (GPL-3.0): run as a separate program for sign-in and launching.
+- SDL 2 (zlib): reads game controllers. Windows and macOS packages include it.
 - Qt 6 (LGPL-3.0), libarchive (BSD-2-Clause), OpenSSL (Apache-2.0),
   QtKeychain (BSD-3-Clause, optional).
 
