@@ -4,6 +4,16 @@ Implementation history and validation evidence. Use [CHANGELOG](CHANGELOG.md) fo
 the release-facing summary and [TECHNICAL_REPORT](TECHNICAL_REPORT.md) for current
 architecture and status. Raw logs and captures from these runs stayed local and are not kept.
 
+## 0.5.0: smaller files, 2026-11-06
+
+- Split `Main.qml` from 992 to 384 lines: `AppDialogs`, `AppEvents`, `LaunchActions`, `ContentActions`,
+  `AppShortcuts`, `PageStack`, `InstanceDragGhost` and `SettingsIndex`. Main keeps the public
+  functions other QML calls, as one-line forwards.
+- Split `SessionPage` from 507 to 118 lines, and the controller checks into state, navigation and
+  values.
+- A review of the mechanical rewrite found a bad string and an unresolved `altLaunch` that no test
+  reached. A private test now runs those launch paths, and `qmllint` checked the new files.
+
 ## 0.5.0: controller navigation, 2026-11-06
 
 - Add `GamepadState` (timing and direction rules, no SDL), `SpatialFocus`, `GamepadNavigator`

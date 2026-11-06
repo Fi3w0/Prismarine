@@ -55,6 +55,7 @@ release.
 - Shared type scale with 15 px body text and larger small labels.
 - More layered dark colours, and clearer outlines on fields in both themes.
 - Shorter page, dialog, menu and button animations with shared timing.
+- The sidebar says 1 instance instead of 1 instances.
 - Calmer account status: offline accounts no longer show as expired, and an expired
   token says it refreshes when you play.
 - The Library sidebar field is now called Filter, to separate it from Search everything.
