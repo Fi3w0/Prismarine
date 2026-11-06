@@ -13,7 +13,7 @@ ItemDelegate {
     contentItem: RowLayout {
         spacing: 10
         LineIcon { name: action.glyph; implicitWidth: 18; implicitHeight: 18; tint: action.hovered ? Colors.accent : Colors.subtext }
-        Text { Layout.fillWidth: true; text: action.text; color: Colors.text; font.pixelSize: 13; elide: Text.ElideRight }
-        Text { text: action.trailing; color: Colors.subtext; font.pixelSize: 15 }
+        Text { Layout.fillWidth: true; text: action.text; color: Colors.text; font.pixelSize: Typography.body; elide: Text.ElideRight }
+        Text { text: action.trailing; color: Colors.subtext; font.pixelSize: Typography.bodyLarge }
     }
 }

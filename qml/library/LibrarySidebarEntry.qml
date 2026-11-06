@@ -11,10 +11,12 @@ ItemDelegate {
     objectName: "sidebarEntry_" + instance.instanceId
     implicitHeight: 36
     onClicked: controller.selectId(instance.instanceId)
+    function gamepadContext() { controller.showInstanceMenu(instance.instanceId, instance.name, entry); }
     onDoubleClicked: controller.openInstance(instance.instanceId)
     opacity: dragHost && dragHost.draggingId === instance.instanceId ? 0.45 : 1
     background: Rectangle {
         radius: 6
+        border.color: entry.visualFocus ? Colors.accent : "transparent"
         color: entry.hovered || entry.controller.current.instanceId === entry.instance.instanceId ? Colors.surfaceHi : "transparent"
     }
     contentItem: RowLayout {
@@ -29,7 +31,7 @@ ItemDelegate {
             Layout.fillWidth: true
             text: entry.instance.name
             color: Colors.text
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
             elide: Text.ElideRight
             font.weight: entry.controller.current.instanceId === entry.instance.instanceId ? Font.Bold : Font.Normal
         }

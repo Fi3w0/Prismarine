@@ -16,14 +16,14 @@ TextField {
     placeholderText: "Search instances or Minecraft version…"
     placeholderTextColor: Colors.subtext
     color: Colors.text
-    font.pixelSize: 14
+    font.pixelSize: Typography.control
     leftPadding: 14
     rightPadding: 36
     Accessible.name: "Search instances"
     background: Rectangle {
         color: Colors.surfaceHi
         radius: 10
-        border.color: search.activeFocus ? Colors.accent : Colors.border
+        border.color: search.activeFocus ? Colors.accent : Colors.outline
     }
     onTextChanged: if (text !== win.searchText)
         win.searchText = text

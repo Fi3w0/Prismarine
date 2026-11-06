@@ -27,7 +27,7 @@ ListView {
         required property int mods
         required property string played
         width: rows.width
-        height: 74
+        height: win.preferences.libraryDensity === "compact" ? 58 : 74
         onClicked: {
             win.select(index);
             rows.forceActiveFocus();
@@ -70,7 +70,7 @@ ListView {
                     text: entry.name
                     elide: Text.ElideRight
                     color: Colors.text
-                    font.pixelSize: 14
+                    font.pixelSize: Typography.control
                     font.weight: Font.DemiBold
                     RenameTarget {
                         objectName: "rowRename_" + entry.instanceId
@@ -81,19 +81,21 @@ ListView {
                 Text {
                     text: entry.version + " · " + entry.loader
                     color: Colors.loaderColor(entry.loader)
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                 }
             }
             Text {
                 text: entry.mods + " mods\n" + entry.played
                 color: Colors.subtext
-                font.pixelSize: 11
+                font.pixelSize: Typography.caption
                 horizontalAlignment: Text.AlignRight
             }
         }
     }
-    Keys.onUpPressed: win.select(win.selected - 1)
-    Keys.onDownPressed: win.select(win.selected + 1)
+    activeFocusOnTab: true
+    // A controller leaves the list at its ends.
+    Keys.onUpPressed: event => { if (win.gamepadKey && win.selected <= 0) event.accepted = false; else win.select(win.selected - 1); }
+    Keys.onDownPressed: event => { if (win.gamepadKey && win.selected >= count - 1) event.accepted = false; else win.select(win.selected + 1); }
     Keys.onReturnPressed: if (win.hasSelection)
         win.play(win.current.instanceId, win.current.name)
 }

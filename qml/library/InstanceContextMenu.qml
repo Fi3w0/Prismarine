@@ -7,10 +7,12 @@ ThemedMenu {
     required property var controller
     property string instanceId: ""
     property string name: ""
-    function openFor(id, label) {
+    // Opens at the mouse, or beside anchor when a controller asked for it.
+    function openFor(id, label, anchor) {
         instanceId = id;
         name = label;
-        popup();
+        if (anchor) popup(anchor, anchor.width / 2, anchor.height / 2);
+        else popup();
     }
     ThemedMenuItem { text: "Play"; onTriggered: menu.controller.play(menu.instanceId, menu.name) }
     ThemedMenuItem { text: "Open instance"; onTriggered: menu.controller.openInstance(menu.instanceId) }

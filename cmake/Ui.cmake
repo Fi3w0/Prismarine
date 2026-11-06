@@ -3,7 +3,7 @@
 set(QML_SOURCES
     qml/pages/FriendsPage.qml qml/social/SocialIdentityCard.qml qml/social/SocialFriendsCard.qml qml/social/SocialInvitesCard.qml
     qml/accounts/SkinParts.js qml/accounts/SkinMesh.qml qml/accounts/SkinScene.qml qml/accounts/FlatSkin.qml qml/accounts/ProfileDetails.qml qml/accounts/SkinLibrary.qml
-    qml/library/LibraryFact.qml qml/library/LibraryAction.qml 
+    qml/library/LibraryFact.qml qml/library/LibraryAction.qml qml/library/LibraryShortcut.qml
     qml/accounts/SkinAvatar.qml qml/accounts/AccountSwitcher.qml
     qml/browse/DownloadSelection.qml qml/browse/DownloadQueueBar.qml qml/browse/ProjectContent.qml
     qml/components/ContentIcon.qml qml/components/SideNavItem.qml qml/components/TextLink.qml qml/components/ConfirmDialog.qml

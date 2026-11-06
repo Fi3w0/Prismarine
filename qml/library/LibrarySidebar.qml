@@ -37,7 +37,7 @@ Rectangle {
             Layout.fillWidth: true
             controller: sidebar.controller
             objectName: sidebar.visible ? "searchField" : "sidebarSearch"
-            placeholderText: "Search instances…"
+            placeholderText: "Filter instances…"
             onMoveToBrowser: sidebar.focusBrowser()
         }
         ScrollView {
@@ -53,7 +53,7 @@ Rectangle {
                     visible: sidebar.controller.preferences.favorites.length > 0
                     text: "— FAVORITES"
                     font.family: Colors.displayFont
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     font.letterSpacing: 2
                     color: Colors.brass
                     Layout.topMargin: 4
@@ -75,7 +75,7 @@ Rectangle {
                         Layout.fillWidth: true
                         text: "— GROUPS"
                         font.family: Colors.displayFont
-                        font.pixelSize: 12
+                        font.pixelSize: Typography.bodySmall
                         font.letterSpacing: 2
                         color: Colors.brass
                     }
@@ -88,7 +88,7 @@ Rectangle {
                         ToolTip.delay: 400
                         ToolTip.text: "New group"
                         onClicked: sidebar.controller.newGroup("")
-                        background: Rectangle { radius: 6; color: parent.hovered ? Colors.surfaceHi : "transparent" }
+                        background: Rectangle { border.color: parent.visualFocus ? Colors.accent : "transparent"; radius: 6; color: parent.hovered ? Colors.surfaceHi : "transparent" }
                         contentItem: LineIcon { name: "plus"; tint: Colors.brass; implicitWidth: 14; implicitHeight: 14 }
                     }
                 }
@@ -111,14 +111,19 @@ Rectangle {
                             implicitHeight: 30
                             radius: 6
                             color: drop.containsDrag ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.16) : headerHover.hovered ? Colors.surfaceHi : "transparent"
-                            border.color: drop.containsDrag ? Colors.accent : "transparent"
-                            HoverHandler { id: headerHover }
-                            TapHandler {
-                                onTapped: {
-                                    if (group.modelData.editable) sidebar.controller.instances.setGroupCollapsed(group.modelData.name, !group.collapsed);
-                                    else group.localCollapsed = !group.localCollapsed;
-                                }
+                            border.color: drop.containsDrag || activeFocus ? Colors.accent : "transparent"
+                            activeFocusOnTab: true
+                            Accessible.role: Accessible.Button
+                            Accessible.name: group.modelData.name
+                            function toggle() {
+                                if (group.modelData.editable) sidebar.controller.instances.setGroupCollapsed(group.modelData.name, !group.collapsed);
+                                else group.localCollapsed = !group.localCollapsed;
                             }
+                            function gamepadContext() { if (group.modelData.editable) groupMenu.popup(header, 0, header.height); }
+                            Keys.onSpacePressed: toggle()
+                            Keys.onReturnPressed: toggle()
+                            HoverHandler { id: headerHover }
+                            TapHandler { onTapped: header.toggle() }
                             TapHandler {
                                 acceptedButtons: Qt.RightButton
                                 enabled: group.modelData.editable
@@ -131,7 +136,7 @@ Rectangle {
                                     text: "›"
                                     rotation: group.collapsed ? 0 : 90
                                     color: Colors.brass
-                                    font.pixelSize: 15
+                                    font.pixelSize: Typography.bodyLarge
                                     Behavior on rotation { NumberAnimation { duration: Colors.animations ? 140 : 0 } }
                                 }
                                 Text {
@@ -140,13 +145,13 @@ Rectangle {
                                     color: Colors.brass
                                     font.family: Colors.displayFont
                                     font.letterSpacing: 1.5
-                                    font.pixelSize: 12
+                                    font.pixelSize: Typography.bodySmall
                                     elide: Text.ElideRight
                                 }
                                 Text {
                                     text: group.modelData.instances.length
                                     color: Colors.subtext
-                                    font.pixelSize: 11
+                                    font.pixelSize: Typography.caption
                                 }
                                 ToolButton {
                                     visible: group.modelData.editable && (headerHover.hovered || groupMenu.visible)
@@ -154,8 +159,8 @@ Rectangle {
                                     implicitHeight: 24
                                     Accessible.name: "Group options"
                                     onClicked: groupMenu.popup()
-                                    background: Rectangle { radius: 6; color: parent.hovered ? Colors.border : "transparent" }
-                                    contentItem: Text { text: "⋯"; color: Colors.subtext; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: 14 }
+                                    background: Rectangle { border.color: parent.visualFocus ? Colors.accent : "transparent"; radius: 6; color: parent.hovered ? Colors.border : "transparent" }
+                                    contentItem: Text { text: "⋯"; color: Colors.subtext; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.pixelSize: Typography.control }
                                 }
                             }
                             DropArea {
@@ -180,7 +185,7 @@ Rectangle {
                             Layout.bottomMargin: 4
                             text: group.modelData.editable ? "Drag instances here" : "Every instance is in a group"
                             color: Colors.subtext
-                            font.pixelSize: 12
+                            font.pixelSize: Typography.bodySmall
                             font.italic: true
                         }
                         Repeater {
@@ -203,7 +208,7 @@ Rectangle {
         Text {
             text: sidebar.controller.instances.totalCount + " instances"
             color: Colors.subtext
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
         }
     }
 }

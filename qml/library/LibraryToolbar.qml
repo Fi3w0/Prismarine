@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 RowLayout {
+    id: toolbar
     required property var controller
     readonly property var win: controller
     readonly property var instances: controller.instances
@@ -14,31 +15,25 @@ RowLayout {
         text: "Library"
         color: Colors.bone
         font.family: Colors.displayFont
-        font.pixelSize: 30
+        font.pixelSize: Typography.pageTitle
         font.letterSpacing: 3
     }
     Item {
         Layout.fillWidth: true
     }
-    Text {
-        text: "SORT"
-        font.pixelSize: 10
-        font.letterSpacing: 1.5
-        font.weight: Font.Bold
-        color: Colors.subtext
-    }
     SelectBox {
         id: sort
         objectName: "sortPicker"
         model: ["Last played", "Name", "Mod count"]
-        implicitWidth: 136
+        Layout.preferredWidth: toolbar.width < 400 ? 112 : 136
+        Layout.minimumWidth: 112
         implicitHeight: 32
         currentIndex: ["recent", "name", "mods"].indexOf(win.preferences.sortOrder)
         onActivated: win.preferences.sortOrder = ["recent", "name", "mods"][currentIndex]
         contentItem: Text {
             text: sort.displayText
             color: Colors.text
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             verticalAlignment: Text.AlignVCenter
             leftPadding: 10
             rightPadding: 24
@@ -52,6 +47,7 @@ RowLayout {
     ActionButton {
         text: "▦"
         compact: true
+        implicitWidth: 36
         implicitHeight: 34
         checked: !win.rowsView
         onClicked: win.preferences.libraryView = "covers"
@@ -62,6 +58,7 @@ RowLayout {
     ActionButton {
         text: "☰"
         compact: true
+        implicitWidth: 36
         implicitHeight: 34
         checked: win.rowsView
         onClicked: win.preferences.libraryView = "rows"
