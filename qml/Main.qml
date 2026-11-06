@@ -35,6 +35,7 @@ ApplicationWindow {
     property var desktop: null
     property var launcherMode: null
     property var gamepad: null
+    readonly property alias dialogs: dialogHost
     // True while a controller action is delivered as a key.
     property bool gamepadKey: false
     // The control a controller is adjusting right now.
@@ -114,12 +115,11 @@ ApplicationWindow {
     function openTab(tab) { openInstance(details.instanceId, tab); }
     function editSettings(id) {
         launchSettings.load(id);
-        instanceSettings.open();
+        dialogHost.instanceSettings.open();
     }
-    function renameInstance(id) { renameDialog.openFor(id); }
-    RenameInstanceDialog { id: renameDialog; controller: appWindow; anchors.centerIn: Overlay.overlay }
+    function renameInstance(id) { dialogHost.rename.openFor(id); }
     function importPack() {
-        packImport.open();
+        dialogHost.packImport.open();
     }
     function importDroppedPack(url) {
         if (packImporter.state === "extracting" || packImporter.state === "downloading" || packImporter.state === "fetching") {
@@ -127,7 +127,7 @@ ApplicationWindow {
             return;
         }
         packImporter.importFile(url);
-        packImport.open();
+        dialogHost.packImport.open();
     }
     // Files dropped on the window or on one instance. A single modpack imports directly;
     // anything else is reviewed first.
@@ -139,19 +139,19 @@ ApplicationWindow {
             importDroppedPack(packs[0].url);
             return;
         }
-        dropDialog.openFor(files, targetId || (page === "instance" ? details.instanceId : current.instanceId));
+        dialogHost.drop.openFor(files, targetId || (page === "instance" ? details.instanceId : current.instanceId));
     }
     function saveModProfile() {
         const current = details.profiles.find(it => it.current);
-        profilePrompt.ask(current ? current.name : "");
+        dialogHost.profilePrompt.ask(current ? current.name : "");
     }
     property bool multiAccountAccepted: false
     function launchAs(id, account) {
         if (!altLaunch || !preferences.multiAccount) return;
         if (!multiAccountAccepted) {
-            multiAccountWarning.instanceId = id;
-            multiAccountWarning.account = account;
-            multiAccountWarning.open();
+            dialogHost.multiAccountWarning.instanceId = id;
+            dialogHost.multiAccountWarning.account = account;
+            dialogHost.multiAccountWarning.open();
             return;
         }
         if (altLaunch.launchAs(id, account)) notify("Preparing a copy for " + account + "…");
@@ -185,7 +185,7 @@ ApplicationWindow {
         { group: "Other", name: "Experimental", words: "multi-account alt accounts unsafe" },
         { group: "Other", name: "About", words: "version licence license credits" }
     ]
-    function openPalette() { commandPalette.openPalette(); }
+    function openPalette() { dialogHost.commandPalette.openPalette(); }
     // Instance artwork per slot ("card" or "hero"); see AppPreferences::setArtwork.
     function artworkOf(id, slot) {
         const entry = id ? preferences.artwork[id] : null;
@@ -199,26 +199,26 @@ ApplicationWindow {
         const mode = artworkOf(id, slot).mode;
         return mode === "screenshot" || (mode === "" && showScreenshots);
     }
-    function editArtwork(id) { artworkDialog.openFor(id); }
+    function editArtwork(id) { dialogHost.artwork.openFor(id); }
     function openSettings(section) {
         settingsSection = section;
         navigate("settings");
         if (page === "settings" && pageLoader.item) pageLoader.item.section = section;
     }
-    function showInstanceMenu(id, name, anchor) { instanceMenu.openFor(id, name, anchor); }
-    function moveToGroup(id) { moveGroupDialog.openFor(id); }
-    function newGroup(instanceId) { groupNameDialog.openFor("", instanceId || ""); }
-    function renameGroup(name) { groupNameDialog.openFor(name, ""); }
+    function showInstanceMenu(id, name, anchor) { dialogHost.instanceMenu.openFor(id, name, anchor); }
+    function moveToGroup(id) { dialogHost.moveGroup.openFor(id); }
+    function newGroup(instanceId) { dialogHost.groupName.openFor("", instanceId || ""); }
+    function renameGroup(name) { dialogHost.groupName.openFor(name, ""); }
     function deleteGroup(name) {
-        deleteGroupConfirm.group = name;
-        deleteGroupConfirm.open();
+        dialogHost.deleteGroup.group = name;
+        dialogHost.deleteGroup.open();
     }
     // Prism reads groups only at startup, so an open Prism window needs a restart to show changes.
     function afterGroupEdit(message) {
         notify(instances.prismRunning() ? message + " · restart Prism to see it there" : message);
     }
     function createInstance() {
-        newInstance.openFor("");
+        dialogHost.newInstance.openFor("");
     }
     function instanceBusy(id) {
         if (session && session.instanceId === id && session.active && session.state !== "exited") {
@@ -230,8 +230,8 @@ ApplicationWindow {
         }
         return false;
     }
-    function duplicateInstance(id) { if (!instanceBusy(id)) duplicateDialog.openFor(id); }
-    function editVersions(id) { if (!instanceBusy(id)) newInstance.openFor(id); }
+    function duplicateInstance(id) { if (!instanceBusy(id)) dialogHost.duplicate.openFor(id); }
+    function editVersions(id) { if (!instanceBusy(id)) dialogHost.newInstance.openFor(id); }
     function browsePacks() {
         if (page === "browse" && pageLoader.item) {
             pageLoader.item.chooseType("modpack");
@@ -241,22 +241,21 @@ ApplicationWindow {
         }
     }
     property string pendingBrowseType: ""
-    DuplicateDialog { id: duplicateDialog; controller: appWindow; anchors.centerIn: Overlay.overlay }
     property string pendingBrowseWorld: ""
-    function installPackVersion(version) { packImporter.importVersion(version); packImport.open(); }
+    function installPackVersion(version) { packImporter.importVersion(version); dialogHost.packImport.open(); }
     function browseDatapacks(id, world) { details.load(id); pendingBrowseType = "datapack"; pendingBrowseWorld = world; navigate("browse"); }
     function reviewSelection(id, type, world) {
-        installReview.retryInstanceId = "";
+        dialogHost.installReview.retryInstanceId = "";
         installingType = type;
         installer.prepareMany(id, downloads.items(id, type).map(it => it.version), type, world || "");
-        installReview.open();
+        dialogHost.installReview.open();
     }
     function reviewInstall(id, version, type, world) {
         if (instanceBusy(id)) return;
-        installReview.retryInstanceId = "";
+        dialogHost.installReview.retryInstanceId = "";
         installingType = "";
         installer.prepare(id, version, type, world || "");
-        installReview.open();
+        dialogHost.installReview.open();
     }
     function reviewLaunchFix(id, project) {
         if (instanceBusy(id)) return false;
@@ -266,11 +265,11 @@ ApplicationWindow {
         }
         // A repair does not consume the user's separate Browse selection.
         installingType = "";
-        installReview.retryInstanceId = id;
-        installReview.repairProject = project;
-        installReview.repairDetail = launchOverlay.finding.detail || "";
+        dialogHost.installReview.retryInstanceId = id;
+        dialogHost.installReview.repairProject = project;
+        dialogHost.installReview.repairDetail = dialogHost.launchOverlay.finding.detail || "";
         installer.prepareProject(id, project);
-        installReview.open();
+        dialogHost.installReview.open();
         return true;
     }
     function refresh() {
@@ -299,16 +298,16 @@ ApplicationWindow {
     // Known mod errors (from the last health check of this instance) ask before launching.
     function play(id, name, force = false) {
         if (!force && modHealth && modHealth.instanceId === id && !modHealth.checking && modHealth.errors > 0) {
-            launchWarning.instanceId = id;
-            launchWarning.name = name;
-            launchWarning.open();
+            dialogHost.launchWarning.instanceId = id;
+            dialogHost.launchWarning.name = name;
+            dialogHost.launchWarning.open();
             return;
         }
         // Prism can run an instance only once; offer the useful choices instead.
         if (id && instances.isRunning(id)) {
-            alreadyRunning.instanceId = id;
-            alreadyRunning.name = name;
-            alreadyRunning.open();
+            dialogHost.alreadyRunning.instanceId = id;
+            dialogHost.alreadyRunning.name = name;
+            dialogHost.alreadyRunning.open();
             return;
         }
         if (!id || !instances.launch(id))
@@ -325,7 +324,7 @@ ApplicationWindow {
         navigate("browse");
     }
     function exportInstance(id) {
-        exportDialog.openFor(id);
+        dialogHost.exportPack.openFor(id);
     }
     // Stops the launch shown on the launch screen: the game if it is already running,
     // otherwise the Prism process started for it (see LaunchProgress::abort).
@@ -342,7 +341,7 @@ ApplicationWindow {
         gameRunningAtLaunch = instances.isRunning(id);
         if (launchProgress) {
             launchProgress.start(id);
-            launchOverlay.open();
+            dialogHost.launchOverlay.open();
         }
         if (session && session.start(id))
             navigate("session");
@@ -402,7 +401,7 @@ ApplicationWindow {
     }
     Connections {
         target: appWindow.instances
-        function onAccountRequired() { accountNeeded.open(); }
+        function onAccountRequired() { dialogHost.accountNeeded.open(); }
         function onCountChanged() {
             const id = appWindow.current.instanceId;
             for (let row = 0; row < appWindow.instances.count; ++row)
@@ -572,7 +571,7 @@ ApplicationWindow {
         function onChanged() {
             const p = appWindow.launchProgress, s = appWindow.session;
             if (p && p.stage === "failed" && !p.abortRequested && s && s.instanceId === p.instanceId)
-                launchOverlay.diagnosis = s.launchDiagnosis();
+                dialogHost.launchOverlay.diagnosis = s.launchDiagnosis();
             if (!p || p.stage !== "failed" || !s || s.instanceId !== p.instanceId || s.processFound || s.state !== "starting") return;
             // A Prism that was already open may still start the game after an abort; the game is
             // stopped when it appears, so wait a while before giving up on it.
@@ -622,9 +621,9 @@ ApplicationWindow {
         case "group": newGroup(""); break;
         case "move-group": moveToGroup(id); break;
         case "delete-group": deleteGroup(instances.groupNames()[0] || "Group"); break;
-        case "menu": instanceMenu.x = 300; instanceMenu.y = 200; instanceMenu.instanceId = id; instanceMenu.open(); break;
+        case "menu": dialogHost.instanceMenu.x = 300; dialogHost.instanceMenu.y = 200; dialogHost.instanceMenu.instanceId = id; dialogHost.instanceMenu.open(); break;
         case "drop":
-            dropDialog.openFor([
+            dialogHost.drop.openFor([
                 { url: "file:///tmp/sodium-fabric-0.6.0.jar", fileName: "sodium-fabric-0.6.0.jar", name: "Sodium", kind: "mod", loaders: ["Fabric"] },
                 { url: "file:///tmp/create-1.21.1.jar", fileName: "create-1.21.1-6.0.jar", name: "Create", kind: "mod", loaders: ["NeoForge"] },
                 { url: "file:///tmp/Faithful.zip", fileName: "Faithful 32x.zip", name: "Faithful 32x", kind: "resourcepack", loaders: [] },
@@ -636,7 +635,7 @@ ApplicationWindow {
         case "palette": openPalette(); break;
         case "artwork": editArtwork(id); break;
         case "launch":
-            if (launchProgress) { launchProgress.start(id); launchProgress.reach("signin", "Getting authorization to access Mojang services"); launchOverlay.open(); }
+            if (launchProgress) { launchProgress.start(id); launchProgress.reach("signin", "Getting authorization to access Mojang services"); dialogHost.launchOverlay.open(); }
             break;
         case "profile": saveModProfile(); break;
         case "multi-account": launchAs(id, (instances.accounts[0] || {}).name || "Steve"); break;
@@ -660,7 +659,7 @@ ApplicationWindow {
     }
     Shortcut {
         sequence: "F2"
-        enabled: !renameDialog.visible && ((appWindow.page === "library" && appWindow.hasSelection) || (appWindow.page === "instance" && !!appWindow.details.instanceId))
+        enabled: !dialogHost.rename.visible && ((appWindow.page === "library" && appWindow.hasSelection) || (appWindow.page === "instance" && !!appWindow.details.instanceId))
         onActivated: appWindow.renameInstance(appWindow.page === "instance" ? appWindow.details.instanceId : appWindow.current.instanceId)
     }
     Shortcut {
@@ -704,7 +703,7 @@ ApplicationWindow {
         spacing: 0
         NavigationRail {
             controller: appWindow
-            onNewInstanceRequested: newInstance.openFor("")
+            onNewInstanceRequested: dialogHost.newInstance.openFor("")
             onRevealCrownRequested: {
                 appWindow.reefCrownAwake = true;
                 reefCrownTimer.restart();
@@ -794,26 +793,10 @@ ApplicationWindow {
                 return;
             }
             appWindow.packImporter.importFile(file);
-            packImport.open();
+            dialogHost.packImport.open();
         }
     }
 
-    NewInstanceDialog {
-        id: newInstance
-        controller: appWindow
-        anchors.centerIn: parent
-    }
-
-    InstanceSettingsDialog {
-        id: instanceSettings
-        controller: appWindow
-        anchors.centerIn: parent
-    }
-    InstallReviewDialog {
-        id: installReview
-        controller: appWindow
-        anchors.centerIn: parent
-    }
     Connections {
         target: appWindow.packImporter
         function onImported(id) {
@@ -827,16 +810,6 @@ ApplicationWindow {
         function onHandedOff(format) {
             appWindow.notify(format + " pack opened in Prism's importer");
         }
-    }
-    ExportDialog {
-        id: exportDialog
-        controller: appWindow
-        anchors.centerIn: parent
-    }
-    PackImportDialog {
-        id: packImport
-        controller: appWindow
-        anchors.centerIn: parent
     }
     FirstRunScreen {
         id: firstRun
@@ -896,94 +869,10 @@ ApplicationWindow {
         confirmLabel: appWindow.gamepad ? appWindow.gamepad.confirmLabel : "A"
         cancelLabel: appWindow.gamepad ? appWindow.gamepad.cancelLabel : "B"
     }
-    ConfirmDialog {
-        id: accountNeeded
-        objectName: "accountNeeded"
-        anchors.centerIn: Overlay.overlay
-        title: "Add an account first"
-        message: "Minecraft needs a Microsoft account to start. Add one in Accounts, then press Play again."
-        confirmText: "Go to Accounts"
-        onConfirmed: appWindow.navigate("accounts")
-    }
-    ConfirmDialog {
-        id: alreadyRunning
-        objectName: "alreadyRunning"
-        property string instanceId: ""
-        property string name: ""
-        anchors.centerIn: Overlay.overlay
-        title: name + " is already running"
-        message: "Prism can run each instance only once. To play it with a second account at the same time, use the ▾ next to Play on the instance page"
-            + (appWindow.preferences.multiAccount ? "." : " after turning on Settings → Experimental → Multi-account play.")
-        confirmText: "Go to Now playing"
-        onConfirmed: {
-            if (appWindow.session) appWindow.session.start(instanceId);
-            appWindow.navigate("session");
-        }
-    }
-    ConfirmDialog {
-        id: launchWarning
-        objectName: "launchWarning"
-        property string instanceId: ""
-        property string name: ""
-        anchors.centerIn: Overlay.overlay
-        title: "Launch with mod errors?"
-        message: (appWindow.modHealth ? appWindow.modHealth.errors : 0) + " problems were found in this instance's mods, such as duplicates or missing dependencies. The game will probably stop while loading. Fix them in the Mods tab, or launch anyway."
-        confirmText: "Launch anyway"
-        danger: true
-        onConfirmed: appWindow.play(instanceId, name, true)
-    }
-    ConfirmDialog {
-        id: multiAccountWarning
-        objectName: "multiAccountWarning"
-        property string instanceId: ""
-        property string account: ""
-        anchors.centerIn: Overlay.overlay
-        width: 520
-        title: "Play as " + account + "? (unsafe)"
-        message: "Prism runs one game per instance, so Prismarine makes a separate copy for " + account + " and refreshes it from the original before every launch. "
-            + "Mods and packs are shared as hard links, config is copied over the copy's own each time, and worlds are never shared. "
-            + "The original is only read, but two games at once double memory use, and a mod that writes into its own jar would affect both. Use at your own risk."
-        confirmText: "I understand, launch"
-        danger: true
-        onConfirmed: {
-            appWindow.multiAccountAccepted = true;
-            appWindow.launchAs(instanceId, account);
-        }
-    }
-    TextPromptDialog {
-        id: profilePrompt
-        objectName: "profilePrompt"
-        anchors.centerIn: Overlay.overlay
-        title: "Save mod profile"
-        subtitle: "Remembers which mods are on and off. Saving under an existing name replaces it."
-        placeholder: "Profile name, e.g. Performance"
-        confirmText: "Save"
-        Connections {
-            target: appWindow.details
-            function onErrorOccurred(message) { if (profilePrompt.visible) profilePrompt.error = message; }
-        }
-        onSubmitted: value => {
-            if (!appWindow.details.saveProfile(value)) return;
-            close();
-            appWindow.notify("Profile saved");
-        }
-    }
-    DropInstallDialog { id: dropDialog; controller: appWindow; anchors.centerIn: Overlay.overlay }
-    GroupNameDialog { id: groupNameDialog; controller: appWindow; anchors.centerIn: Overlay.overlay }
-    MoveToGroupDialog { id: moveGroupDialog; controller: appWindow; anchors.centerIn: Overlay.overlay }
-    InstanceContextMenu { id: instanceMenu; controller: appWindow }
-    CommandPalette { id: commandPalette; controller: appWindow }
-    LaunchOverlay { id: launchOverlay; controller: appWindow }
-    ArtworkDialog { id: artworkDialog; controller: appWindow; anchors.centerIn: Overlay.overlay }
-    ConfirmDialog {
-        id: deleteGroupConfirm
-        property string group: ""
-        anchors.centerIn: Overlay.overlay
-        title: "Delete “" + group + "”?"
-        message: "Its instances move to Ungrouped. No instance or file is deleted."
-        confirmText: "Delete group"
-        danger: true
-        onConfirmed: if (appWindow.instances.deleteGroup(group)) appWindow.afterGroupEdit("Group deleted")
+    AppDialogs {
+        id: dialogHost
+        anchors.fill: parent
+        controller: appWindow
     }
     Toast {
         id: toast
