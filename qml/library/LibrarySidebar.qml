@@ -206,7 +206,7 @@ Rectangle {
             }
         }
         Text {
-            text: sidebar.controller.instances.totalCount + " instances"
+            text: sidebar.controller.instances.totalCount === 1 ? qsTr("1 instance") : qsTr("%1 instances").arg(sidebar.controller.instances.totalCount)
             color: Colors.subtext
             font.pixelSize: Typography.caption
         }
