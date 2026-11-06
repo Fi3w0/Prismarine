@@ -18,7 +18,7 @@ AbstractButton {
     contentItem: Text {
         text: box.checked ? "✓" : box.partial ? "–" : ""
         color: Colors.accentInk
-        font.pixelSize: 12
+        font.pixelSize: Typography.bodySmall
         font.weight: Font.Bold
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

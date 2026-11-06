@@ -119,6 +119,15 @@ Canvas {
             ctx.lineTo(3, 20);
             ctx.closePath();
             break;
+        case "copy":
+            ctx.rect(8, 8, 12, 12);
+            ctx.moveTo(16, 8); ctx.lineTo(16, 4); ctx.lineTo(4, 4); ctx.lineTo(4, 16); ctx.lineTo(8, 16);
+            break;
+        case "image":
+            ctx.rect(3, 4, 18, 16);
+            ctx.moveTo(3, 17); ctx.lineTo(9, 11); ctx.lineTo(13, 15); ctx.lineTo(16, 12); ctx.lineTo(21, 17);
+            ctx.moveTo(17, 8); ctx.arc(16, 8, 1, 0, Math.PI * 2);
+            break;
         case "edit":
             ctx.moveTo(4, 20); ctx.lineTo(5, 15); ctx.lineTo(16, 4);
             ctx.lineTo(20, 8); ctx.lineTo(9, 19); ctx.closePath();

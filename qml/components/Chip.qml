@@ -26,7 +26,7 @@ Button {
         id: label
         text: chip.text
         color: chip.tint
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
         font.weight: Font.DemiBold
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

@@ -12,9 +12,9 @@ Button {
     implicitHeight: angular ? 54 : 40
     hoverEnabled: true
     scale: down ? 0.97 : 1
-    Behavior on scale { NumberAnimation { duration: Colors.animations ? 160 : 0; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: Colors.animations ? Colors.motionFeedbackDuration : 0; easing.type: Easing.OutCubic } }
     padding: 12
-    font.pixelSize: angular ? 18 : 14
+    font.pixelSize: angular ? Typography.titleSmall : Typography.control
     font.weight: primary ? Font.ExtraBold : Font.Normal
     font.letterSpacing: angular ? 2 : 0
     Accessible.name: text
@@ -32,8 +32,8 @@ Button {
         Rectangle {
             anchors.fill: parent
             visible: !control.angular
-            radius: 10
-            Behavior on color { ColorAnimation { duration: Colors.animations ? 180 : 0 } }
+            radius: Colors.controlRadius
+            Behavior on color { ColorAnimation { duration: Colors.animations ? Colors.motionFeedbackDuration : 0 } }
             color: control.primary ? (control.down ? Colors.accentDark : control.hovered ? Qt.lighter(Colors.accent, 1.1) : Colors.accent) : control.hovered || control.checked ? Colors.surfaceHi : Colors.surface
             border.color: control.activeFocus ? Colors.accent : control.primary ? Colors.accent : control.danger ? Qt.rgba(Colors.danger.r, Colors.danger.g, Colors.danger.b, 0.45) : Colors.border
         }
@@ -44,7 +44,7 @@ Button {
                 strokeWidth: control.activeFocus ? 2 : 0
                 strokeColor: Colors.bone
                 fillColor: control.down ? Colors.accentDark : control.hovered ? Qt.lighter(Colors.accent, 1.1) : Colors.accent
-                Behavior on fillColor { ColorAnimation { duration: Colors.animations ? 180 : 0 } }
+                Behavior on fillColor { ColorAnimation { duration: Colors.animations ? Colors.motionFeedbackDuration : 0 } }
                 startX: 12
                 startY: 0
                 PathLine {

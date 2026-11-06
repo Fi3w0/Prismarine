@@ -9,7 +9,7 @@ Switch {
     contentItem: Text {
         id: label
         text: control.text
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
         color: Colors.text
         leftPadding: control.text ? 56 : 0
         verticalAlignment: Text.AlignVCenter

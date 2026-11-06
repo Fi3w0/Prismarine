@@ -12,7 +12,7 @@ Button {
     hoverEnabled: true
     leftPadding: 12
     rightPadding: 12
-    font.pixelSize: 13
+    font.pixelSize: Typography.body
     font.weight: checked ? Font.DemiBold : Font.Normal
     Accessible.name: text
     contentItem: RowLayout {
@@ -29,7 +29,7 @@ Button {
             visible: item.detail !== ""
             text: item.detail
             color: item.detailColor
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
         }
     }
     background: Rectangle {

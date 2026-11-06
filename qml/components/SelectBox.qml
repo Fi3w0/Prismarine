@@ -5,7 +5,7 @@ ComboBox {
     id: control
     implicitHeight: 40
     implicitWidth: 160
-    font.pixelSize: 14
+    font.pixelSize: Typography.control
     padding: 10
     rightPadding: 30
     contentItem: Text {
@@ -16,6 +16,8 @@ ComboBox {
         elide: Text.ElideRight
     }
     indicator: Canvas {
+        readonly property color stroke: Colors.subtext
+        onStrokeChanged: requestPaint()
         x: control.width - width - 12
         y: (control.height - height) / 2
         width: 10
@@ -23,7 +25,7 @@ ComboBox {
         onPaint: {
             const ctx = getContext("2d");
             ctx.reset();
-            ctx.strokeStyle = Colors.subtext;
+            ctx.strokeStyle = stroke;
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(1, 1);
@@ -33,9 +35,9 @@ ComboBox {
         }
     }
     background: Rectangle {
-        radius: 8
+        radius: Colors.controlRadius
         color: Colors.surfaceHi
-        border.color: control.visualFocus ? Colors.accent : Colors.border
+        border.color: control.visualFocus ? Colors.accent : Colors.outline
     }
     delegate: ItemDelegate {
         required property int index
@@ -61,7 +63,7 @@ ComboBox {
         padding: 4
         background: Rectangle {
             color: Colors.surface
-            radius: 10
+            radius: Colors.controlRadius
             border.color: Colors.border
         }
         contentItem: ListView {

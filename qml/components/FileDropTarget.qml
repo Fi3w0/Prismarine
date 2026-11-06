@@ -36,7 +36,7 @@ DropArea {
                 horizontalAlignment: Text.AlignHCenter
                 text: "Add to " + target.label
                 color: Colors.accentInk
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }

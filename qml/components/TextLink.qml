@@ -5,7 +5,7 @@ import QtQuick.Controls
 AbstractButton {
     id: link
     property color tint: Colors.accent
-    property int pixelSize: 12
+    property int pixelSize: Typography.bodySmall
     property bool underline: true
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight + 4
@@ -14,6 +14,7 @@ AbstractButton {
     contentItem: Text {
         id: label
         text: link.text
+        elide: Text.ElideRight
         color: link.hovered ? Qt.lighter(link.tint, 1.2) : link.tint
         font.pixelSize: link.pixelSize
         font.underline: link.underline || link.hovered

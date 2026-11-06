@@ -49,6 +49,7 @@ Rectangle {
             border.color: Colors.accent
         }
     }
+    // Waves stay in the bottom 28 px so they never cross text placed above them.
     Shape {
         visible: !backdrop.hasImage
         anchors.fill: parent
@@ -60,14 +61,14 @@ Rectangle {
             strokeWidth: 1.2
             fillColor: "transparent"
             startX: 0
-            startY: backdrop.height - 48
+            startY: backdrop.height - 24
             PathCubic {
                 control1X: backdrop.width * 0.3
-                control1Y: backdrop.height + 5
+                control1Y: backdrop.height + 2
                 control2X: backdrop.width * 0.56
-                control2Y: backdrop.height - 100
+                control2Y: backdrop.height - 44
                 x: backdrop.width
-                y: backdrop.height - 34
+                y: backdrop.height - 18
             }
         }
         ShapePath {
@@ -75,14 +76,14 @@ Rectangle {
             strokeWidth: 1.2
             fillColor: "transparent"
             startX: 0
-            startY: backdrop.height - 26
+            startY: backdrop.height - 10
             PathCubic {
                 control1X: backdrop.width * 0.3
-                control1Y: backdrop.height + 28
+                control1Y: backdrop.height + 14
                 control2X: backdrop.width * 0.56
-                control2Y: backdrop.height - 78
+                control2Y: backdrop.height - 36
                 x: backdrop.width
-                y: backdrop.height - 12
+                y: backdrop.height - 4
             }
         }
     }

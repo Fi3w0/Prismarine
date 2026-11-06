@@ -21,7 +21,7 @@ MotionDialog {
         text: dialog.title
         color: Colors.bone
         font.family: Colors.displayFont
-        font.pixelSize: 20
+        font.pixelSize: Typography.sectionTitle
         font.letterSpacing: 1
         padding: 22
         bottomPadding: 0
@@ -30,7 +30,7 @@ MotionDialog {
     contentItem: Text {
         text: dialog.message
         color: Colors.subtext
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
         lineHeight: 1.25
         wrapMode: Text.Wrap
     }

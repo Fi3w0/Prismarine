@@ -15,7 +15,7 @@ MenuItem {
             Layout.fillWidth: true
             text: item.text
             color: item.danger ? Colors.danger : item.enabled ? Colors.text : Colors.subtext
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
             elide: Text.ElideRight
             opacity: item.enabled ? 1 : 0.55
         }
@@ -23,11 +23,11 @@ MenuItem {
             visible: !!item.hint || item.checked || !!item.subMenu
             text: item.checked ? "✓" : item.subMenu ? "›" : item.hint
             color: item.checked ? Colors.accent : Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
         }
     }
     background: Rectangle {
         radius: 8
-        color: item.highlighted ? Colors.surfaceHi : "transparent"
+        color: item.highlighted || item.visualFocus ? Colors.surfaceHi : "transparent"
     }
 }
