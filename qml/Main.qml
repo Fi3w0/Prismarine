@@ -890,6 +890,12 @@ ApplicationWindow {
             appWindow.notify(handheld ? "Handheld preview on. Choose Desktop or press F11 to leave full screen." : "Desktop interface on");
         }
     }
+    GamepadEditFrame {
+        objectName: "gamepadEditFrame"
+        target: appWindow.gamepadEditItem
+        confirmLabel: appWindow.gamepad ? appWindow.gamepad.confirmLabel : "A"
+        cancelLabel: appWindow.gamepad ? appWindow.gamepad.cancelLabel : "B"
+    }
     ConfirmDialog {
         id: accountNeeded
         objectName: "accountNeeded"

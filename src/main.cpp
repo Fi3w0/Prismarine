@@ -30,6 +30,8 @@
 #include "core/session/gamesession.h"
 #include "core/install/modupdater.h"
 #include "core/settings/launchermode.h"
+#include "ui/gamepadinput.h"
+#include "ui/gamepadnavigator.h"
 #include "core/servers/serverlist.h"
 #include "core/packs/packexporter.h"
 #include "core/library/playtimehistory.h"
@@ -126,6 +128,9 @@ int main(int argc, char *argv[])
         return 1;
     }
     LauncherMode launcherMode({}, interfaceMode);
+    GamepadInput gamepad;
+    gamepad.setEnabled(preferences.controllerEnabled());
+    QObject::connect(&preferences, &AppPreferences::changed, &gamepad, [&] { gamepad.setEnabled(preferences.controllerEnabled()); });
     InstanceModel instances(nullptr, parser.value("prism-data"));
     InstanceDetails details(&instances);
     ModCatalog catalog;
@@ -178,7 +183,7 @@ int main(int argc, char *argv[])
         {"architecture", QSysInfo::currentCpuArchitecture()}, {"compiler", compiler},
         {"appData", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)}};
     QQmlApplicationEngine engine;
-    engine.setInitialProperties({{"applicationTheme", QVariant::fromValue(&applicationTheme)}, {"instances", QVariant::fromValue(&instances)}, {"launcherMode", QVariant::fromValue(&launcherMode)}, {"javaManager", QVariant::fromValue(&javaManager)},
+    engine.setInitialProperties({{"applicationTheme", QVariant::fromValue(&applicationTheme)}, {"instances", QVariant::fromValue(&instances)}, {"launcherMode", QVariant::fromValue(&launcherMode)}, {"gamepad", QVariant::fromValue(&gamepad)}, {"javaManager", QVariant::fromValue(&javaManager)},
         {"preferences", QVariant::fromValue(&preferences)}, {"details", QVariant::fromValue(&details)},
         {"catalog", QVariant::fromValue(&catalog)}, {"launchSettings", QVariant::fromValue(&launchSettings)},
         {"creator", QVariant::fromValue(&creator)}, {"accountManager", QVariant::fromValue(&accountManager)},
@@ -198,6 +203,10 @@ int main(int argc, char *argv[])
     if (!window)
         return 1;
     if (launcherMode.interfaceMode() == QLatin1String("handheld")) window->showFullScreen();
+    GamepadNavigator gamepadNavigator(window);
+    QObject::connect(&gamepad, &GamepadInput::action, &gamepadNavigator, &GamepadNavigator::handle);
+    QObject::connect(&gamepad, &GamepadInput::scrollBy, &gamepadNavigator, &GamepadNavigator::scroll);
+    QObject::connect(&gamepadNavigator, &GamepadNavigator::editingChanged, &gamepad, &GamepadInput::setFastRepeat);
     if (parser.isSet("window-size")) {
         const auto match = QRegularExpression("^(\\d+)x(\\d+)$").match(parser.value("window-size"));
         if (!match.hasMatch() || match.captured(1).toInt() < 960 || match.captured(2).toInt() < 640) {

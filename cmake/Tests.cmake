@@ -1,10 +1,11 @@
 find_package(Qt6 REQUIRED COMPONENTS Test)
-qt_add_executable(prismarine_tests tests/applicationtest.cpp)
+qt_add_executable(prismarine_tests tests/applicationtest.cpp src/ui/gamepadstate.cpp src/ui/spatialfocus.cpp src/ui/gamepadnavigator.cpp)
+target_include_directories(prismarine_tests PRIVATE src)
 target_link_libraries(prismarine_tests PRIVATE prismarine_core Qt6::Test
     Qt6::Quick Qt6::QuickControls2 LibArchive::LibArchive)
 set_source_files_properties(tests/qmldir PROPERTIES QT_RESOURCE_ALIAS "qmldir")
 qt_add_resources(prismarine_tests test_ui PREFIX "/ui" FILES ${QML_SOURCES} tests/qmldir)
-qt_add_resources(prismarine_tests test_branding PREFIX "/" FILES ${FONT_ASSETS} ${LOGO_ASSETS})
+qt_add_resources(prismarine_tests test_branding PREFIX "/" FILES ${FONT_ASSETS} ${LOGO_ASSETS} ${PROFILE_ASSETS})
 add_test(NAME application COMMAND prismarine_tests)
 set_tests_properties(application PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
 
