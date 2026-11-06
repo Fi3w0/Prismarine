@@ -9,6 +9,11 @@ void setLauncherProgram(const QString &path);
 // Prismarine's own executable (bundled builds), then PATH, common native/Nix/Snap
 // locations and Linux portable/AppImage directories. Flatpak uses startLauncher.
 QString launcherProgram();
+// Prismarine's own engine (Full mode). A program the user chose still comes first.
+void setEngineProgram(const QString &path);
+QString engineProgram();
+// Where the engine writes launch events, one JSON object per line.
+QString engineEventsPath(const QString &dataDir);
 // Folder holding generic/<prismarinequiet plugin> (see src/prismquiet), or empty. Prism
 // started by Prismarine loads it so launches show none of Prism's windows unless its main
 // window is open. Flatpak Prism cannot see it and runs unchanged.

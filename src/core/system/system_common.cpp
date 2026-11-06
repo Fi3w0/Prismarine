@@ -27,6 +27,8 @@ bool Sys::isJavaName(const QString &name)
 
 bool Sys::isPrismName(const QString &name)
 {
+    // Process names can be cut to 15 characters, as on Linux.
+    if (name.startsWith(QLatin1String("prismarine-engi"))) return true;
     // Linux shortens process names to 15 characters, which still fits "prismlauncher".
     const QString n = normalizedName(name);
     return n == "prismlauncher" || n == "prismlauncher-q" || n == "prism launcher";

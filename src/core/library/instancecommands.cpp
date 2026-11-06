@@ -116,6 +116,10 @@ bool InstanceModel::openModsFolder(const QString &instanceId)
 
 bool InstanceModel::startPrism(const QStringList &arguments)
 {
+    if (arguments.contains(QStringLiteral("--launch")) && accounts().isEmpty()) {
+        emit accountRequired();
+        return false;
+    }
     QString error;
     if (Prism::startLauncher(m_dataDir, arguments, &error)) return true;
     emit errorOccurred(error);

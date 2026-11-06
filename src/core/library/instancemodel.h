@@ -101,6 +101,8 @@ public:
 signals:
     void countChanged();
     void errorOccurred(const QString &message);
+    // A launch needs an account; Prism would otherwise open its own dialog.
+    void accountRequired();
 
 private:
     void applyFilter();

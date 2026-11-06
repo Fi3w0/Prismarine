@@ -20,7 +20,7 @@ add_library(prismarine_core STATIC
     mods/modmetadata.h mods/modmetadata.cpp
     preferences/apppreferences.h preferences/apppreferences.cpp
     prism/configwriter.h prism/configwriter.cpp
-    settings/launchsettings.h settings/launchsettings.cpp settings/networksettings.h settings/networksettings.cpp settings/desktopintegration.h settings/desktopintegration.cpp
+    settings/launchermode.h settings/launchermode.cpp settings/launchsettings.h settings/launchsettings.cpp settings/networksettings.h settings/networksettings.cpp settings/desktopintegration.h settings/desktopintegration.cpp
     settings/javamanager.h settings/javamanager.cpp settings/javaarchive.cpp
     creation/instancecreator.h creation/instancecreator.cpp creation/instanceediting.cpp
     accounts/accountmanager.h accounts/accountmanager.cpp

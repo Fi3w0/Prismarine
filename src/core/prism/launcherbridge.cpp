@@ -11,6 +11,7 @@
 
 namespace {
 QString chosenProgram;
+QString chosenEngine;
 qint64 startedLauncher = 0;
 
 #ifdef Q_OS_LINUX
@@ -71,9 +72,25 @@ void Prism::setLauncherProgram(const QString &path)
 #endif
 }
 
+void Prism::setEngineProgram(const QString &path)
+{
+    chosenEngine = path;
+}
+
+QString Prism::engineProgram()
+{
+    return chosenEngine;
+}
+
+QString Prism::engineEventsPath(const QString &dataDir)
+{
+    return dataDir + QStringLiteral("/logs/prismarine-engine-events.jsonl");
+}
+
 QString Prism::launcherProgram()
 {
     if (!chosenProgram.isEmpty() && QFileInfo(chosenProgram).isExecutable()) return chosenProgram;
+    if (!chosenEngine.isEmpty() && QFileInfo(chosenEngine).isExecutable()) return chosenEngine;
     QStringList candidates;
 #ifdef Q_OS_WIN
     candidates.append(QCoreApplication::applicationDirPath() + "/prismlauncher.exe");
@@ -141,10 +158,11 @@ QString Prism::quietPluginDir()
 bool Prism::startLauncher(const QString &dataDir, const QStringList &arguments, QString *error)
 {
     QString executable = launcherProgram();
+    const bool engine = !chosenEngine.isEmpty() && executable == chosenEngine;
     QStringList args;
     bool sandboxed = false;
 #ifdef Q_OS_LINUX
-    if (chosenProgram.isEmpty() || !QFileInfo(chosenProgram).isExecutable()) {
+    if (!engine && (chosenProgram.isEmpty() || !QFileInfo(chosenProgram).isExecutable())) {
         const QString absoluteData = QDir::cleanPath(QDir(dataDir).absolutePath());
         const bool flatpakData = absoluteData.startsWith(QDir::homePath() + "/.var/app/org.prismlauncher.PrismLauncher/");
         const QString flatpak = QStandardPaths::findExecutable("flatpak");
@@ -166,6 +184,7 @@ bool Prism::startLauncher(const QString &dataDir, const QStringList &arguments, 
     sandboxed = sandboxed || snapExecutable(executable);
 #endif
     args << "--dir" << dataDir;
+    if (engine && arguments.contains("--launch")) args << "--engine-events" << engineEventsPath(dataDir);
     args.append(arguments);
     QProcess process;
     process.setProgram(executable);
@@ -177,7 +196,7 @@ bool Prism::startLauncher(const QString &dataDir, const QStringList &arguments, 
         env.remove(variable);
     const QString plugins = quietPluginDir();
     // Explicit editing/importing must show Prism's windows. Only game launches are quiet.
-    if (!sandboxed && arguments.contains("--launch") && !arguments.contains("--show-window") && !plugins.isEmpty()) {
+    if (!engine && !sandboxed && arguments.contains("--launch") && !arguments.contains("--show-window") && !plugins.isEmpty()) {
         // Prism keeps the isolated plugin path out of the game's environment.
         env.insert("QT_PLUGIN_PATH", plugins);
         const QString generic = env.value("QT_QPA_GENERIC_PLUGINS");
