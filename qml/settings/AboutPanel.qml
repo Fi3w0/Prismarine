@@ -34,6 +34,7 @@ ColumnLayout {
         { name: "Qt 6", note: "Interface, networking and concurrency · LGPL-3.0", url: "https://www.qt.io" },
         { name: "libarchive", note: "Reading jars and modpacks · BSD-2-Clause", url: "https://libarchive.org" },
         { name: "OpenSSL", note: "Signatures for Friends · Apache-2.0", url: "https://www.openssl.org" },
+        { name: "SDL", note: "Controller input · zlib", url: "https://www.libsdl.org" },
         { name: "QtKeychain", note: "System keyring storage · BSD-3-Clause", url: "https://github.com/frankosterfeld/qtkeychain" },
         { name: "Modrinth & CurseForge", note: "Project search, downloads and update checks", url: "https://modrinth.com" },
         { name: "Outfit, Marcellus SC, Silkscreen", note: "Fonts · SIL Open Font License 1.1", url: "https://fonts.google.com" }
@@ -63,7 +64,7 @@ ColumnLayout {
     component Heading: Text {
         color: Colors.brass
         font.family: Colors.displayFont
-        font.pixelSize: 12
+        font.pixelSize: Typography.bodySmall
         font.letterSpacing: 2
     }
 
@@ -92,14 +93,14 @@ ColumnLayout {
                 spacing: 8
                 RowLayout {
                     spacing: 12
-                    Text { text: "Prismarine"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: 36 }
+                    Text { text: "Prismarine"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: Typography.brand }
                     Chip { text: "v" + Qt.application.version; tint: Colors.accent }
                 }
                 Text {
                     Layout.fillWidth: true
                     text: "A native Qt 6 home for your Minecraft library, built on top of your existing Prism Launcher installation. Prismarine manages instances, mods, worlds and content; Prism still handles Microsoft sign-in, game files and launching."
                     color: Colors.subtext
-                    font.pixelSize: 14
+                    font.pixelSize: Typography.control
                     lineHeight: 1.25
                     wrapMode: Text.Wrap
                 }
@@ -107,7 +108,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: 6
                     spacing: 10
-                    ActionButton { text: "Open Prism Launcher"; onClicked: about.controller.instances.openPrism() }
+                    ActionButton { visible: about.controller.prismShortcuts !== false; text: "Open Prism Launcher"; onClicked: about.controller.instances.openPrism() }
                     ActionButton { text: "Prism Launcher website  ↗"; onClicked: Qt.openUrlExternally("https://prismlauncher.org") }
                 }
             }
@@ -120,54 +121,23 @@ ColumnLayout {
         RowLayout {
             Layout.fillWidth: true
             spacing: 16
-            // Round avatar from GitHub, drawn with a circular clip; a letter while offline.
-            Canvas {
-                id: avatar
-                readonly property string url: "https://avatars.githubusercontent.com/u/98111375?s=128"
-                property bool ready: false
-                implicitWidth: 64
-                implicitHeight: 64
-                Component.onCompleted: loadImage(url)
-                onImageLoaded: { ready = isImageLoaded(url); requestPaint(); }
-                onPaint: {
-                    const ctx = getContext("2d");
-                    ctx.reset();
-                    ctx.beginPath();
-                    ctx.arc(width / 2, height / 2, width / 2 - 2, 0, Math.PI * 2);
-                    ctx.closePath();
-                    ctx.fillStyle = Colors.surfaceHi;
-                    ctx.fill();
-                    if (ready) {
-                        ctx.save();
-                        ctx.clip();
-                        ctx.drawImage(url, 2, 2, width - 4, height - 4);
-                        ctx.restore();
-                    }
-                    ctx.lineWidth = 2;
-                    ctx.strokeStyle = Colors.accent;
-                    ctx.stroke();
-                }
-                Text {
-                    anchors.centerIn: parent
-                    visible: !avatar.ready
-                    text: "F"
-                    color: Colors.accent
-                    font.family: Colors.displayFont
-                    font.pixelSize: 28
-                }
+            RoundAvatar {
+                objectName: "creatorAvatar"
+                source: "https://avatars.githubusercontent.com/u/98111375?s=128"
+                fallback: "F"
             }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 3
                 RowLayout {
                     spacing: 8
-                    Text { text: "Fi3w0 · Fiw Labs"; color: Colors.text; font.pixelSize: 18; font.weight: Font.DemiBold }
+                    Text { text: "Fi3w0 · Fiw Labs"; color: Colors.text; font.pixelSize: Typography.titleSmall; font.weight: Font.DemiBold }
                 }
                 Text {
                     Layout.fillWidth: true
                     text: "Minecraft server mods, Linux and Qt tooling. Gentoo on the desktop, Wayland compositors, and whatever else comes to mind."
                     color: Colors.subtext
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                     wrapMode: Text.Wrap
                 }
             }
@@ -187,7 +157,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.topMargin: 4
         Heading { Layout.fillWidth: true; text: "MINECRAFT MODS BY FI3W0" }
-        TextLink { text: "All projects on Modrinth  ↗"; pixelSize: 12; onClicked: Qt.openUrlExternally(about.modrinth) }
+        TextLink { text: "All projects on Modrinth  ↗"; pixelSize: Typography.bodySmall; onClicked: Qt.openUrlExternally(about.modrinth) }
     }
     GridLayout {
         Layout.fillWidth: true
@@ -218,11 +188,11 @@ ColumnLayout {
                     spacing: 4
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { Layout.fillWidth: true; text: project.modelData.name; color: Colors.text; font.pixelSize: 15; font.weight: Font.DemiBold }
-                        Text { text: "↗"; color: project.hovered ? Colors.accent : Colors.subtext; font.pixelSize: 14 }
+                        Text { Layout.fillWidth: true; text: project.modelData.name; color: Colors.text; font.pixelSize: Typography.bodyLarge; font.weight: Font.DemiBold }
+                        Text { text: "↗"; color: project.hovered ? Colors.accent : Colors.subtext; font.pixelSize: Typography.control }
                     }
-                    Text { text: project.modelData.stack; color: Colors.brass; font.pixelSize: 11; font.letterSpacing: 0.5 }
-                    Text { Layout.fillWidth: true; text: project.modelData.text; color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.Wrap; lineHeight: 1.2 }
+                    Text { text: project.modelData.stack; color: Colors.brass; font.pixelSize: Typography.caption; font.letterSpacing: 0.5 }
+                    Text { Layout.fillWidth: true; text: project.modelData.text; color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap; lineHeight: 1.2 }
                     // Keeps a shorter card's text at the top when its neighbour is taller.
                     Item { Layout.fillHeight: true }
                 }
@@ -239,7 +209,7 @@ ColumnLayout {
             TextLink {
                 objectName: "copySystemInfo"
                 text: "Copy system info"
-                pixelSize: 12
+                pixelSize: Typography.bodySmall
                 onClicked: {
                     clipboard.text = about.systemReport();
                     clipboard.selectAll();
@@ -264,7 +234,7 @@ ColumnLayout {
                     Layout.column: 0
                     text: modelData.label
                     color: Colors.subtext
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                 }
             }
             Repeater {
@@ -277,7 +247,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     text: modelData.value
                     color: Colors.text
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     elide: Text.ElideRight
                 }
             }
@@ -289,11 +259,11 @@ ColumnLayout {
                 required property var modelData
                 Layout.fillWidth: true
                 spacing: 12
-                Text { Layout.preferredWidth: 150; text: modelData.label; color: Colors.subtext; font.pixelSize: 12 }
-                Text { Layout.fillWidth: true; text: modelData.path; color: Colors.text; font.pixelSize: 12; elide: Text.ElideMiddle }
+                Text { Layout.preferredWidth: 150; text: modelData.label; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
+                Text { Layout.fillWidth: true; text: modelData.path; color: Colors.text; font.pixelSize: Typography.bodySmall; elide: Text.ElideMiddle }
                 TextLink {
                     text: "Open"
-                    pixelSize: 12
+                    pixelSize: Typography.bodySmall
                     Accessible.name: "Open " + modelData.label
                     // A settings file opens its folder.
                     // "file:///" + path without its leading slash works for /home/… and C:/… alike.
@@ -316,9 +286,9 @@ ColumnLayout {
                 Item {
                     Layout.preferredWidth: 220
                     implicitHeight: creditLink.implicitHeight
-                    TextLink { id: creditLink; text: modelData.name; pixelSize: 13; underline: false; onClicked: Qt.openUrlExternally(modelData.url) }
+                    TextLink { id: creditLink; text: modelData.name; pixelSize: Typography.body; underline: false; onClicked: Qt.openUrlExternally(modelData.url) }
                 }
-                Text { Layout.fillWidth: true; text: modelData.note; color: Colors.subtext; font.pixelSize: 12; elide: Text.ElideRight }
+                Text { Layout.fillWidth: true; text: modelData.note; color: Colors.subtext; font.pixelSize: Typography.bodySmall; elide: Text.ElideRight }
             }
         }
     }
@@ -331,7 +301,7 @@ ColumnLayout {
             Layout.fillWidth: true
             text: "Prismarine is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License, version 3 only (GPL-3.0-only). It comes with ABSOLUTELY NO WARRANTY."
             color: Colors.text
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
             wrapMode: Text.Wrap
             lineHeight: 1.2
         }
@@ -339,15 +309,15 @@ ColumnLayout {
             Layout.fillWidth: true
             text: "The Prismarine logos are artwork by Fi3w0 under CC BY-NC-ND 4.0, not the GPL. The name and logos identify the official app, so forks must use their own."
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             wrapMode: Text.Wrap
         }
         Flow {
             Layout.fillWidth: true
             spacing: 16
-            TextLink { text: "GNU GPL v3  ↗"; pixelSize: 12; onClicked: Qt.openUrlExternally("https://www.gnu.org/licenses/gpl-3.0.html") }
-            TextLink { text: "Logo license (CC BY-NC-ND 4.0)  ↗"; pixelSize: 12; onClicked: Qt.openUrlExternally("https://creativecommons.org/licenses/by-nc-nd/4.0/") }
-            TextLink { text: "Name & logo policy  ↗"; pixelSize: 12; onClicked: Qt.openUrlExternally("https://github.com/Fi3w0") }
+            TextLink { text: "GNU GPL v3  ↗"; pixelSize: Typography.bodySmall; onClicked: Qt.openUrlExternally("https://www.gnu.org/licenses/gpl-3.0.html") }
+            TextLink { text: "Logo license (CC BY-NC-ND 4.0)  ↗"; pixelSize: Typography.bodySmall; onClicked: Qt.openUrlExternally("https://creativecommons.org/licenses/by-nc-nd/4.0/") }
+            TextLink { text: "Name & logo policy  ↗"; pixelSize: Typography.bodySmall; onClicked: Qt.openUrlExternally("https://github.com/Fi3w0") }
         }
     }
 
@@ -356,7 +326,7 @@ ColumnLayout {
         Layout.topMargin: 4
         text: "© 2026 Fi3w0. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft. Prismarine is an independent project and is not affiliated with the Prism Launcher team."
         color: Colors.subtext
-        font.pixelSize: 11
+        font.pixelSize: Typography.caption
         wrapMode: Text.Wrap
         opacity: 0.8
     }
