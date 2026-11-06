@@ -41,7 +41,7 @@ set(QML_SOURCES
     qml/settings/AccentPicker.qml
     qml/settings/ThemePicker.qml
     qml/settings/AppearancePreview.qml
-    qml/settings/AppearanceSwitches.qml              
+    qml/settings/AppearanceSwitches.qml qml/settings/SettingsDraft.qml qml/settings/SettingsBanner.qml qml/settings/SettingsChoiceRow.qml qml/settings/SettingsToggleRow.qml qml/settings/SettingsLayoutPreview.qml qml/settings/SettingsLivePreview.qml qml/settings/ContrastPanel.qml qml/settings/PaletteStartingPoints.qml qml/settings/PaletteSwatches.qml qml/settings/PaletteCustomization.qml qml/settings/ColourEditor.qml qml/settings/InterfaceOptions.qml qml/settings/HomePreferences.qml qml/settings/PrismIntegrationSettings.qml
     qml/settings/LibraryPreferences.qml
     qml/settings/SettingsSidebar.qml
     qml/library/InstanceSearch.qml

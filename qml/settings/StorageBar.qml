@@ -53,7 +53,7 @@ Item {
                     visible: tip.containsMouse
                     delay: 120
                     text: piece.modelData.label + " · " + Colors.formatBytes(piece.modelData.size) + " · " + Math.round(100 * piece.modelData.size / Math.max(1, bar.sum)) + "%"
-                    contentItem: Text { text: tipBox.text; color: Colors.text; font.pixelSize: 12 }
+                    contentItem: Text { text: tipBox.text; color: Colors.text; font.pixelSize: Typography.bodySmall }
                     background: Rectangle { color: Colors.surface; radius: 8; border.color: Colors.border }
                 }
             }

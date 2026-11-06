@@ -41,13 +41,13 @@ ColumnLayout {
         color: Colors.brass
         font.family: Colors.displayFont
         font.letterSpacing: 2
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
         Layout.topMargin: 10
     }
     component Hint: Text {
         Layout.fillWidth: true
         color: Colors.subtext
-        font.pixelSize: 12
+        font.pixelSize: Typography.bodySmall
         wrapMode: Text.Wrap
     }
     component Field: ColumnLayout {
@@ -60,7 +60,7 @@ ColumnLayout {
         Layout.preferredWidth: 1
         spacing: 6
         opacity: enabled ? 1 : 0.55
-        Text { text: field.label; color: Colors.text; font.pixelSize: 13 }
+        Text { text: field.label; color: Colors.text; font.pixelSize: Typography.body }
         InputField {
             Layout.fillWidth: true
             objectName: "network_" + field.key
@@ -83,12 +83,12 @@ ColumnLayout {
         Layout.preferredWidth: 1
         spacing: 6
         RowLayout {
-            Text { Layout.fillWidth: true; text: secretField.label; color: Colors.text; font.pixelSize: 13 }
+            Text { Layout.fillWidth: true; text: secretField.label; color: Colors.text; font.pixelSize: Typography.body }
             TextLink {
                 visible: secretField.stored
                 text: "Remove"
                 tint: Colors.danger
-                pixelSize: 12
+                pixelSize: Typography.bodySmall
                 onClicked: form.secret(secretField.clearKey, true)
             }
         }
@@ -117,7 +117,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.preferredWidth: 1
             spacing: 6
-            Text { text: "Type"; color: Colors.text; font.pixelSize: 13 }
+            Text { text: "Type"; color: Colors.text; font.pixelSize: Typography.body }
             SelectBox {
                 objectName: "proxyType"
                 Layout.fillWidth: true

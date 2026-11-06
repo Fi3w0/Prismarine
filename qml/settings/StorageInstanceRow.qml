@@ -35,14 +35,14 @@ Rectangle {
                 spacing: 6
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { Layout.fillWidth: true; text: row.entry.name; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                    Text { Layout.fillWidth: true; text: row.entry.name; color: Colors.text; font.pixelSize: Typography.control; font.weight: Font.DemiBold; elide: Text.ElideRight }
                     Text {
                         visible: row.cleanableSize > 0
                         text: Colors.formatBytes(row.cleanableSize) + " cleanable"
                         color: Colors.subtext
-                        font.pixelSize: 12
+                        font.pixelSize: Typography.bodySmall
                     }
-                    Text { text: Colors.formatBytes(row.entry.total); color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold; Layout.leftMargin: 10 }
+                    Text { text: Colors.formatBytes(row.entry.total); color: Colors.text; font.pixelSize: Typography.control; font.weight: Font.DemiBold; Layout.leftMargin: 10 }
                 }
                 // Bars share one scale, so the biggest instance spans the full width.
                 Item {
@@ -61,13 +61,13 @@ Rectangle {
                 implicitHeight: 34
                 Accessible.name: row.expanded ? "Hide details" : "Show details"
                 onClicked: row.expanded = !row.expanded
-                background: Rectangle { radius: 17; color: parent.hovered ? Colors.surfaceHi : "transparent" }
+                background: Rectangle { border.color: parent.visualFocus ? Colors.accent : "transparent"; radius: 17; color: parent.hovered ? Colors.surfaceHi : "transparent" }
                 contentItem: Text {
                     text: "›"
                     rotation: row.expanded ? 90 : 0
                     Behavior on rotation { NumberAnimation { duration: Colors.animations ? 160 : 0 } }
                     color: Colors.subtext
-                    font.pixelSize: 20
+                    font.pixelSize: Typography.sectionTitle
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -85,7 +85,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 spacing: 2
-                Text { text: "WHAT'S INSIDE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 11; font.letterSpacing: 2; Layout.bottomMargin: 4 }
+                Text { text: "WHAT'S INSIDE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.caption; font.letterSpacing: 2; Layout.bottomMargin: 4 }
                 Repeater {
                     model: row.entry.categories.filter(it => it.size > 0)
                     delegate: RowLayout {
@@ -100,8 +100,8 @@ Rectangle {
                             onToggled: row.selected = checked ? row.selected.concat([modelData.key]) : row.selected.filter(it => it !== modelData.key)
                         }
                         Item { visible: !modelData.cleanable; implicitWidth: 18 }
-                        Text { Layout.fillWidth: true; text: modelData.label; color: Colors.text; font.pixelSize: 13; elide: Text.ElideRight }
-                        Text { text: Colors.formatBytes(modelData.size); color: Colors.subtext; font.pixelSize: 13 }
+                        Text { Layout.fillWidth: true; text: modelData.label; color: Colors.text; font.pixelSize: Typography.body; elide: Text.ElideRight }
+                        Text { text: Colors.formatBytes(modelData.size); color: Colors.subtext; font.pixelSize: Typography.body }
                     }
                 }
                 RowLayout {
@@ -117,7 +117,7 @@ Rectangle {
                     TextLink {
                         visible: row.cleanableParts.length > 0
                         text: "Select logs & caches"
-                        pixelSize: 13
+                        pixelSize: Typography.body
                         onClicked: row.selected = row.cleanableParts.filter(it => ["logs", "caches", "removed"].indexOf(it.key) >= 0).map(it => it.key)
                     }
                 }
@@ -126,8 +126,8 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 spacing: 2
-                Text { text: "WORLDS"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 11; font.letterSpacing: 2; Layout.bottomMargin: 4 }
-                Text { visible: !row.entry.worlds.length; text: "No worlds yet."; color: Colors.subtext; font.pixelSize: 13 }
+                Text { text: "WORLDS"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.caption; font.letterSpacing: 2; Layout.bottomMargin: 4 }
+                Text { visible: !row.entry.worlds.length; text: "No worlds yet."; color: Colors.subtext; font.pixelSize: Typography.body }
                 Repeater {
                     model: row.entry.worlds
                     delegate: RowLayout {
@@ -136,12 +136,12 @@ Rectangle {
                         Layout.preferredHeight: 30
                         spacing: 8
                         LineIcon { name: "world"; tint: Colors.subtext; implicitWidth: 16; implicitHeight: 16 }
-                        Text { Layout.fillWidth: true; text: modelData.name; color: Colors.text; font.pixelSize: 13; elide: Text.ElideRight }
-                        Text { text: Colors.formatBytes(modelData.size); color: Colors.subtext; font.pixelSize: 13 }
+                        Text { Layout.fillWidth: true; text: modelData.name; color: Colors.text; font.pixelSize: Typography.body; elide: Text.ElideRight }
+                        Text { text: Colors.formatBytes(modelData.size); color: Colors.subtext; font.pixelSize: Typography.body }
                         TextLink {
                             text: "Trash"
                             tint: Colors.danger
-                            pixelSize: 12
+                            pixelSize: Typography.bodySmall
                             Accessible.name: "Move " + modelData.name + " to the trash"
                             onClicked: row.host.askTrashWorld(row.entry, modelData)
                         }

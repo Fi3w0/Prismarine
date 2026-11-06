@@ -93,14 +93,14 @@ ColumnLayout {
                         text: panel.storage && panel.storage.total ? Colors.formatBytes(panel.storage.total) : panel.storage && panel.storage.loading ? "Measuring…" : "—"
                         color: Colors.bone
                         font.family: Colors.displayFont
-                        font.pixelSize: 34
+                        font.pixelSize: Typography.storageTotal
                     }
                     Text {
                         Layout.fillWidth: true
                         text: "used by Prism instances and launcher files"
                               + (panel.storage && panel.storage.diskSize ? " · " + Colors.formatBytes(panel.storage.diskFree) + " free of " + Colors.formatBytes(panel.storage.diskSize) + " on this drive" : "")
                         color: Colors.subtext
-                        font.pixelSize: 13
+                        font.pixelSize: Typography.body
                         wrapMode: Text.Wrap
                     }
                 }
@@ -147,8 +147,8 @@ ColumnLayout {
                         required property var modelData
                         spacing: 7
                         Rectangle { width: 10; height: 10; radius: 3; color: modelData.color; anchors.verticalCenter: parent.verticalCenter }
-                        Text { text: modelData.label; color: Colors.text; font.pixelSize: 12 }
-                        Text { text: Colors.formatBytes(modelData.size); color: Colors.subtext; font.pixelSize: 12 }
+                        Text { text: modelData.label; color: Colors.text; font.pixelSize: Typography.bodySmall }
+                        Text { text: Colors.formatBytes(modelData.size); color: Colors.subtext; font.pixelSize: Typography.bodySmall }
                     }
                 }
             }
@@ -160,12 +160,12 @@ ColumnLayout {
         Layout.fillWidth: true
         visible: !!panel.storage && panel.storage.shared.length > 0
         spacing: 8
-        Text { text: "LAUNCHER FILES"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
+        Text { text: "LAUNCHER FILES"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.bodySmall; font.letterSpacing: 2 }
         Text {
             Layout.fillWidth: true
             text: "Shared by every instance and managed by Prism. Only the download cache is safe to clear, and only while Prism is closed."
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             wrapMode: Text.Wrap
         }
         GridLayout {
@@ -186,14 +186,14 @@ ColumnLayout {
                     ColumnLayout {
                         anchors { fill: parent; margins: 12 }
                         spacing: 2
-                        Text { Layout.fillWidth: true; text: modelData.label; color: Colors.subtext; font.pixelSize: 12; elide: Text.ElideRight }
+                        Text { Layout.fillWidth: true; text: modelData.label; color: Colors.subtext; font.pixelSize: Typography.bodySmall; elide: Text.ElideRight }
                         RowLayout {
                             Layout.fillWidth: true
-                            Text { Layout.fillWidth: true; text: Colors.formatBytes(modelData.size); color: Colors.text; font.pixelSize: 18; font.weight: Font.DemiBold }
+                            Text { Layout.fillWidth: true; text: Colors.formatBytes(modelData.size); color: Colors.text; font.pixelSize: Typography.titleSmall; font.weight: Font.DemiBold }
                             TextLink {
                                 visible: modelData.cleanable && modelData.size > 0
                                 text: "Clear"
-                                pixelSize: 13
+                                pixelSize: Typography.body
                                 onClicked: {
                                     // Clearing refreshes this list and destroys this card, so keep the controller first.
                                     const controller = panel.controller;
@@ -225,21 +225,21 @@ ColumnLayout {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
-                Text { text: "Shared content"; color: Colors.text; font.pixelSize: 15; font.weight: Font.DemiBold }
+                Text { text: "Shared content"; color: Colors.text; font.pixelSize: Typography.bodyLarge; font.weight: Font.DemiBold }
                 Chip { text: "OPTIONAL"; tint: Colors.subtext }
                 Item { Layout.fillWidth: true }
                 Text {
                     visible: (sharingCard.sharing.sharedFiles || 0) > 0
                     text: sharingCard.sharing.sharedFiles + " files shared · saving " + Colors.formatBytes(sharingCard.sharing.saved)
                     color: Colors.success
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                 }
             }
             Text {
                 Layout.fillWidth: true
                 text: "Identical mods, resource packs and shaders in several instances can be stored once. Each instance keeps its own file name (a hard link), so disabling, updating or deleting a mod in one instance never changes another. Instances that are running are skipped."
                 color: Colors.subtext
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 wrapMode: Text.Wrap
                 lineHeight: 1.2
             }
@@ -254,13 +254,13 @@ ColumnLayout {
                         : sharingCard.sharing.duplicates ? sharingCard.sharing.duplicates + " duplicate files could free " + Colors.formatBytes(sharingCard.sharing.savings) + "."
                         : "No unshared duplicates found."
                     color: Colors.text
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                     wrapMode: Text.Wrap
                 }
                 TextLink {
                     visible: (sharingCard.sharing.sharedFiles || 0) > 0
                     text: "Stop sharing"
-                    pixelSize: 13
+                    pixelSize: Typography.body
                     onClicked: {
                         panel.pendingClean = { unshare: true };
                         confirm.title = "Stop sharing files?";
@@ -300,14 +300,14 @@ ColumnLayout {
         spacing: 8
         RowLayout {
             Layout.fillWidth: true
-            Text { Layout.fillWidth: true; text: "INSTANCES"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
+            Text { Layout.fillWidth: true; text: "INSTANCES"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.bodySmall; font.letterSpacing: 2 }
             InputField {
                 id: storageSearch
                 objectName: "storageSearch"
                 visible: !!panel.storage && panel.storage.instances.length > 5
                 Layout.preferredWidth: 240
                 implicitHeight: 34
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 placeholderText: "Filter instances…"
             }
         }

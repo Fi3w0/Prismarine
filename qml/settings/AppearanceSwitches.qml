@@ -7,23 +7,12 @@ Repeater {
     required property var controller
     required property string section
 
-    model: section !== "Interface" && section !== "Library & covers" && section !== "Java & game" ? [] : [
-        {
-            name: "Animations",
-            detail: "Hover lifts and smooth transitions.",
-            key: "animations"
-        },
-        {
-            name: "Screenshot covers",
-            detail: "Use your newest screenshot when no custom cover is set.",
-            key: "showScreenshots"
-        },
-        {
-            name: "Deco frames",
-            detail: "Thin brass frames around your covers.",
-            key: "decoFrames"
-        }
-    ]
+    model: section === "Interface" ? [
+        { name: "Animations", detail: "Turn off for reduced motion throughout Prismarine.", key: "animations" }
+    ] : section === "Library & covers" ? [
+        { name: "Screenshot covers", detail: "Use your newest screenshot when no custom cover is set.", key: "showScreenshots" },
+        { name: "Deco frames", detail: "Thin brass frames around your covers.", key: "decoFrames" }
+    ] : []
     delegate: ColumnLayout {
         required property var modelData
         Layout.fillWidth: true
@@ -39,14 +28,14 @@ Repeater {
                 Text {
                     text: modelData.name
                     color: Colors.text
-                    font.pixelSize: 14
+                    font.pixelSize: Typography.control
                     font.weight: Font.DemiBold
                 }
                 Text {
                     Layout.fillWidth: true
                     text: modelData.detail
                     color: Colors.subtext
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     wrapMode: Text.Wrap
                 }
             }

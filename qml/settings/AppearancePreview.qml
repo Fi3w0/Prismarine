@@ -14,17 +14,19 @@ ColumnLayout {
     Text {
         text: "Launcher UI"
         color: Colors.text
-        font.pixelSize: 14
+        font.pixelSize: Typography.control
         font.weight: Font.DemiBold
     }
-    RowLayout {
+    GridLayout {
         Layout.fillWidth: true
-        spacing: 14
+        columns: width < 600 ? 1 : 2
+        columnSpacing: 16
+        rowSpacing: 16
         Repeater {
             model: [
                 { title: "Prismarine", detail: "The new look. Same instances, accounts and settings.", classic: false },
-                { title: "Classic Prism", detail: "Prism Launcher's original window. Switch back any time from its menu.", classic: true }
-            ]
+                { title: "Classic Prism", detail: "Opens Prism Launcher's original window. Prismarine stays installed.", classic: true }
+            ].filter(option => !option.classic || chooser.controller.prismShortcuts !== false)
             delegate: AbstractButton {
                 id: option
                 required property var modelData
@@ -37,7 +39,7 @@ ColumnLayout {
                 Accessible.name: modelData.title
                 onClicked: if (modelData.classic && chooser.controller.instances.openPrism()) chooser.controller.notify("Opening Classic Prism…")
                 background: Rectangle {
-                    radius: 12
+                    radius: 20
                     color: option.current ? Colors.surfaceHi : Colors.surface
                     border.width: option.current ? 2 : 1
                     border.color: option.current || option.visualFocus ? Colors.accent : option.hovered ? Colors.subtext : Colors.border
@@ -92,7 +94,7 @@ ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 6
                                 Repeater {
-                                    model: 5
+                                    model: 3
                                     delegate: Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 16
@@ -106,18 +108,23 @@ ColumnLayout {
                             }
                         }
                     }
-                    Text {
+                    RowLayout {
+                        Layout.fillWidth: true
                         Layout.topMargin: 4
-                        text: option.modelData.title + (option.current ? "  ·  in use" : "  ↗")
-                        color: Colors.text
-                        font.pixelSize: 13
-                        font.weight: Font.DemiBold
+                        spacing: 8
+                        Text { text: option.modelData.title + (option.current ? "" : "  ↗"); color: Colors.text; font.pixelSize: Typography.body; font.weight: Font.DemiBold }
+                        Rectangle {
+                            visible: option.current
+                            implicitWidth: 54; implicitHeight: 22; radius: 11; color: Colors.accent
+                            Text { anchors.centerIn: parent; text: qsTr("In use"); color: Colors.accentInk; font.pixelSize: Typography.caption; font.weight: Font.DemiBold }
+                        }
+                        Item { Layout.fillWidth: true }
                     }
                     Text {
                         Layout.fillWidth: true
                         text: option.modelData.detail
                         color: Colors.subtext
-                        font.pixelSize: 11
+                        font.pixelSize: Typography.caption
                         wrapMode: Text.Wrap
                     }
                 }

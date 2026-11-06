@@ -39,7 +39,7 @@ ColumnLayout {
         color: Colors.brass
         font.family: Colors.displayFont
         font.letterSpacing: 2
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
     }
     InputField {
         Layout.fillWidth: true
@@ -51,7 +51,7 @@ ColumnLayout {
     Text {
         text: "Memory allocation"
         color: Colors.bone
-        font.pixelSize: 17
+        font.pixelSize: Typography.valueSmall
     }
     ToggleSwitch {
         visible: form.instanceMode
@@ -102,7 +102,7 @@ ColumnLayout {
         color: Colors.brass
         font.family: Colors.displayFont
         font.letterSpacing: 2
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
     }
     ToggleSwitch {
         visible: !form.instanceMode; text: "Automatically select compatible Java in Prism"
@@ -144,7 +144,7 @@ ColumnLayout {
     Text {
         text: "JVM arguments"
         color: Colors.subtext
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
     }
     InputField {
         Layout.fillWidth: true
@@ -163,7 +163,7 @@ ColumnLayout {
         color: Colors.brass
         font.family: Colors.displayFont
         font.letterSpacing: 2
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
     }
     ToggleSwitch {
         visible: form.instanceMode
@@ -242,7 +242,7 @@ ColumnLayout {
         color: Colors.brass
         font.family: Colors.displayFont
         font.letterSpacing: 2
-        font.pixelSize: 13
+        font.pixelSize: Typography.body
     }
     ToggleSwitch {
         visible: form.instanceMode
@@ -262,7 +262,7 @@ ColumnLayout {
         checked: !!form.draft.mangoHud
         onToggled: form.change("mangoHud", checked)
     }
-    Text { text: "CUSTOM COMMANDS"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 13 }
+    Text { text: "CUSTOM COMMANDS"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.body }
     ToggleSwitch {
         visible: form.instanceMode
         text: "Override launcher commands"
@@ -270,7 +270,7 @@ ColumnLayout {
         onToggled: form.change("commandsOverride", checked)
     }
     Text {
-        Layout.fillWidth: true; wrapMode: Text.Wrap; color: Colors.subtext; font.pixelSize: 12
+        Layout.fillWidth: true; wrapMode: Text.Wrap; color: Colors.subtext; font.pixelSize: Typography.bodySmall
         text: "Prism runs these commands at launch and exit. Use $INST_MC_DIR for the game folder and $INST_JAVA for Java. Quote paths containing spaces."
     }
     Repeater {
@@ -278,7 +278,7 @@ ColumnLayout {
         delegate: ColumnLayout {
             required property var modelData
             Layout.fillWidth: true
-            Text { text: modelData.title; color: Colors.subtext; font.pixelSize: 12 }
+            Text { text: modelData.title; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
             InputField {
                 Layout.fillWidth: true
                 enabled: !form.instanceMode || !!form.draft.commandsOverride

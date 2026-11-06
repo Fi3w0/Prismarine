@@ -12,7 +12,7 @@ ColumnLayout {
     Text {
         text: "Theme"
         color: Colors.text
-        font.pixelSize: 14
+        font.pixelSize: Typography.control
         font.weight: Font.DemiBold
     }
     Text {
@@ -20,7 +20,7 @@ ColumnLayout {
         text: "Dark is the default. System follows your desktop."
         wrapMode: Text.Wrap
         color: Colors.subtext
-        font.pixelSize: 12
+        font.pixelSize: Typography.bodySmall
     }
     Rectangle {
         implicitWidth: options.implicitWidth + 8
@@ -53,7 +53,7 @@ ColumnLayout {
                         id: label
                         text: option.modelData.label
                         color: option.current ? Colors.text : Colors.subtext
-                        font.pixelSize: 12
+                        font.pixelSize: Typography.bodySmall
                         font.weight: option.current ? Font.DemiBold : Font.Normal
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter

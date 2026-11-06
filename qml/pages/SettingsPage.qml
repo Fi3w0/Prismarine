@@ -5,205 +5,165 @@ import QtQuick.Dialogs
 
 Item {
     id: settings
+    objectName: "settingsPage"
     required property var controller
+    readonly property bool compactLayout: width < 1050 || height < 650
+    SettingsDraft { id: appearanceDraft; objectName: "appearanceDraft"; preferences: settings.controller.preferences }
+    QtObject {
+        id: appearanceController
+        property var preferences: appearanceDraft
+        property var instances: settings.controller.instances
+        property var appInfo: settings.controller.appInfo
+        property bool prismShortcuts: settings.controller.prismShortcuts !== false
+        property var gamepad: settings.controller.gamepad
+        function notify(message) { settings.controller.notify(message); }
+    }
+    readonly property bool appearanceSection: section === "Interface" || section === "Library & covers"
     property string section: controller.settingsSection || "Interface"
     onSectionChanged: {
+        if (scroll && scroll.contentItem) scroll.contentItem.contentY = 0;
         if (section === "Java & game") controller.launchSettings.load("");
         if (section === "Network" && controller.network) controller.network.load();
         if (section === "Storage" && controller.storage && !controller.storage.loading && !controller.storage.instances.length) controller.storage.scan();
     }
+    function chooseSection(name) {
+        if (name === "Accounts") controller.navigate("accounts");
+        else section = name;
+    }
     Component.onCompleted: if (section === "Storage" && controller.storage) controller.storage.scan()
-    RowLayout {
-        anchors {
-            fill: parent
-            margins: 32
+    ColumnLayout {
+        anchors { fill: parent; margins: settings.compactLayout ? 20 : 28 }
+        spacing: 16
+        RowLayout {
+            visible: settings.compactLayout
+            Layout.fillWidth: true
+            Layout.maximumWidth: settingsBody.width
+            Layout.alignment: Qt.AlignHCenter
+            InputField {
+                id: compactSearch
+                objectName: visible ? "settingsSearch" : ""
+                Layout.fillWidth: true
+                placeholderText: qsTr("Search settings…")
+                Accessible.name: qsTr("Search settings")
+                readonly property var matches: {
+                    const tokens = text.trim().toLowerCase().split(/\s+/).filter(it => it.length);
+                    return settings.controller.settingsSections.filter(it => tokens.every(token => (it.name + " " + it.words).toLowerCase().indexOf(token) >= 0));
+                }
+                onAccepted: if (matches.length) settings.chooseSection(matches[0].name)
+            }
+            SelectBox {
+                objectName: "settingsSectionPicker"
+                Layout.fillWidth: true
+                model: compactSearch.matches
+                textRole: "name"
+                currentIndex: model.findIndex(it => it.name === settings.section)
+                displayText: !model.length ? qsTr("No settings match") : currentIndex < 0 ? qsTr("Choose a section…") : currentText
+                Accessible.name: qsTr("Settings section")
+                onActivated: settings.chooseSection(model[currentIndex].name)
+            }
         }
-        spacing: 0
-        SettingsSidebar {
-            controller: settings.controller
-            section: settings.section
-            onSectionSelected: nextSection => settings.section = nextSection
-        }
-        ScrollView {
-            id: scroll
+        RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: availableWidth
-            clip: true
-            ColumnLayout {
-                width: scroll.availableWidth - 56
-                x: 28
-                spacing: 24
-                Text {
-                    text: settings.section
-                    color: Colors.bone
-                    font.family: Colors.displayFont
-                    font.pixelSize: 30
-                    font.letterSpacing: 2
-                }
-                AppearancePreview {
-                    controller: settings.controller
-                    section: settings.section
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Interface" || settings.section === "Library & covers"
-                    spacing: 32
-                    AccentPicker {
-                        Layout.preferredWidth: 1
-                        controller: settings.controller
-                        section: settings.section
-                    }
-                    ThemePicker {
-                        Layout.preferredWidth: 1
-                        Layout.alignment: Qt.AlignTop
-                        controller: settings.controller
-                        section: settings.section
-                    }
-                }
-                LibraryPreferences {
-                    controller: settings.controller
-                    section: settings.section
-                }
-                AppearanceSwitches {
-                    controller: settings.controller
-                    section: settings.section
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Interface"
-                    spacing: 32
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Text { text: "While a game is running"; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold }
-                        Text {
-                            Layout.fillWidth: true
-                            text: "What Prismarine's window does once the game window opens. Instances can override this in their overview."
-                            color: Colors.subtext
-                            font.pixelSize: 12
-                            wrapMode: Text.Wrap
-                        }
-                    }
-                    SelectBox {
-                        objectName: "whilePlayingSetting"
-                        readonly property var keys: ["keep", "minimize", "hide"]
-                        Layout.preferredWidth: 260
-                        model: ["Keep Prismarine open", "Minimize Prismarine", "Hide until the game closes"]
-                        currentIndex: Math.max(0, keys.indexOf(settings.controller.preferences.whilePlaying))
-                        onActivated: index => settings.controller.preferences.whilePlaying = keys[index]
-                    }
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Interface"
-                    spacing: 32
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Let Prism open its console window"; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold }
-                        Text {
-                            Layout.fillWidth: true
-                            text: "Off: Prism never opens its console on its own, not even after a crash. Now playing has the log and crash help, and you can still open the console from Prism yourself. Changes Prism's “Show console” settings."
-                            color: Colors.subtext
-                            font.pixelSize: 12
-                            wrapMode: Text.Wrap
-                        }
-                    }
-                    ToggleSwitch {
-                        objectName: "prismConsoleToggle"
-                        checked: settings.controller.preferences.prismConsole
-                        onToggled: settings.controller.preferences.prismConsole = checked
-                    }
-                }
+            spacing: 24
+            SettingsSidebar {
+                visible: !settings.compactLayout
+                controller: settings.controller
+                section: settings.section
+                onSectionSelected: nextSection => settings.section = nextSection
+            }
+            ScrollView {
+                id: scroll
+                objectName: "settingsScroll"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentWidth: availableWidth
+                clip: true
                 ColumnLayout {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Interface"
-                    spacing: 6
-                    Text { text: "Prism Launcher program"; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold }
-                    Text {
+                    id: settingsBody
+                    objectName: "settingsBody"
+                    width: Math.min(980, scroll.availableWidth - 16)
+                    x: Math.max(0, (scroll.availableWidth - width) / 2)
+                    spacing: 24
+                    SettingsBanner {
+                        title: settings.section
+                        detail: settings.section === "Interface" ? qsTr("How Prismarine looks and what it does while a game runs.")
+                            : settings.section === "Library & covers" ? qsTr("Shape your library, covers and artwork.") : settings.section === "Prism integration" ? qsTr("Launcher integration. Changes here apply immediately.") : settings.section === "Launcher mode" ? qsTr("How Prismarine runs, and which parts you want.") : qsTr("Your launcher, your settings.")
+                    }
+                    InterfaceOptions {
+                        controller: appearanceController
+                        visible: settings.section === "Interface"
+                    }
+                    SettingsLayoutPreview {
+                        preferences: appearanceDraft
+                        visible: settings.section === "Library & covers"
+                    }
+                    LibraryPreferences {
+                        controller: appearanceController
+                        section: settings.section
+                    }
+                    AppearanceSwitches {
+                        controller: appearanceController
+                        section: settings.section === "Library & covers" ? settings.section : ""
+                    }
+                    LauncherModeSettings {
+                        controller: settings.controller
+                        visible: settings.section === "Launcher mode"
+                    }
+                    PrismIntegrationSettings {
+                        controller: settings.controller
+                        visible: settings.section === "Prism integration"
+                    }
+                    LaunchSettingsForm {
                         Layout.fillWidth: true
-                        text: "Which Prism Prismarine starts games with. A Prism built with Prismarine's patch shows no “Please wait…” window unless its own launcher window is open. Leave empty to use the one next to Prismarine, or the installed Prism."
-                        color: Colors.subtext
-                        font.pixelSize: 12
-                        wrapMode: Text.Wrap
+                        visible: settings.section === "Java & game"
+                        javaManager: settings.controller.javaManager
+                        service: settings.controller.launchSettings
+                        onSaved: settings.controller.notify("Launcher settings saved")
                     }
-                    RowLayout {
+                    NetworkSettingsForm {
                         Layout.fillWidth: true
-                        spacing: 10
-                        InputField {
-                            id: prismProgram
-                            objectName: "prismProgramField"
-                            Layout.fillWidth: true
-                            text: settings.controller.preferences.prismProgram
-                            placeholderText: "Automatic: " + (settings.controller.instances.prismProgram() || "not found")
-                            onEditingFinished: settings.controller.preferences.prismProgram = text
-                        }
-                        ActionButton { text: "Browse…"; implicitWidth: 110; onClicked: prismPicker.open() }
-                        TextLink {
-                            visible: !!settings.controller.preferences.prismProgram
-                            text: "Automatic"
-                            pixelSize: 13
-                            onClicked: { settings.controller.preferences.prismProgram = ""; prismProgram.text = ""; }
-                        }
+                        visible: settings.section === "Network"
+                        controller: settings.controller
                     }
-                    FileDialog {
-                        id: prismPicker
-                        title: "Choose the Prism Launcher program"
-                        onAccepted: settings.controller.preferences.setPrismProgramFromUrl(selectedFile)
-                    }
-                }
-                RowLayout {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Interface" && !!settings.controller.desktop && settings.controller.desktop.kdeAvailable
-                    spacing: 32
-                    ColumnLayout {
+                    ExperimentalPanel {
                         Layout.fillWidth: true
-                        Text { text: "Hide Prism's progress window"; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold }
-                        Text {
-                            Layout.fillWidth: true
-                            text: "Adds a KDE window rule that keeps Prism's “Please wait…” window minimized, so only Prismarine's launch screen shows. It also applies to that window inside Prism itself. Prism's error messages still appear. Turning this off removes the rule."
-                            color: Colors.subtext
-                            font.pixelSize: 12
-                            wrapMode: Text.Wrap
-                        }
+                        visible: settings.section === "Experimental"
+                        controller: settings.controller
                     }
-                    ToggleSwitch {
-                        objectName: "hidePrismProgressToggle"
-                        checked: !!settings.controller.desktop && settings.controller.desktop.hidePrismProgress
-                        onToggled: {
-                            if (settings.controller.desktop.setHidePrismProgress(checked))
-                                settings.controller.notify(checked ? "Prism's progress window will stay minimized" : "Prism's progress window shows again");
-                        }
+                    StoragePanel {
+                        Layout.fillWidth: true
+                        visible: settings.section === "Storage"
+                        controller: settings.controller
+                    }
+                    AboutPanel {
+                        controller: settings.controller
+                        section: settings.section
+                    }
+                    Item {
+                        Layout.preferredHeight: 32
                     }
                 }
-                LaunchSettingsForm {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Java & game"
-                    javaManager: settings.controller.javaManager
-                    service: settings.controller.launchSettings
-                    onSaved: settings.controller.notify("Launcher settings saved")
-                }
-                NetworkSettingsForm {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Network"
-                    controller: settings.controller
-                }
-                ExperimentalPanel {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Experimental"
-                    controller: settings.controller
-                }
-                StoragePanel {
-                    Layout.fillWidth: true
-                    visible: settings.section === "Storage"
-                    controller: settings.controller
-                }
-                AboutPanel {
-                    controller: settings.controller
-                    section: settings.section
-                }
-                Item {
-                    Layout.preferredHeight: 32
-                }
+            }
+        }
+        Rectangle {
+            objectName: "settingsActionBar"
+            visible: settings.appearanceSection
+            Layout.fillWidth: true
+            Layout.maximumWidth: settings.compactLayout ? settingsBody.width : -1
+            Layout.alignment: Qt.AlignHCenter
+            implicitHeight: footer.implicitHeight + 24
+            radius: 14
+            color: Colors.surface
+            border.color: appearanceDraft.dirty ? Colors.accent : Colors.border
+            RowLayout {
+                id: footer
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
+                spacing: 10
+                Text { Layout.fillWidth: true; text: appearanceDraft.dirty ? qsTr("Preview changes · Apply to save") : qsTr("Try changes in the preview before applying."); color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap }
+                ActionButton { objectName: "resetAppearance"; text: qsTr("Defaults"); implicitWidth: 90; onClicked: appearanceDraft.resetDefaults() }
+                ActionButton { objectName: "discardAppearance"; text: qsTr("Discard"); implicitWidth: 90; enabled: appearanceDraft.dirty; onClicked: appearanceDraft.load() }
+                ActionButton { objectName: "applyAppearance"; text: qsTr("Apply"); implicitWidth: 100; primary: true; enabled: appearanceDraft.dirty; onClicked: appearanceDraft.apply() }
             }
         }
     }

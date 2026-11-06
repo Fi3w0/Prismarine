@@ -23,14 +23,14 @@ ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
                     RowLayout {
-                        Text { text: "Multi-account play"; color: Colors.text; font.pixelSize: 15; font.weight: Font.DemiBold }
+                        Text { text: "Multi-account play"; color: Colors.text; font.pixelSize: Typography.bodyLarge; font.weight: Font.DemiBold }
                         Chip { text: "UNSAFE"; tint: Colors.warning }
                     }
                     Text {
                         Layout.fillWidth: true
                         text: "Adds a ▾ next to Play on an instance to launch it with another signed-in account at the same time."
                         color: Colors.subtext
-                        font.pixelSize: 13
+                        font.pixelSize: Typography.body
                         wrapMode: Text.Wrap
                     }
                 }
@@ -47,7 +47,7 @@ ColumnLayout {
                     + "Before every launch the copy is refreshed from the original: mods, resource packs and shaders as hard links (no extra space), config copied over. Worlds are never shared — play together on a server or LAN. "
                     + "The original instance is only read. Risks: double memory use, config changes made in a copy are replaced, and a mod that writes into its own jar file would affect both. Use at your own risk."
                 color: Colors.subtext
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 lineHeight: 1.25
                 wrapMode: Text.Wrap
             }
