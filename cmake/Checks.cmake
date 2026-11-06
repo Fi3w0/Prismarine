@@ -55,11 +55,19 @@ qt_add_resources(browse_flow_checks browse_ui PREFIX "/browse" FILES
 add_test(NAME browse_flow COMMAND browse_flow_checks)
 set_tests_properties(browse_flow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
 
-qt_add_executable(gamepad_navigation_checks checks/gamepadnavigationtest.cpp src/ui/gamepadstate.cpp src/ui/spatialfocus.cpp src/ui/gamepadnavigator.cpp)
-target_include_directories(gamepad_navigation_checks PRIVATE src)
-target_link_libraries(gamepad_navigation_checks PRIVATE Qt6::Test Qt6::Quick Qt6::QuickControls2)
-add_test(NAME gamepad_navigation COMMAND gamepad_navigation_checks)
-set_tests_properties(gamepad_navigation PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+qt_add_executable(gamepad_state_checks checks/gamepadstatetest.cpp src/ui/gamepadstate.cpp)
+target_include_directories(gamepad_state_checks PRIVATE src)
+target_link_libraries(gamepad_state_checks PRIVATE Qt6::Test Qt6::Core)
+add_test(NAME gamepad_state COMMAND gamepad_state_checks)
+
+foreach(check navigation values)
+    qt_add_executable(gamepad_${check}_checks checks/gamepad${check}test.cpp checks/gamepadfixture.h
+        src/ui/gamepadstate.cpp src/ui/spatialfocus.cpp src/ui/gamepadnavigator.cpp)
+    target_include_directories(gamepad_${check}_checks PRIVATE src)
+    target_link_libraries(gamepad_${check}_checks PRIVATE Qt6::Test Qt6::Quick Qt6::QuickControls2)
+    add_test(NAME gamepad_${check} COMMAND gamepad_${check}_checks)
+    set_tests_properties(gamepad_${check} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
+endforeach()
 
 qt_add_executable(launcher_mode_checks checks/launchermodetest.cpp)
 target_link_libraries(launcher_mode_checks PRIVATE prismarine_core Qt6::Test)

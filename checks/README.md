@@ -16,7 +16,9 @@ them on its build platforms. Source installers set `BUILD_TESTING=OFF` and skip 
 | `motion_components` | The real page loader and dialogs: direction, input during entry, interruption, reduced motion, and hide and show. |
 | `launch_recovery` | The launch overlay, progress tracking, engine events, crash findings and reviewed fixes, using a loopback server. It never starts Prism or Minecraft. |
 | `browse_flow` | The real Browse page with an in-memory catalog: direct and batch install, target and world rules, and layout at four sizes in both themes. |
-| `gamepad_navigation` | Controller timing rules, moving focus, value controls, dropdowns, dialogs, menus and scrolling, with simulated input. |
+| `gamepad_state` | Controller timing and direction rules, with no window or controller. |
+| `gamepad_navigation` | Moving focus, dialogs, menus and scrolling, with simulated input. |
+| `gamepad_values` | Sliders, number boxes, dropdowns and custom controls only changing when adjusted on purpose. |
 | `launcher_mode` | Stable and Full detection with fixture engines, launch arguments, and validated preferences. |
 | `appearance_preferences` | Allowed appearance values, persistence, staged Apply and Discard, colour dragging, and starting palette contrast. |
 
