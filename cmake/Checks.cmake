@@ -52,6 +52,7 @@ qt_add_resources(browse_flow_checks browse_ui PREFIX "/browse" FILES
     qml/components/InputField.qml qml/components/SideNavItem.qml qml/components/ContentIcon.qml
     qml/components/LineIcon.qml qml/components/NavButton.qml qml/components/TextLink.qml
     qml/components/ToggleSwitch.qml)
+qt_add_resources(browse_flow_checks browse_fonts PREFIX "/" FILES ${FONT_ASSETS})
 add_test(NAME browse_flow COMMAND browse_flow_checks)
 set_tests_properties(browse_flow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
 

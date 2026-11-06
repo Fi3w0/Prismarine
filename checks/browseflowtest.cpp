@@ -1,4 +1,7 @@
 #include <QtTest>
+#include <QDir>
+#include <QFont>
+#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlComponent>
 #include <QQmlEngine>
@@ -121,6 +124,10 @@ int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
     QQuickStyle::setStyle("Basic");
+    // The same fonts as the app, because this checks layout and CI machines may have none.
+    for (const QString &font : QDir(":/assets/fonts").entryList({"*.ttf"}))
+        QFontDatabase::addApplicationFont(":/assets/fonts/" + font);
+    app.setFont(QFont("Outfit"));
     BrowseFlowTest test;
     return QTest::qExec(&test, argc, argv);
 }
