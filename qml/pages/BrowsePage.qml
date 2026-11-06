@@ -8,6 +8,10 @@ Item {
     property string targetId: controller.details.instanceId || controller.current.instanceId || ""
     property string contentType: "mod"
     property string world: ""
+    property bool batchMode: false
+    readonly property bool compactLayout: width < 1000 || height < 650
+    readonly property bool compactProject: compactLayout && !!selectedProject.project_id
+    readonly property var selection: controller.downloads.items(targetId, contentType)
     onTargetIdChanged: {
         world = "";
         controller.downloads.clear(targetId, "datapack");
@@ -30,6 +34,7 @@ Item {
             query.text = controller.pendingBrowseQuery;
             controller.pendingBrowseQuery = "";
         }
+        batchMode = selection.length > 0;
         controller.catalog.loadCategories();
         performSearch();
     }
@@ -51,7 +56,7 @@ Item {
             targetId: browse.targetId
             contentType: browse.contentType
             categories: browse.categories
-            visible: browse.width >= 1050
+            visible: browse.width >= 1050 && !browse.compactProject
             onCategoriesSelected: chosen => {
                 browse.categories = chosen;
                 browse.performSearch();
@@ -70,39 +75,24 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: 24
-            spacing: 16
+            spacing: 12
             Text {
+                visible: !browse.compactProject
                 text: ({mod: "Download mods", shader: "Download shaders", resourcepack: "Download resource packs", datapack: "Download datapacks", modpack: "Discover modpacks"})[browse.contentType]
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 30
+                font.pixelSize: Typography.pageTitle
                 font.letterSpacing: 2
             }
-            RowLayout {
-                Layout.fillWidth: true
-                visible: browse.width < 1050
-                SelectBox {
-                    Layout.fillWidth: true
-                    visible: !browse.packs
-                    model: browse.controller.instances.allInstances
-                    textRole: "name"
-                    currentIndex: Math.max(0, model.findIndex(it => it.instanceId === browse.targetId))
-                    onActivated: {
-                        browse.targetId = model[currentIndex].instanceId;
-                        browse.performSearch();
-                    }
-                }
-                SelectBox {
-                    model: ["Mods", "Resource packs", "Shaders", "Datapacks", "Modpacks"]
-                    currentIndex: ["mod", "resourcepack", "shader", "datapack", "modpack"].indexOf(browse.contentType)
-                    onActivated: {
-                        browse.contentType = ["mod", "resourcepack", "shader", "datapack", "modpack"][currentIndex];
-                        browse.performSearch();
-                    }
-                }
+            BrowseTarget {
+                visible: !browse.compactProject
+                controller: browse.controller
+                targetId: browse.targetId
+                contentType: browse.contentType
+                onTargetSelected: id => { browse.targetId = id; browse.performSearch(); }
             }
             RowLayout {
-                visible: browse.contentType === "datapack"
+                visible: browse.contentType === "datapack" && !browse.compactProject
                 Layout.fillWidth: true
                 Text { text: "Install into world"; color: Colors.subtext }
                 SelectBox {
@@ -113,7 +103,15 @@ Item {
                 Text { visible: !browse.worlds.length; text: "Create a world in Minecraft first."; color: Colors.subtext }
             }
             RowLayout {
+                visible: !browse.compactProject
                 Layout.fillWidth: true
+                SelectBox {
+                    Layout.fillWidth: true
+                    visible: browse.width < 1050
+                    model: ["Mods", "Resource packs", "Shaders", "Datapacks", "Modpacks"]
+                    currentIndex: ["mod", "resourcepack", "shader", "datapack", "modpack"].indexOf(browse.contentType)
+                    onActivated: browse.chooseType(["mod", "resourcepack", "shader", "datapack", "modpack"][currentIndex])
+                }
                 SelectBox {
                     model: ["Modrinth", "CurseForge"]
                     currentIndex: browse.controller.catalog.provider === "curseforge" ? 1 : 0
@@ -123,7 +121,7 @@ Item {
                         browse.categories = []; browse.performSearch();
                     }
                 }
-                Text { Layout.fillWidth: true; text: browse.packs ? "Each pack installs as a new instance" : ""; color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.Wrap }
+                Text { Layout.fillWidth: true; text: browse.packs ? "Each pack installs as a new instance" : ""; color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap }
                 ActionButton {
                     visible: browse.controller.catalog.provider === "curseforge"
                     text: browse.controller.catalog.curseForgeReady ? "API key…" : "Add API key…"
@@ -131,14 +129,27 @@ Item {
                 }
                 ActionButton { visible: browse.packs; text: "Import archive…"; onClicked: browse.controller.importPack() }
             }
-            InputField {
-                id: query
+            RowLayout {
+                visible: !browse.compactProject
                 Layout.fillWidth: true
-                placeholderText: browse.controller.catalog.provider === "curseforge" ? "Search CurseForge…" : "Search Modrinth…"
-                onTextChanged: searchDelay.restart()
-                onAccepted: {
-                    searchDelay.stop();
-                    browse.performSearch();
+                InputField {
+                    id: query
+                    Layout.fillWidth: true
+                    placeholderText: browse.controller.catalog.provider === "curseforge" ? "Search CurseForge…" : "Search Modrinth…"
+                    onTextChanged: searchDelay.restart()
+                    onAccepted: {
+                        searchDelay.stop();
+                        browse.performSearch();
+                    }
+                }
+                ActionButton {
+                    objectName: "browseBatchToggle"
+                    visible: !browse.packs
+                    implicitWidth: Math.max(144, contentItem.implicitWidth + 24)
+                    text: browse.batchMode ? qsTr("Done selecting") : qsTr("Select multiple")
+                    checkable: true
+                    checked: browse.batchMode
+                    onClicked: browse.batchMode = !browse.batchMode
                 }
             }
             RowLayout {
@@ -146,11 +157,14 @@ Item {
                 Layout.fillHeight: true
                 spacing: 14
                 BrowseResults {
+                    visible: !browse.compactProject
+                    Layout.fillWidth: browse.compactLayout
                     controller: browse.controller
                     preferredPanelWidth: browse.width >= 1050 ? (browse.width - 266) * 0.45 : browse.width * 0.43
                     selectedProject: browse.selectedProject
                     targetId: browse.targetId
                     contentType: browse.contentType
+                    activeCategories: browse.categories.length
                     onApiKeyRequested: keyDialog.open()
                     onPrismInstallRequested: {
                         if (browse.packs) browse.controller.instances.openPrism();
@@ -163,7 +177,12 @@ Item {
                     }
                 }
                 BrowseProject {
+                    visible: !browse.compactLayout || browse.compactProject
+                    compact: browse.compactLayout
+                    targetName: browse.targetInfo.name || ""
+                    onDismissed: browse.selectedProject = ({})
                     world: browse.world
+                    batchMode: browse.batchMode
                     controller: browse.controller
                     selectedProject: browse.selectedProject
                     targetId: browse.targetId
@@ -171,11 +190,12 @@ Item {
                 }
             }
             DownloadQueueBar {
-                visible: !browse.packs
+                visible: !browse.packs && (browse.batchMode || browse.selection.length > 0)
                 world: browse.world
                 controller: browse.controller
                 targetId: browse.targetId
                 contentType: browse.contentType
+                targetName: browse.targetInfo.name || ""
             }
         }
     }

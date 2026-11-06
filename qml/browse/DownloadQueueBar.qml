@@ -6,6 +6,7 @@ Rectangle {
     id: bar
     required property var controller
     property string world: ""
+    property string targetName: ""
     required property string targetId
     required property string contentType
     readonly property var selection: controller.downloads.items(targetId, contentType)
@@ -18,8 +19,17 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 12
         spacing: 12
-        Text { text: bar.selection.length + " selected"; color: Colors.text; font.pixelSize: 13; font.weight: Font.DemiBold }
+        Text {
+            Layout.fillWidth: bar.width < 720
+            Layout.maximumWidth: bar.width < 720 ? 240 : 220
+            text: qsTr("%1 selected").arg(bar.selection.length) + (bar.targetName ? " · " + bar.targetName : "")
+            color: Colors.text
+            font.pixelSize: Typography.body
+            font.weight: Font.DemiBold
+            elide: Text.ElideRight
+        }
         ListView {
+            visible: bar.width >= 720
             Layout.fillWidth: true
             Layout.fillHeight: true
             orientation: ListView.Horizontal

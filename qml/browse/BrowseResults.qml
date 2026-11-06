@@ -5,6 +5,7 @@ import QtQuick.Dialogs
 
 Rectangle {
     id: panel
+    property int activeCategories: 0
     required property var controller
     property real preferredPanelWidth: 400
     property var selectedProject: ({})
@@ -43,12 +44,9 @@ Rectangle {
             }
             contentItem: RowLayout {
                 spacing: 12
-                Image {
-                    Layout.preferredWidth: 42
-                    Layout.preferredHeight: 42
+                ContentIcon {
+                    size: 42
                     source: result.modelData.icon_url || ""
-                    fillMode: Image.PreserveAspectFit
-                    asynchronous: true
                 }
                 ColumnLayout {
                     Layout.fillWidth: true
@@ -57,7 +55,7 @@ Rectangle {
                         Layout.fillWidth: true
                         text: result.modelData.title
                         color: Colors.text
-                        font.pixelSize: 15
+                        font.pixelSize: Typography.bodyLarge
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -65,12 +63,12 @@ Rectangle {
                         Layout.fillWidth: true
                         text: result.modelData.description
                         color: Colors.subtext
-                        font.pixelSize: 12
+                        font.pixelSize: Typography.bodySmall
                         elide: Text.ElideRight
                     }
 
                 }
-                Text { text: "✓"; visible: controller.downloads.contains(targetId, contentType, result.modelData.project_id); color: Colors.accent; font.pixelSize: 18 }
+                Text { text: "✓"; visible: controller.downloads.contains(targetId, contentType, result.modelData.project_id); color: Colors.accent; font.pixelSize: Typography.titleSmall }
             }
         }
         BusyIndicator {
@@ -86,9 +84,9 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: panel.needsApiKey ? "Install CurseForge content through Prism Launcher without adding an API key here, or add a key to browse in Prismarine."
-                                       : controller.catalog.error || "No matching projects. Try another search."
+                                       : controller.catalog.error || (panel.activeCategories > 0 ? "No projects match all selected categories. Try fewer." : "No matching projects. Try another search.")
                 color: Colors.subtext
-                font.pixelSize: 14
+                font.pixelSize: Typography.control
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
             }
@@ -110,7 +108,7 @@ Rectangle {
                     : "In Prism: " + ({mod: "Mods", resourcepack: "Resource packs", shader: "Shader packs"})[panel.contentType]
                       + " → Download → CurseForge."
                 color: Colors.subtext
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
             }

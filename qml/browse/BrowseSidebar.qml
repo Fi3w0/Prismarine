@@ -27,24 +27,10 @@ Rectangle {
             margins: 16
         }
         spacing: 16
-        SelectBox {
-            Layout.fillWidth: true
-            model: sidebar.controller.instances.allInstances
-            visible: sidebar.contentType !== "modpack"
-            textRole: "name"
-            currentIndex: Math.max(0, model.findIndex(it => it.instanceId === sidebar.targetId))
-            onActivated: sidebar.targetSelected(model[currentIndex].instanceId)
-        }
-        Chip {
-            text: sidebar.controller.catalog.provider === "curseforge" ? "CurseForge" : "Modrinth"
-            tint: Colors.accent
-            active: true
-            Layout.fillWidth: true
-        }
         Text {
             text: "CONTENT"
             font.family: Colors.displayFont
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             font.letterSpacing: 2
             color: Colors.brass
         }
@@ -73,36 +59,6 @@ Rectangle {
                 onClicked: sidebar.typeSelected(modelData.key)
             }
         }
-        Text {
-            text: "COMPATIBILITY"
-            font.family: Colors.displayFont
-            font.pixelSize: 12
-            font.letterSpacing: 2
-            color: Colors.brass
-            Layout.topMargin: 10
-        }
-        Text {
-            text: "Game version"
-            color: Colors.subtext
-            font.pixelSize: 12
-        }
-        InputField {
-            Layout.fillWidth: true
-            readOnly: true
-            text: sidebar.contentType === "modpack" ? "All versions" : sidebar.target.version || "Select an instance"
-        }
-        Text {
-            text: "Loader"
-            color: Colors.subtext
-            font.pixelSize: 12
-            visible: sidebar.contentType === "mod"
-        }
-        InputField {
-            Layout.fillWidth: true
-            readOnly: true
-            visible: sidebar.contentType === "mod"
-            text: sidebar.target.loader || "—"
-        }
         RowLayout {
             Layout.fillWidth: true
             Layout.topMargin: 6
@@ -110,7 +66,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: "CATEGORIES"
                 font.family: Colors.displayFont
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 font.letterSpacing: 2
                 color: Colors.brass
             }
@@ -120,6 +76,15 @@ Rectangle {
                 visible: sidebar.categories.length > 0
                 onClicked: sidebar.categoriesSelected([])
             }
+        }
+        Text {
+            Layout.fillWidth: true
+            Layout.topMargin: -12
+            visible: sidebar.categories.length > 1
+            text: qsTr("Showing projects in all %1 categories").arg(sidebar.categories.length)
+            color: Colors.subtext
+            font.pixelSize: Typography.caption
+            wrapMode: Text.Wrap
         }
         ListView {
             id: categoryList
@@ -147,7 +112,7 @@ Rectangle {
                 visible: !categoryList.count
                 text: sidebar.controller.catalog.provider === "curseforge" ? "Use search to find CurseForge content." : "Categories load from Modrinth."
                 color: Colors.subtext
-                font.pixelSize: 11
+                font.pixelSize: Typography.caption
             }
         }
         ActionButton {

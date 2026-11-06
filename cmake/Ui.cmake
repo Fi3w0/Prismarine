@@ -12,7 +12,7 @@ set(QML_SOURCES
     qml/components/MotionLoader.qml qml/components/MotionDialog.qml
     qml/components/RenameTarget.qml qml/shell/RenameInstanceDialog.qml
     qml/settings/LaunchSettingsForm.qml qml/settings/JavaRuntimePicker.qml qml/settings/InstanceSettingsDialog.qml
-     qml/browse/BrowseSidebar.qml qml/browse/CurseForgeKeyDialog.qml
+    qml/browse/BrowseTarget.qml qml/browse/BrowseSidebar.qml qml/browse/CurseForgeKeyDialog.qml
     qml/browse/InstallReviewDialog.qml
     qml/accounts/SkinPreview.qml qml/shell/PackImportDialog.qml
     qml/Main.qml qml/theme/ColorPalette.qml qml/theme/Colors.qml qml/theme/Typography.qml

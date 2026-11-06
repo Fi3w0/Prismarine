@@ -20,9 +20,9 @@ ScrollView {
         Text {
             Layout.fillWidth: true
             visible: content.selectedTab === 0
-            text: content.controller.catalog.project.body || content.selectedProject.description || "Select projects, choose versions, then review your selection together."
+            text: content.controller.catalog.project.body || content.selectedProject.description || "Choose a project to see compatible versions and install it. Use Select multiple to install several projects together."
             color: Colors.subtext
-            font.pixelSize: 14
+            font.pixelSize: Typography.control
             wrapMode: Text.Wrap
             textFormat: content.controller.catalog.project.plainText ? Text.PlainText : Text.MarkdownText
             lineHeight: 1.4
@@ -39,8 +39,8 @@ ScrollView {
                 background: Rectangle { radius: 8; color: parent.hovered || content.selectedVersion.id === parent.modelData.id ? Colors.surfaceHi : "transparent" }
                 contentItem: Column {
                     spacing: 5
-                    Text { width: parent.width; text: modelData.name; color: Colors.text; font.pixelSize: 14; elide: Text.ElideRight }
-                    Text { text: modelData.version_type + " · " + (modelData.date_published || "").slice(0, 10); color: Colors.subtext; font.pixelSize: 11 }
+                    Text { width: parent.width; text: modelData.name; color: Colors.text; font.pixelSize: Typography.control; elide: Text.ElideRight }
+                    Text { text: modelData.version_type + " · " + (modelData.date_published || "").slice(0, 10); color: Colors.subtext; font.pixelSize: Typography.caption }
                 }
             }
         }
@@ -50,7 +50,7 @@ ScrollView {
                 required property var modelData
                 Layout.fillWidth: true
                 Image { Layout.fillWidth: true; Layout.preferredHeight: width * 0.57; source: modelData.url; fillMode: Image.PreserveAspectFit; asynchronous: true }
-                Text { Layout.fillWidth: true; text: modelData.title || modelData.description || ""; color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.Wrap }
+                Text { Layout.fillWidth: true; text: modelData.title || modelData.description || ""; color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap }
             }
         }
         Text {
@@ -58,7 +58,7 @@ ScrollView {
             visible: content.selectedTab === 2 && !(content.controller.catalog.project.gallery || []).length
             text: "This project has no gallery images."
             color: Colors.subtext
-            font.pixelSize: 14
+            font.pixelSize: Typography.control
         }
         Repeater {
             model: content.selectedTab === 3 ? (content.selectedVersion.dependencies || []) : []
@@ -67,7 +67,7 @@ ScrollView {
                 Layout.fillWidth: true
                 text: modelData.dependency_type + " · " + (modelData.file_name || modelData.project_id || modelData.version_id)
                 color: Colors.text
-                font.pixelSize: 14
+                font.pixelSize: Typography.control
                 wrapMode: Text.Wrap
             }
         }
@@ -76,7 +76,7 @@ ScrollView {
             visible: content.selectedTab === 3
             text: (content.selectedVersion.dependencies || []).length ? "Required dependencies are resolved and included when you review your selection." : "No dependencies declared for this version."
             color: Colors.subtext
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
             wrapMode: Text.Wrap
         }
     }

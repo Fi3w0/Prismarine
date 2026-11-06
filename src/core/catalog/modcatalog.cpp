@@ -36,10 +36,9 @@ void ModCatalog::search(const QString &query, const QString &version, const QStr
     if (type == "mod" && QStringList{"fabric", "forge", "neoforge", "quilt"}.contains(normalized))
         facets.append(QJsonArray{QStringLiteral("categories:") + normalized});
     // Facets in one inner array are OR'd: a project matching any chosen category is shown.
-    QJsonArray anyCategory;
+    // Separate facets are ANDed by Modrinth: each category narrows the results.
     for (const QString &category : categories)
-        anyCategory.append(QStringLiteral("categories:") + category);
-    if (!anyCategory.isEmpty()) facets.append(anyCategory);
+        facets.append(QJsonArray{QStringLiteral("categories:") + category});
     QUrl url(m_apiRoot.toString() + "/search");
     QUrlQuery params;
     params.addQueryItem("query", query);
