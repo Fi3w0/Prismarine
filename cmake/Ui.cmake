@@ -16,7 +16,7 @@ set(QML_SOURCES
     qml/browse/InstallReviewDialog.qml
     qml/accounts/SkinPreview.qml qml/shell/PackImportDialog.qml
     qml/Main.qml qml/theme/ColorPalette.qml qml/theme/Colors.qml qml/theme/Typography.qml
-    qml/shell/AppDialogs.qml qml/shell/AppEvents.qml qml/shell/LaunchActions.qml qml/shell/NavigationRail.qml qml/shell/TopBar.qml qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
+    qml/shell/AppDialogs.qml qml/shell/AppEvents.qml qml/shell/ContentActions.qml qml/shell/LaunchActions.qml qml/shell/NavigationRail.qml qml/shell/TopBar.qml qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
     qml/pages/HomePage.qml qml/pages/LibraryPage.qml qml/pages/InstancePage.qml
     qml/pages/SettingsPage.qml qml/pages/AccountsPage.qml qml/pages/BrowsePage.qml
     qml/components/ToggleSwitch.qml qml/components/InputField.qml qml/components/SelectBox.qml

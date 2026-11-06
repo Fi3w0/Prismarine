@@ -118,29 +118,6 @@ ApplicationWindow {
         dialogHost.instanceSettings.open();
     }
     function renameInstance(id) { dialogHost.rename.openFor(id); }
-    function importPack() {
-        dialogHost.packImport.open();
-    }
-    function importDroppedPack(url) {
-        if (packImporter.state === "extracting" || packImporter.state === "downloading" || packImporter.state === "fetching") {
-            notify("Wait for the current import to finish.", true);
-            return;
-        }
-        packImporter.importFile(url);
-        dialogHost.packImport.open();
-    }
-    // Files dropped on the window or on one instance. A single modpack imports directly;
-    // anything else is reviewed first.
-    function handleDrop(urls, targetId) {
-        if (!drops || !urls || !urls.length) return;
-        const files = drops.inspect(urls);
-        const packs = files.filter(it => it.kind === "modpack");
-        if (files.length === 1 && packs.length === 1) {
-            importDroppedPack(packs[0].url);
-            return;
-        }
-        dialogHost.drop.openFor(files, targetId || (page === "instance" ? details.instanceId : current.instanceId));
-    }
     function saveModProfile() {
         const current = details.profiles.find(it => it.current);
         dialogHost.profilePrompt.ask(current ? current.name : "");
@@ -221,46 +198,8 @@ ApplicationWindow {
     }
     function duplicateInstance(id) { if (!instanceBusy(id)) dialogHost.duplicate.openFor(id); }
     function editVersions(id) { if (!instanceBusy(id)) dialogHost.newInstance.openFor(id); }
-    function browsePacks() {
-        if (page === "browse" && pageLoader.item) {
-            pageLoader.item.chooseType("modpack");
-        } else {
-            pendingBrowseType = "modpack";
-            navigate("browse");
-        }
-    }
     property string pendingBrowseType: ""
     property string pendingBrowseWorld: ""
-    function installPackVersion(version) { packImporter.importVersion(version); dialogHost.packImport.open(); }
-    function browseDatapacks(id, world) { details.load(id); pendingBrowseType = "datapack"; pendingBrowseWorld = world; navigate("browse"); }
-    function reviewSelection(id, type, world) {
-        dialogHost.installReview.retryInstanceId = "";
-        installingType = type;
-        installer.prepareMany(id, downloads.items(id, type).map(it => it.version), type, world || "");
-        dialogHost.installReview.open();
-    }
-    function reviewInstall(id, version, type, world) {
-        if (instanceBusy(id)) return;
-        dialogHost.installReview.retryInstanceId = "";
-        installingType = "";
-        installer.prepare(id, version, type, world || "");
-        dialogHost.installReview.open();
-    }
-    function reviewLaunchFix(id, project) {
-        if (instanceBusy(id)) return false;
-        if (instances.isRunning(id) || ["resolving", "ready", "downloading"].indexOf(installer.state) >= 0) {
-            notify("Stop the game and finish any content installation before installing a fix.", true);
-            return false;
-        }
-        // A repair does not consume the user's separate Browse selection.
-        installingType = "";
-        dialogHost.installReview.retryInstanceId = id;
-        dialogHost.installReview.repairProject = project;
-        dialogHost.installReview.repairDetail = dialogHost.launchOverlay.finding.detail || "";
-        installer.prepareProject(id, project);
-        dialogHost.installReview.open();
-        return true;
-    }
     function refresh() {
         selected = instances.count > 0 ? Math.max(0, Math.min(selected, instances.count - 1)) : -1;
         current = hasSelection ? instances.get(selected) : ({});
@@ -284,14 +223,7 @@ ApplicationWindow {
             details.refresh();
         notify("Library refreshed");
     }
-    // Opens Browse for an instance with a search already typed, e.g. a missing dependency.
     property string pendingBrowseQuery: ""
-    function browseFor(id, text) {
-        if (id && details.instanceId !== id)
-            details.load(id);
-        pendingBrowseQuery = text;
-        navigate("browse");
-    }
     function exportInstance(id) {
         dialogHost.exportPack.openFor(id);
     }
@@ -577,6 +509,18 @@ ApplicationWindow {
     function abortLaunch() { launchActions.abortLaunch(); }
     function followLaunch(id) { launchActions.followLaunch(id); }
     function applyWhilePlaying() { launchActions.applyWhilePlaying(); }
+    ContentActions { id: contentActions; controller: appWindow }
+    readonly property var pageItem: pageLoader.item
+    function importPack() { contentActions.importPack(); }
+    function importDroppedPack(url) { contentActions.importDroppedPack(url); }
+    function handleDrop(urls, targetId) { contentActions.handleDrop(urls, targetId); }
+    function installPackVersion(version) { contentActions.installPackVersion(version); }
+    function reviewSelection(id, type, world) { contentActions.reviewSelection(id, type, world); }
+    function reviewInstall(id, version, type, world) { contentActions.reviewInstall(id, version, type, world); }
+    function reviewLaunchFix(id, project) { return contentActions.reviewLaunchFix(id, project); }
+    function browsePacks() { contentActions.browsePacks(); }
+    function browseDatapacks(id, world) { contentActions.browseDatapacks(id, world); }
+    function browseFor(id, text) { contentActions.browseFor(id, text); }
     AppEvents { controller: appWindow }
     AppDialogs {
         id: dialogHost
