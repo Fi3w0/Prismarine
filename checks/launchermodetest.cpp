@@ -2,6 +2,7 @@
 #include "core/settings/launchermode.h"
 #include "core/prism/launcherbridge.h"
 #include <QFile>
+#include <QScopeGuard>
 #include <QTemporaryDir>
 #include <QtTest>
 

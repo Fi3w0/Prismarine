@@ -76,7 +76,7 @@ add_test(NAME launcher_mode COMMAND launcher_mode_checks)
 set_tests_properties(launcher_mode PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 qt_add_executable(appearance_preferences_checks checks/appearancepreferencestest.cpp)
-target_link_libraries(appearance_preferences_checks PRIVATE prismarine_core Qt6::Test Qt6::Quick)
+target_link_libraries(appearance_preferences_checks PRIVATE prismarine_core Qt6::Test Qt6::Quick Qt6::QuickControls2)
 qt_add_resources(appearance_preferences_checks appearance_ui PREFIX "/appearance" FILES qml/settings/SettingsDraft.qml)
 set_source_files_properties(checks/ColourApplyFixture.qml PROPERTIES QT_RESOURCE_ALIAS "ColourApplyFixture.qml")
 qt_add_qml_module(appearance_preferences_checks URI AppearanceChecks VERSION 1.0 QML_FILES
@@ -84,4 +84,4 @@ qt_add_qml_module(appearance_preferences_checks URI AppearanceChecks VERSION 1.0
     qml/components/InputField.qml qml/components/SelectBox.qml qml/components/ActionButton.qml qml/theme/ColorPalette.qml qml/theme/Colors.qml qml/theme/Typography.qml)
 
 add_test(NAME appearance_preferences COMMAND appearance_preferences_checks)
-set_tests_properties(appearance_preferences PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+set_tests_properties(appearance_preferences PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")

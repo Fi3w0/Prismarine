@@ -1,4 +1,6 @@
 #include <QtTest>
+#include <QGuiApplication>
+#include <QQuickStyle>
 #include <QTemporaryDir>
 #include <QSettings>
 #include <QQmlEngine>
@@ -267,5 +269,12 @@ private slots:
         QCOMPARE(preferences.homeSections(), QStringList({"worlds"}));
     }
 };
-QTEST_MAIN(AppearancePreferencesTest)
+int main(int argc, char **argv)
+{
+    QGuiApplication app(argc, argv);
+    // The same style as the app. The native macOS style cannot draw these customised controls.
+    QQuickStyle::setStyle("Basic");
+    AppearancePreferencesTest test;
+    return QTest::qExec(&test, argc, argv);
+}
 #include "appearancepreferencestest.moc"
