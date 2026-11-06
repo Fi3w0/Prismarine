@@ -38,11 +38,11 @@ Rectangle {
         visible: texture.status !== Image.Ready
         text: texture.status === Image.Loading ? "Loading skin…" : "No skin available"
         color: Colors.subtext
-        font.pixelSize: 14
+        font.pixelSize: Typography.control
     }
     RowLayout {
         anchors { bottom: parent.bottom; left: parent.left; right: parent.right; margins: 16 }
-        Text { Layout.fillWidth: true; text: preview.hardware ? "Drag to rotate" : "Front view"; color: Colors.subtext; font.pixelSize: 12 }
+        Text { Layout.fillWidth: true; text: preview.hardware ? "Drag to rotate" : "Front view"; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
         ActionButton {
             visible: preview.hardware && preview.cape !== ""
             implicitWidth: 80; implicitHeight: 32

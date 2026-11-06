@@ -22,7 +22,7 @@ Rectangle {
             text: "Details"
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             font.letterSpacing: 2
         }
         GridLayout {
@@ -30,16 +30,16 @@ Rectangle {
             columns: 2
             columnSpacing: 24
             rowSpacing: 10
-            Text { text: "Status"; color: Colors.subtext; font.pixelSize: 12 }
+            Text { text: "Status"; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
             Text {
                 Layout.fillWidth: true
-                text: !card.profile.id ? "—" : card.profile.signedIn ? "✓ Signed in, token valid" : "Sign-in expired · refresh in Prism"
-                color: !card.profile.id ? Colors.subtext : card.profile.signedIn ? Colors.success : Colors.warning
-                font.pixelSize: 12
+                text: !card.profile.id ? "—" : card.profile.type !== "MSA" ? "Offline account" : card.profile.signedIn ? "✓ Signed in, token valid" : "Token expired · refreshes when you play"
+                color: card.profile.id && card.profile.type === "MSA" && card.profile.signedIn ? Colors.success : Colors.subtext
+                font.pixelSize: Typography.bodySmall
             }
-            Text { text: "Account type"; color: Colors.subtext; font.pixelSize: 12 }
-            Text { Layout.fillWidth: true; text: card.profile.type === "MSA" ? "Microsoft" : card.profile.type || "—"; color: Colors.text; font.pixelSize: 12 }
-            Text { text: "UUID"; color: Colors.subtext; font.pixelSize: 12 }
+            Text { text: "Account type"; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
+            Text { Layout.fillWidth: true; text: card.profile.type === "MSA" ? "Microsoft" : card.profile.type || "—"; color: Colors.text; font.pixelSize: Typography.bodySmall }
+            Text { text: "UUID"; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
             TextEdit {
                 Layout.fillWidth: true
                 text: card.profile.id || "—"
@@ -48,15 +48,15 @@ Rectangle {
                 wrapMode: TextEdit.WrapAnywhere
                 color: Colors.text
                 font.family: Colors.pixelFont
-                font.pixelSize: 9
+                font.pixelSize: Typography.chartLabel
             }
-            Text { text: "Used by"; color: Colors.subtext; font.pixelSize: 12 }
+            Text { text: "Used by"; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
             Text {
                 Layout.fillWidth: true
                 text: card.usedBy === card.instanceCount && card.instanceCount ? "All " + card.instanceCount + " instances" + (card.profile.active ? " (default account)" : "")
                     : card.usedBy + (card.usedBy === 1 ? " instance" : " instances") + (card.profile.active ? " (default account)" : "")
                 color: Colors.text
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 wrapMode: Text.Wrap
             }
         }
@@ -70,14 +70,14 @@ Rectangle {
                 enabled: !!card.profile.id && !card.profile.active
                 implicitWidth: 130
                 implicitHeight: 34
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 onClicked: if (card.controller.accountManager.setDefault(card.profile.id)) card.controller.notify("Playing as " + card.profile.name)
             }
             ActionButton {
                 text: "Refresh sign-in ↗"
                 implicitWidth: 130
                 implicitHeight: 34
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 enabled: !!card.profile.id
                 ToolTip.visible: hovered
                 ToolTip.delay: 500
@@ -88,7 +88,7 @@ Rectangle {
                 text: "Change username ↗"
                 implicitWidth: 140
                 implicitHeight: 34
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 onClicked: Qt.openUrlExternally("https://www.minecraft.net/msaprofile/mygames/editprofile")
             }
             ActionButton {
@@ -96,7 +96,7 @@ Rectangle {
                 danger: true
                 implicitWidth: 130
                 implicitHeight: 34
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 enabled: !!card.profile.id
                 onClicked: card.removeRequested()
             }

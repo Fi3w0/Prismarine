@@ -63,7 +63,7 @@ Item {
                 anchors.fill: parent
                 anchors.margins: 20
                 spacing: 12
-                Text { text: "Accounts"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: 28; Layout.bottomMargin: 16 }
+                Text { text: "Accounts"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: Typography.contentTitle; Layout.bottomMargin: 16 }
                 Repeater {
                     model: accounts.profiles
                     delegate: ItemDelegate {
@@ -81,22 +81,29 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 5
-                                Text { Layout.fillWidth: true; text: row.modelData.name; color: Colors.text; font.pixelSize: 15; font.weight: Font.DemiBold; elide: Text.ElideRight }
-                                Text { text: row.modelData.active ? "Default account" : "Minecraft profile"; color: row.modelData.active ? Colors.accent : Colors.subtext; font.pixelSize: 11 }
+                                Text { Layout.fillWidth: true; text: row.modelData.name; color: Colors.text; font.pixelSize: Typography.bodyLarge; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                                Text { text: row.modelData.active ? "Default account" : "Minecraft profile"; color: row.modelData.active ? Colors.accent : Colors.subtext; font.pixelSize: Typography.caption }
                             }
                         }
                     }
                 }
-                ActionButton { Layout.fillWidth: true; text: "+  Add Microsoft account"; implicitWidth: 0; font.pixelSize: 12; onClicked: controller.instances.openPrism() }
+                ActionButton { Layout.fillWidth: true; text: "+  Add Microsoft account"; implicitWidth: 0; font.pixelSize: Typography.bodySmall; onClicked: controller.instances.openPrism() }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: !controller.launcherMode || !controller.launcherMode.fullAvailable
+                    spacing: 4
+                    Text { Layout.fillWidth: true; text: qsTr("Signing in without opening Prism:"); color: Colors.subtext; font.pixelSize: Typography.caption; wrapMode: Text.Wrap }
+                    FullModeBadge {}
+                }
                 ActionButton {
-                    visible: !!controller.social
-                    Layout.fillWidth: true; implicitWidth: 0; font.pixelSize: 12
+                    visible: !!controller.social && controller.friendsEnabled !== false
+                    Layout.fillWidth: true; implicitWidth: 0; font.pixelSize: Typography.bodySmall
                     text: "Identity & friends · Beta"
                     onClicked: controller.navigate("friends")
                 }
                 Item { Layout.fillHeight: true }
-                Text { Layout.fillWidth: true; text: "Right-click your avatar in the rail to switch accounts."; color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.Wrap; lineHeight: 1.35 }
-                Text { Layout.fillWidth: true; text: "Microsoft sign-in opens Prism Launcher."; color: Colors.subtext; font.pixelSize: 11; wrapMode: Text.Wrap }
+                Text { Layout.fillWidth: true; text: "Right-click your name in the top bar to switch accounts."; color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap; lineHeight: 1.35 }
+                Text { Layout.fillWidth: true; text: "Microsoft sign-in opens Prism Launcher."; color: Colors.subtext; font.pixelSize: Typography.caption; wrapMode: Text.Wrap }
             }
         }
         ScrollView {
@@ -131,14 +138,14 @@ Item {
                                 text: accounts.profile.name || "No account"
                                 color: Colors.bone
                                 font.family: Colors.displayFont
-                                font.pixelSize: 26
+                                font.pixelSize: Typography.dialogTitle
                                 font.letterSpacing: 1
                             }
                             Text {
                                 Layout.fillWidth: true
                                 text: "Java Edition"
                                 color: Colors.subtext
-                                font.pixelSize: 12
+                                font.pixelSize: Typography.bodySmall
                             }
                         }
                         SkinPreview {
@@ -158,7 +165,7 @@ Item {
                                     Layout.fillWidth: true
                                     implicitWidth: 0
                                     implicitHeight: 36
-                                    font.pixelSize: 12
+                                    font.pixelSize: Typography.bodySmall
                                     text: modelData.label
                                     checked: accounts.chosenVariant === modelData.key
                                     onClicked: accounts.chosenVariant = modelData.key
@@ -173,14 +180,14 @@ Item {
                                 Layout.fillWidth: true
                                 text: accounts.profile.signedIn ? "Preview only until you apply it." : "Refresh the sign-in in Prism to change skins and capes."
                                 color: accounts.profile.signedIn ? Colors.subtext : Colors.warning
-                                font.pixelSize: 11
+                                font.pixelSize: Typography.caption
                                 wrapMode: Text.Wrap
                             }
                             ActionButton {
                                 text: "Reset"
                                 implicitWidth: 70
                                 implicitHeight: 34
-                                font.pixelSize: 12
+                                font.pixelSize: Typography.bodySmall
                                 onClicked: accounts.resetChoices()
                             }
                             ActionButton {
@@ -189,7 +196,7 @@ Item {
                                 primary: true
                                 implicitWidth: 110
                                 implicitHeight: 34
-                                font.pixelSize: 12
+                                font.pixelSize: Typography.bodySmall
                                 enabled: !controller.accountManager.busy && !!accounts.profile.signedIn
                                 onClicked: accounts.applyChoices()
                             }

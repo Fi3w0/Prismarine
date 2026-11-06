@@ -16,14 +16,14 @@ Rectangle {
         spacing: 12
         RowLayout {
             Layout.fillWidth: true
-            Text { Layout.fillWidth: true; text: "Your friends"; font.family: Colors.displayFont; font.pixelSize: 22; color: Colors.bone }
+            Text { Layout.fillWidth: true; text: "Your friends"; font.family: Colors.displayFont; font.pixelSize: Typography.panelTitle; color: Colors.bone }
             ActionButton { text: "Add friend"; implicitWidth: contentItem.implicitWidth + 32; enabled: !!panel.social && panel.social.ready && !panel.social.busy; onClicked: openCard.open() }
         }
         Text {
             Layout.fillWidth: true
             visible: !panel.contacts.length
             text: "Start with a friend card. No directory, follower counts, or account on someone else’s server."
-            color: Colors.subtext; font.pixelSize: 14; wrapMode: Text.Wrap
+            color: Colors.subtext; font.pixelSize: Typography.control; wrapMode: Text.Wrap
         }
         Repeater {
             model: panel.contacts
@@ -39,21 +39,21 @@ Rectangle {
                     spacing: 6
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { Layout.fillWidth: true; text: friend.modelData.name; textFormat: Text.PlainText; font.pixelSize: 16; font.weight: Font.DemiBold; color: Colors.text; elide: Text.ElideRight }
-                        Text { text: friend.modelData.nearby ? "Nearby" : "Saved friend"; font.pixelSize: 12; color: friend.modelData.nearby ? Colors.accent : Colors.subtext }
+                        Text { Layout.fillWidth: true; text: friend.modelData.name; textFormat: Text.PlainText; font.pixelSize: Typography.subtitle; font.weight: Font.DemiBold; color: Colors.text; elide: Text.ElideRight }
+                        Text { text: friend.modelData.nearby ? "Nearby" : "Saved friend"; font.pixelSize: Typography.bodySmall; color: friend.modelData.nearby ? Colors.accent : Colors.subtext }
                         TextLink { text: "Remove"; enabled: !!panel.social && panel.social.ready && !panel.social.busy; onClicked: { remove.key = friend.modelData.key; remove.open(); } }
                     }
-                    Text { Layout.fillWidth: true; text: friend.modelData.fingerprint; font.family: "monospace"; font.pixelSize: 11; color: Colors.subtext; wrapMode: Text.WrapAnywhere }
+                    Text { Layout.fillWidth: true; text: friend.modelData.fingerprint; font.family: "monospace"; font.pixelSize: Typography.caption; color: Colors.subtext; wrapMode: Text.WrapAnywhere }
                     Repeater {
                         model: friend.modelData.accounts
                         delegate: Text {
                             required property var modelData
                             Layout.fillWidth: true
                             text: modelData.name + " · " + modelData.uuid + (modelData.current ? " · current proof" : " · expired proof")
-                            textFormat: Text.PlainText; color: modelData.current ? Colors.accent : Colors.warning; font.pixelSize: 11; wrapMode: Text.WrapAnywhere
+                            textFormat: Text.PlainText; color: modelData.current ? Colors.accent : Colors.warning; font.pixelSize: Typography.caption; wrapMode: Text.WrapAnywhere
                         }
                     }
-                    Text { visible: !friend.modelData.accounts.length; text: "No Minecraft account proof shared"; color: Colors.subtext; font.pixelSize: 12 }
+                    Text { visible: !friend.modelData.accounts.length; text: "No Minecraft account proof shared"; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
                 }
             }
         }
@@ -68,7 +68,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: "Off by default. When enabled, your public identity is visible on this LAN. Only saved friends appear here. Locking or closing Prismarine turns discovery off."
-            color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.Wrap
+            color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap
         }
     }
     FileDialog {
@@ -95,7 +95,7 @@ Rectangle {
             id: reviewBody
             width: reviewScroll.availableWidth
             spacing: 14
-            Text { Layout.fillWidth: true; text: panel.social ? panel.social.pendingFriend.name || "" : ""; textFormat: Text.PlainText; font.pixelSize: 22; color: Colors.bone; wrapMode: Text.Wrap }
+            Text { Layout.fillWidth: true; text: panel.social ? panel.social.pendingFriend.name || "" : ""; textFormat: Text.PlainText; font.pixelSize: Typography.panelTitle; color: Colors.bone; wrapMode: Text.Wrap }
             Text { Layout.fillWidth: true; text: panel.social ? panel.social.pendingFriend.fingerprint || "" : ""; font.family: "monospace"; color: Colors.accent; wrapMode: Text.WrapAnywhere }
             Text { Layout.fillWidth: true; text: "A valid signature proves control of this key. Confirm this fingerprint with your friend through a channel you trust. Names alone do not identify someone."; color: Colors.subtext; wrapMode: Text.Wrap }
             Text { Layout.fillWidth: true; text: panel.social && panel.social.pendingFriend.accounts ? panel.social.pendingFriend.accounts.length + " current Minecraft account proof(s)" : ""; color: Colors.text }
@@ -105,7 +105,7 @@ Rectangle {
                     required property var modelData
                     Layout.fillWidth: true
                     text: modelData.name + " · " + modelData.uuid
-                    textFormat: Text.PlainText; color: Colors.subtext; wrapMode: Text.WrapAnywhere; font.pixelSize: 12
+                    textFormat: Text.PlainText; color: Colors.subtext; wrapMode: Text.WrapAnywhere; font.pixelSize: Typography.bodySmall
                 }
             }
             CheckBox { id: compare; objectName: "confirmFriendFingerprint"; text: "I checked this is my friend’s fingerprint" }

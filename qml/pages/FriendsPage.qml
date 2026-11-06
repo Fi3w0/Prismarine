@@ -18,7 +18,7 @@ ScrollView {
             spacing: 8
             RowLayout {
                 spacing: 12
-                Text { text: "Friends, on your terms"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: 30 }
+                Text { text: "Friends, on your terms"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: Typography.pageTitle }
                 Rectangle {
                     implicitWidth: betaLabel.implicitWidth + 18
                     implicitHeight: 26
@@ -30,7 +30,7 @@ ScrollView {
                         anchors.centerIn: parent
                         text: "BETA"
                         color: Colors.accent
-                        font.pixelSize: 11
+                        font.pixelSize: Typography.caption
                         font.weight: Font.DemiBold
                         font.letterSpacing: 1
                     }
@@ -39,7 +39,7 @@ ScrollView {
             Text {
                 Layout.fillWidth: true
                 text: "One optional Prismarine identity for your Minecraft accounts. Exchange friend cards and invites through any chat you already use."
-                color: Colors.subtext; font.pixelSize: 14; wrapMode: Text.Wrap
+                color: Colors.subtext; font.pixelSize: Typography.control; wrapMode: Text.Wrap
             }
             Text {
                 visible: !page.social

@@ -47,7 +47,7 @@ Rectangle {
                 Layout.topMargin: 14
                 text: "+"
                 color: Colors.subtext
-                font.pixelSize: 26
+                font.pixelSize: Typography.dialogTitle
             }
             Item { Layout.fillHeight: true }
             Text {
@@ -56,7 +56,7 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 text: tile.text
                 color: tile.selected ? Colors.text : Colors.subtext
-                font.pixelSize: 10
+                font.pixelSize: Typography.badge
                 elide: Text.ElideRight
             }
         }
@@ -74,14 +74,14 @@ Rectangle {
                 text: "Skins"
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 20
+                font.pixelSize: Typography.sectionTitle
                 font.letterSpacing: 2
             }
             ActionButton {
                 text: "Upload skin…"
                 implicitWidth: 120
                 implicitHeight: 32
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 onClicked: skinDialog.open()
             }
         }
@@ -104,6 +104,8 @@ Rectangle {
                     selected: card.chosen === modelData.file
                     Accessible.name: "Saved skin " + modelData.name
                     onClicked: card.skinChosen(modelData.file)
+                    // Unlike a deliberate right click, a stray controller press asks first.
+                    function gamepadContext() { removeSkinConfirm.ask(modelData.file, modelData.name); }
                     TapHandler {
                         acceptedButtons: Qt.RightButton
                         onTapped: if (card.manager.removeSkin(parent.modelData.file) && card.chosen === parent.modelData.file) card.skinChosen("")
@@ -122,7 +124,7 @@ Rectangle {
         Text {
             text: "Cape"
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             Layout.topMargin: 4
         }
         Flow {
@@ -170,7 +172,7 @@ Rectangle {
                                 visible: capeTile.modelData.url === "" || capeArt.status !== Image.Ready
                                 text: capeTile.modelData.url === "" ? "∅" : "…"
                                 color: Colors.subtext
-                                font.pixelSize: 18
+                                font.pixelSize: Typography.titleSmall
                             }
                         }
                         Item { Layout.fillHeight: true }
@@ -180,7 +182,7 @@ Rectangle {
                             horizontalAlignment: Text.AlignHCenter
                             text: capeTile.modelData.alias
                             color: capeTile.selected ? Colors.text : Colors.subtext
-                            font.pixelSize: 9
+                            font.pixelSize: Typography.chartLabel
                             elide: Text.ElideRight
                         }
                     }
@@ -198,5 +200,21 @@ Rectangle {
             if (file)
                 card.skinChosen(file);
         }
+    }
+    ConfirmDialog {
+        id: removeSkinConfirm
+        objectName: "removeSkinConfirm"
+        property string file: ""
+        function ask(skinFile, name) {
+            file = skinFile;
+            title = qsTr("Remove %1?").arg(name);
+            open();
+        }
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        message: qsTr("This removes the skin from your library.")
+        confirmText: qsTr("Remove")
+        danger: true
+        onConfirmed: if (card.manager.removeSkin(file) && card.chosen === file) card.skinChosen("")
     }
 }

@@ -20,14 +20,14 @@ Rectangle {
         spacing: 14
         RowLayout {
             Layout.fillWidth: true
-            Text { Layout.fillWidth: true; text: "Play together"; font.family: Colors.displayFont; font.pixelSize: 22; color: Colors.bone }
+            Text { Layout.fillWidth: true; text: "Play together"; font.family: Colors.displayFont; font.pixelSize: Typography.panelTitle; color: Colors.bone }
             ActionButton { text: "Open invite"; implicitWidth: contentItem.implicitWidth + 32; enabled: !!panel.social && !panel.social.busy; onClicked: openInvite.open() }
             ActionButton { text: panel.composing ? "Close editor" : "Create invite"; implicitWidth: contentItem.implicitWidth + 32; enabled: panel.contacts.length > 0 && !!panel.social && !panel.social.busy; onClicked: panel.composing = !panel.composing }
         }
         Text {
             Layout.fillWidth: true
             text: "Send a server address, an exported modpack, or both. Invites last seven days and only work for the friend you choose. Share the invite file and pack through your usual chat or file sharing app."
-            color: Colors.subtext; font.pixelSize: 13; wrapMode: Text.Wrap
+            color: Colors.subtext; font.pixelSize: Typography.body; wrapMode: Text.Wrap
         }
         ColumnLayout {
             visible: panel.composing
@@ -46,7 +46,7 @@ Rectangle {
                 Text { Layout.fillWidth: true; text: panel.packFile.toString() ? decodeURIComponent(panel.packFile.toString().split('/').pop()) : "No pack selected"; textFormat: Text.PlainText; color: Colors.subtext; elide: Text.ElideMiddle }
                 TextLink { visible: panel.packFile.toString() !== ""; text: "Clear"; onClicked: panel.packFile = "" }
             }
-            Text { Layout.fillWidth: true; text: "Use Export or share on an instance to create a pack first. Invites are signed, readable files; anyone with the file can read its address and title."; font.pixelSize: 12; color: Colors.subtext; wrapMode: Text.Wrap }
+            Text { Layout.fillWidth: true; text: "Use Export or share on an instance to create a pack first. Invites are signed, readable files; anyone with the file can read its address and title."; font.pixelSize: Typography.bodySmall; color: Colors.subtext; wrapMode: Text.Wrap }
             ActionButton {
                 text: panel.social && panel.social.busy ? "Preparing…" : "Save signed invite"
                 primary: true; implicitWidth: contentItem.implicitWidth + 32
@@ -59,9 +59,9 @@ Rectangle {
             visible: !!panel.invite.id
             spacing: 10
             Rectangle { Layout.fillWidth: true; height: 1; color: Colors.border }
-            Text { Layout.fillWidth: true; text: (panel.invite.title || "") + " · from " + (panel.invite.from || ""); textFormat: Text.PlainText; color: Colors.bone; font.pixelSize: 18; wrapMode: Text.Wrap }
-            Text { Layout.fillWidth: true; text: panel.invite.fingerprint || ""; font.family: "monospace"; color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.WrapAnywhere }
-            Text { Layout.fillWidth: true; text: "Expires " + new Date(panel.invite.expires || 0).toLocaleString(); color: Colors.subtext; font.pixelSize: 12 }
+            Text { Layout.fillWidth: true; text: (panel.invite.title || "") + " · from " + (panel.invite.from || ""); textFormat: Text.PlainText; color: Colors.bone; font.pixelSize: Typography.titleSmall; wrapMode: Text.Wrap }
+            Text { Layout.fillWidth: true; text: panel.invite.fingerprint || ""; font.family: "monospace"; color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.WrapAnywhere }
+            Text { Layout.fillWidth: true; text: "Expires " + new Date(panel.invite.expires || 0).toLocaleString(); color: Colors.subtext; font.pixelSize: Typography.bodySmall }
             Text { Layout.fillWidth: true; visible: !!panel.invite.server; text: "Server: " + (panel.invite.server || ""); textFormat: Text.PlainText; color: Colors.text; wrapMode: Text.Wrap }
             RowLayout {
                 Layout.fillWidth: true
