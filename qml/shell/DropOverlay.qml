@@ -40,7 +40,7 @@ Item {
                 text: "Drop to install"
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 24
+                font.pixelSize: Typography.emptyTitle
                 font.letterSpacing: 1
             }
             Text {
@@ -49,7 +49,7 @@ Item {
                 text: (overlay.targetName ? "Mods, resource packs, shaders and datapacks go to " + overlay.targetName + ". " : "")
                       + "Modpacks (.mrpack or .zip) become new instances. Drop on a card to choose its instance."
                 color: Colors.subtext
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 wrapMode: Text.Wrap
             }
         }

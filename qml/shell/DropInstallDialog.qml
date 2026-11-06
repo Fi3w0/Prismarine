@@ -64,8 +64,8 @@ MotionDialog {
             columns: dialog.needsWorld ? 2 : 1
             columnSpacing: 12
             rowSpacing: 8
-            Text { text: "INSTANCE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
-            Text { visible: dialog.needsWorld; text: "WORLD FOR DATAPACKS"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
+            Text { text: "INSTANCE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.bodySmall; font.letterSpacing: 2 }
+            Text { visible: dialog.needsWorld; text: "WORLD FOR DATAPACKS"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.bodySmall; font.letterSpacing: 2 }
             SelectBox {
                 id: instanceBox
                 objectName: "dropTargetInstance"
@@ -142,7 +142,7 @@ MotionDialog {
                                 Layout.fillWidth: true
                                 text: row.modelData.name || row.modelData.fileName
                                 color: Colors.text
-                                font.pixelSize: 14
+                                font.pixelSize: Typography.control
                                 font.weight: Font.DemiBold
                                 elide: Text.ElideRight
                             }
@@ -150,7 +150,7 @@ MotionDialog {
                                 Layout.fillWidth: true
                                 text: row.modelData.fileName
                                 color: Colors.subtext
-                                font.pixelSize: 11
+                                font.pixelSize: Typography.caption
                                 elide: Text.ElideMiddle
                             }
                         }
@@ -159,7 +159,7 @@ MotionDialog {
                             Layout.maximumWidth: 180
                             text: row.note
                             color: row.modelData.kind === "modpack" && !row.skipped ? Colors.accent : row.skipped ? Colors.subtext : Colors.warning
-                            font.pixelSize: 12
+                            font.pixelSize: Typography.bodySmall
                             elide: Text.ElideRight
                         }
                         Chip {

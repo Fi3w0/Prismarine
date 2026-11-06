@@ -26,6 +26,7 @@ MotionDialog {
         open();
     }
     property string loaderRequestKey: ""
+    property var groupChoices: []
     function selectLoader() {
         if (!visible || creator.loading || !creator.versions.length)
             return;
@@ -46,6 +47,7 @@ MotionDialog {
         }
         const id = creator.create(chosenName, minecraft.currentText, loaderName, loaderVersion.currentText);
         if (id) {
+            if (groupPicker.currentIndex > 0) controller.instances.moveToGroup(id, groupPicker.currentText);
             close();
             controller.selectId(id);
             controller.openInstance(id);
@@ -56,7 +58,8 @@ MotionDialog {
     title: editId ? "Change versions" : "New instance"
     subtitle: editId ? "Pick the Minecraft and loader versions for " + (controller.instances.getById(editId).name || "this instance") + "."
                      : "Choose a loader and a Minecraft version. Game files download the first time you play."
-    width: Math.min(760, controller.width - 64)
+    readonly property bool showPreview: !editId && controller.width >= 1100
+    width: Math.min(showPreview ? 1040 : 760, controller.width - 64)
     modal: true
     onOpened: {
         loaderRequestKey = "";
@@ -65,6 +68,8 @@ MotionDialog {
         initialLoaderVersion = info.loaderVersion || "";
         loaderName = info.loader && loaders.some(it => it.name === info.loader) ? info.loader : "Vanilla";
         instanceName.text = info.name || "";
+        groupChoices = [qsTr("Ungrouped")].concat(controller.instances.groupNames());
+        groupPicker.currentIndex = 0;
         if (editId) snapshots.checked = true;
         creator.loadVersions(snapshots.checked);
         if (!editId) instanceName.forceActiveFocus();
@@ -90,175 +95,230 @@ MotionDialog {
     component FieldLabel: Text {
         color: Colors.brass
         font.family: Colors.displayFont
-        font.pixelSize: 12
+        font.pixelSize: Typography.bodySmall
         font.letterSpacing: 2
     }
-    contentItem: ColumnLayout {
-        spacing: 10
-        FieldLabel { text: "NAME"; visible: !dialog.editId }
-        InputField {
-            id: instanceName
-            visible: !dialog.editId
-            objectName: "newInstanceName"
+    contentItem: RowLayout {
+        spacing: 28
+        ColumnLayout {
             Layout.fillWidth: true
-            placeholderText: dialog.suggestedName
-            Accessible.name: "Instance name"
-            onAccepted: dialog.submit()
-        }
-        FieldLabel { text: "MOD LOADER"; Layout.topMargin: dialog.editId ? 0 : 10 }
-        GridLayout {
-            Layout.fillWidth: true
-            columns: dialog.width >= 700 ? 5 : 3
-            columnSpacing: 8
-            rowSpacing: 8
-            Repeater {
-                model: dialog.loaders
-                delegate: AbstractButton {
-                    id: tile
-                    required property var modelData
-                    readonly property bool chosen: dialog.loaderName === modelData.name
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 1
-                    implicitHeight: 78
-                    padding: 12
-                    hoverEnabled: true
-                    checkable: true
-                    checked: chosen
-                    enabled: !dialog.creator.loading
-                    Accessible.name: modelData.name
-                    onClicked: dialog.loaderName = modelData.name
-                    background: Rectangle {
-                        radius: 12
-                        color: tile.chosen ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.12) : tile.hovered ? Colors.surfaceHi : Colors.inset
-                        border.width: tile.chosen || tile.activeFocus ? 2 : 1
-                        border.color: tile.chosen || tile.activeFocus ? Colors.accent : Colors.border
-                        Behavior on color { ColorAnimation { duration: Colors.animations ? 150 : 0 } }
-                    }
-                    contentItem: ColumnLayout {
-                        spacing: 4
-                        opacity: tile.enabled ? 1 : 0.5
-                        RowLayout {
-                            spacing: 8
-                            Rectangle {
-                                width: 10; height: 10; radius: 3
-                                rotation: 45
-                                color: tile.modelData.name === "Vanilla" ? Colors.success : Colors.loaderColor(tile.modelData.name)
+            Layout.alignment: Qt.AlignTop
+            spacing: 10
+            FieldLabel { text: "NAME"; visible: !dialog.editId }
+            InputField {
+                id: instanceName
+                visible: !dialog.editId
+                objectName: "newInstanceName"
+                Layout.fillWidth: true
+                placeholderText: dialog.suggestedName
+                Accessible.name: "Instance name"
+                onAccepted: dialog.submit()
+            }
+            FieldLabel { text: "MOD LOADER"; Layout.topMargin: dialog.editId ? 0 : 10 }
+            GridLayout {
+                Layout.fillWidth: true
+                columns: dialog.width >= 700 ? 5 : 3
+                columnSpacing: 8
+                rowSpacing: 8
+                Repeater {
+                    model: dialog.loaders
+                    delegate: AbstractButton {
+                        id: tile
+                        required property var modelData
+                        readonly property bool chosen: dialog.loaderName === modelData.name
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        implicitHeight: 78
+                        padding: 12
+                        hoverEnabled: true
+                        checkable: true
+                        checked: chosen
+                        enabled: !dialog.creator.loading
+                        Accessible.name: modelData.name
+                        onClicked: dialog.loaderName = modelData.name
+                        background: Rectangle {
+                            radius: 12
+                            color: tile.chosen ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.12) : tile.hovered ? Colors.surfaceHi : Colors.inset
+                            border.width: tile.chosen || tile.activeFocus ? 2 : 1
+                            border.color: tile.chosen || tile.activeFocus ? Colors.accent : Colors.border
+                            Behavior on color { ColorAnimation { duration: Colors.animations ? 150 : 0 } }
+                        }
+                        contentItem: ColumnLayout {
+                            spacing: 4
+                            opacity: tile.enabled ? 1 : 0.5
+                            RowLayout {
+                                spacing: 8
+                                Rectangle {
+                                    width: 10; height: 10; radius: 3
+                                    rotation: 45
+                                    color: tile.modelData.name === "Vanilla" ? Colors.success : Colors.loaderColor(tile.modelData.name)
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: tile.modelData.name
+                                    color: Colors.text
+                                    font.pixelSize: Typography.control
+                                    font.weight: Font.DemiBold
+                                    elide: Text.ElideRight
+                                }
                             }
                             Text {
                                 Layout.fillWidth: true
-                                text: tile.modelData.name
-                                color: Colors.text
-                                font.pixelSize: 14
-                                font.weight: Font.DemiBold
+                                text: tile.modelData.caption
+                                color: Colors.subtext
+                                font.pixelSize: Typography.caption
+                                wrapMode: Text.Wrap
+                                maximumLineCount: 2
                                 elide: Text.ElideRight
                             }
                         }
+                    }
+                }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                spacing: 16
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    spacing: 8
+                    FieldLabel { text: "MINECRAFT"; Layout.fillWidth: true }
+                    SelectBox {
+                        id: minecraft
+                        Layout.fillWidth: true
+                        model: dialog.creator.versions
+                        textRole: "version"
+                        enabled: !dialog.creator.loading
+                        Accessible.name: "Minecraft version"
+                        onActivated: dialog.selectLoader()
+                    }
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    spacing: 8
+                    FieldLabel {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: dialog.loaderName === "Vanilla" ? "LOADER VERSION" : dialog.loaderName.toUpperCase() + " VERSION"
+                    }
+                    SelectBox {
+                        id: loaderVersion
+                        Layout.fillWidth: true
+                        model: dialog.creator.loaderVersions
+                        textRole: "version"
+                        visible: dialog.loaderName !== "Vanilla"
+                        enabled: !dialog.creator.loading
+                        Accessible.name: dialog.loaderName + " version"
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 40
+                        visible: dialog.loaderName === "Vanilla"
+                        radius: 10
+                        color: Colors.inset
+                        border.color: Colors.border
                         Text {
-                            Layout.fillWidth: true
-                            text: tile.modelData.caption
+                            anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
+                            verticalAlignment: Text.AlignVCenter
+                            text: "Not needed for Vanilla"
                             color: Colors.subtext
-                            font.pixelSize: 11
-                            wrapMode: Text.Wrap
-                            maximumLineCount: 2
+                            font.pixelSize: Typography.body
                             elide: Text.ElideRight
                         }
                     }
                 }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    visible: !dialog.editId
+                    spacing: 8
+                    FieldLabel { text: "GROUP"; Layout.fillWidth: true }
+                    SelectBox {
+                        id: groupPicker
+                        objectName: "newInstanceGroup"
+                        Layout.fillWidth: true
+                        model: dialog.groupChoices
+                        Accessible.name: "Group"
+                    }
+                }
             }
-        }
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: 10
-            spacing: 16
-            ColumnLayout {
+            ToggleSwitch {
+                id: snapshots
+                text: "Show snapshots"
+                onToggled: {
+                    dialog.loaderRequestKey = "";
+                    dialog.creator.loadVersions(checked);
+                }
+            }
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredWidth: 1
-                spacing: 8
+                Layout.topMargin: 4
+                implicitHeight: notice.implicitHeight + 24
+                radius: 10
+                color: dialog.creator.error ? Qt.rgba(Colors.danger.r, Colors.danger.g, Colors.danger.b, 0.1) : Colors.inset
+                border.color: dialog.creator.error ? Qt.rgba(Colors.danger.r, Colors.danger.g, Colors.danger.b, 0.4) : Colors.border
                 RowLayout {
-                    FieldLabel { text: "MINECRAFT"; Layout.fillWidth: true }
-                    ToggleSwitch {
-                        id: snapshots
-                        text: "Snapshots"
-                        onToggled: {
-                            dialog.loaderRequestKey = "";
-                            dialog.creator.loadVersions(checked);
-                        }
+                    id: notice
+                    anchors { fill: parent; margins: 12; leftMargin: 14 }
+                    spacing: 12
+                    BusyIndicator {
+                        running: dialog.creator.loading
+                        visible: running
+                        implicitWidth: 22
+                        implicitHeight: 22
                     }
-                }
-                SelectBox {
-                    id: minecraft
-                    Layout.fillWidth: true
-                    model: dialog.creator.versions
-                    textRole: "version"
-                    enabled: !dialog.creator.loading
-                    Accessible.name: "Minecraft version"
-                    onActivated: dialog.selectLoader()
-                }
-            }
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.preferredWidth: 1
-                spacing: 8
-                FieldLabel {
-                    Layout.preferredHeight: snapshots.implicitHeight
-                    verticalAlignment: Text.AlignVCenter
-                    text: dialog.loaderName === "Vanilla" ? "LOADER VERSION" : dialog.loaderName.toUpperCase() + " VERSION"
-                }
-                SelectBox {
-                    id: loaderVersion
-                    Layout.fillWidth: true
-                    model: dialog.creator.loaderVersions
-                    textRole: "version"
-                    visible: dialog.loaderName !== "Vanilla"
-                    enabled: !dialog.creator.loading
-                    Accessible.name: dialog.loaderName + " version"
-                }
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: 40
-                    visible: dialog.loaderName === "Vanilla"
-                    radius: 10
-                    color: Colors.inset
-                    border.color: Colors.border
                     Text {
-                        anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
-                        verticalAlignment: Text.AlignVCenter
-                        text: "Not needed for Vanilla"
-                        color: Colors.subtext
-                        font.pixelSize: 13
-                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        text: dialog.creator.error ? dialog.creator.error
+                            : dialog.creator.loading ? "Loading versions…"
+                            : dialog.editId ? "Stop the game before applying. Mods and worlds may need matching versions — duplicate the instance before upgrading a world. The previous version manifest is kept in the instance folder."
+                            : "Will be created as “" + dialog.chosenName + "” with " + (dialog.loaderName === "Vanilla" ? "no mod loader" : dialog.loaderName + " " + loaderVersion.currentText) + "."
+                        color: dialog.creator.error ? Colors.danger : Colors.subtext
+                        font.pixelSize: Typography.body
+                        wrapMode: Text.Wrap
+                        lineHeight: 1.2
                     }
                 }
             }
         }
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.topMargin: 12
-            implicitHeight: notice.implicitHeight + 24
-            radius: 10
-            color: dialog.creator.error ? Qt.rgba(Colors.danger.r, Colors.danger.g, Colors.danger.b, 0.1) : Colors.inset
-            border.color: dialog.creator.error ? Qt.rgba(Colors.danger.r, Colors.danger.g, Colors.danger.b, 0.4) : Colors.border
-            RowLayout {
-                id: notice
-                anchors { fill: parent; margins: 12; leftMargin: 14 }
-                spacing: 12
-                BusyIndicator {
-                    running: dialog.creator.loading
-                    visible: running
-                    implicitWidth: 22
-                    implicitHeight: 22
-                }
-                Text {
-                    Layout.fillWidth: true
-                    text: dialog.creator.error ? dialog.creator.error
-                        : dialog.creator.loading ? "Loading versions…"
-                        : dialog.editId ? "Stop the game before applying. Mods and worlds may need matching versions — duplicate the instance before upgrading a world. The previous version manifest is kept in the instance folder."
-                        : "Will be created as “" + dialog.chosenName + "” with " + (dialog.loaderName === "Vanilla" ? "no mod loader" : dialog.loaderName + " " + loaderVersion.currentText) + "."
-                    color: dialog.creator.error ? Colors.danger : Colors.subtext
-                    font.pixelSize: 13
-                    wrapMode: Text.Wrap
-                    lineHeight: 1.2
-                }
+        ColumnLayout {
+            objectName: "newInstancePreview"
+            visible: dialog.showPreview
+            Layout.preferredWidth: 270
+            Layout.maximumWidth: 270
+            Layout.alignment: Qt.AlignTop
+            spacing: 10
+            FieldLabel { Layout.fillWidth: true; text: "IN YOUR LIBRARY"; elide: Text.ElideRight }
+            CoverArt {
+                Layout.fillWidth: true
+                Layout.preferredHeight: width
+                instanceId: dialog.chosenName
+            }
+            Text {
+                Layout.fillWidth: true
+                text: dialog.chosenName
+                color: Colors.bone
+                font.family: Colors.displayFont
+                font.pixelSize: Typography.sectionTitle
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+            Text {
+                Layout.fillWidth: true
+                text: dialog.loaderName + " " + minecraft.currentText
+                color: Colors.text
+                font.pixelSize: Typography.body
+                elide: Text.ElideRight
+            }
+            Text {
+                Layout.fillWidth: true
+                text: qsTr("Cover colours are picked when it's created.")
+                color: Colors.subtext
+                font.pixelSize: Typography.caption
+                wrapMode: Text.Wrap
             }
         }
     }
@@ -272,13 +332,13 @@ MotionDialog {
         TextLink {
             visible: !dialog.editId
             text: "Browse modpacks"
-            pixelSize: 13
+            pixelSize: Typography.body
             onClicked: { dialog.close(); dialog.controller.browsePacks(); }
         }
         TextLink {
             visible: !dialog.editId
             text: "Import a pack file"
-            pixelSize: 13
+            pixelSize: Typography.body
             onClicked: { dialog.close(); dialog.controller.importPack(); }
         }
     }

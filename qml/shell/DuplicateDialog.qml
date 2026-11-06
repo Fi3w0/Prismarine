@@ -29,9 +29,9 @@ MotionDialog {
     }
     contentItem: ColumnLayout {
         spacing: 12
-        Text { text: "NAME"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
+        Text { text: "NAME"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.bodySmall; font.letterSpacing: 2 }
         InputField { id: copyName; Layout.fillWidth: true; placeholderText: "Copy name"; enabled: !dialog.controller.creator.loading }
-        Text { text: "INCLUDE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2; Layout.topMargin: 6 }
+        Text { text: "INCLUDE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: Typography.bodySmall; font.letterSpacing: 2; Layout.topMargin: 6 }
         GridLayout {
             Layout.fillWidth: true
             columns: 2

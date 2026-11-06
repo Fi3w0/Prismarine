@@ -111,7 +111,7 @@ Rectangle {
             text: "WELCOME TO"
             color: Colors.brass
             font.family: Colors.displayFont
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             font.letterSpacing: 4
         }
         Text {
@@ -119,7 +119,7 @@ Rectangle {
             text: "Prismarine"
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: welcome.height < 720 ? 48 : 60
+            font.pixelSize: welcome.height < 720 ? Typography.welcomeCompact : Typography.welcome
             font.letterSpacing: 5
         }
         Text {
@@ -130,7 +130,7 @@ Rectangle {
             textFormat: Text.StyledText
             text: "A new look for Prism Launcher. Everything you already have is here: <b>" + welcome.plural(welcome.instanceCount, "instance") + "</b>, <b>" + welcome.plural(welcome.accountCount, "account") + "</b> and all your settings. Nothing was moved or copied."
             color: Colors.text
-            font.pixelSize: 14
+            font.pixelSize: Typography.control
             lineHeight: 1.3
         }
         RowLayout {
@@ -224,14 +224,14 @@ Rectangle {
                             text: card.modelData.title
                             color: Colors.bone
                             font.family: Colors.displayFont
-                            font.pixelSize: 20
+                            font.pixelSize: Typography.sectionTitle
                             font.letterSpacing: 2
                         }
                         Text {
                             Layout.fillWidth: true
                             text: card.modelData.detail
                             color: Colors.subtext
-                            font.pixelSize: 12
+                            font.pixelSize: Typography.bodySmall
                             wrapMode: Text.Wrap
                         }
                         ActionButton {
@@ -254,7 +254,7 @@ Rectangle {
             wrapMode: Text.Wrap
             text: "Switch any time: Settings → Interface   ·   Classic Prism stays available from About"
             color: Colors.subtext
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
         }
     }
 }

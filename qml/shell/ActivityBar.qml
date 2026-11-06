@@ -58,7 +58,7 @@ Rectangle {
         Text {
             text: bar.task ? bar.task.label : ""
             color: Colors.text
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             font.weight: Font.DemiBold
         }
         ProgressBar {
@@ -95,7 +95,7 @@ Rectangle {
             visible: !!bar.task && bar.task.progress >= 0
             text: bar.task ? Math.round(bar.task.progress * 100) + "%" : ""
             color: Colors.subtext
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
         }
         Item {
             Layout.fillWidth: true

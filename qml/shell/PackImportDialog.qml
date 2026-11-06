@@ -63,14 +63,14 @@ MotionDialog {
                         : dialog.importer.state === "handedoff" ? "Opened in Prism's importer"
                         : "Drop a pack here or click to choose"
                     color: Colors.text
-                    font.pixelSize: 15
+                    font.pixelSize: Typography.bodyLarge
                     font.weight: Font.DemiBold
                 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: dialog.importer.state === "handedoff" ? "It appears in your library when Prism finishes." : ".mrpack or .zip"
                     color: Colors.subtext
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                 }
                 Item { Layout.fillHeight: true }
             }
@@ -110,7 +110,7 @@ MotionDialog {
             Layout.fillWidth: true
             text: "Downloads are verified before the new instance is added to your library."
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             wrapMode: Text.Wrap
         }
     }

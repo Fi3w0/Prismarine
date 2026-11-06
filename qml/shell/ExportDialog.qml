@@ -41,7 +41,7 @@ MotionDialog {
             text: "Export " + (dialog.info.name || "instance")
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 24
+            font.pixelSize: Typography.emptyTitle
             font.letterSpacing: 1
         }
         RowLayout {
@@ -74,7 +74,7 @@ MotionDialog {
                         Text {
                             text: choice.modelData.title
                             color: Colors.text
-                            font.pixelSize: 14
+                            font.pixelSize: Typography.control
                             font.weight: Font.DemiBold
                         }
                         Text {
@@ -82,7 +82,7 @@ MotionDialog {
                             Layout.fillHeight: true
                             text: choice.modelData.detail
                             color: Colors.subtext
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                             wrapMode: Text.Wrap
                         }
                     }
@@ -92,7 +92,7 @@ MotionDialog {
         Text {
             text: "Include"
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
         }
         GridLayout {
             Layout.fillWidth: true
@@ -111,8 +111,8 @@ MotionDialog {
                 ColumnLayout {
                     spacing: 0
                     TapHandler { onTapped: box.toggle() }
-                    Text { text: label; color: Colors.text; font.pixelSize: 12 }
-                    Text { text: hint; color: Colors.subtext; font.pixelSize: 10 }
+                    Text { text: label; color: Colors.text; font.pixelSize: Typography.bodySmall }
+                    Text { text: hint; color: Colors.subtext; font.pixelSize: Typography.badge }
                 }
             }
             Option { id: configs; label: "Mod configs"; hint: "config, defaultconfigs, kubejs" }
@@ -130,14 +130,14 @@ MotionDialog {
                 id: version
                 Layout.preferredWidth: 110
                 implicitHeight: 34
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 placeholderText: "Version"
             }
             InputField {
                 id: description
                 Layout.fillWidth: true
                 implicitHeight: 34
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 placeholderText: "Short description for friends (optional)"
             }
         }
@@ -150,7 +150,7 @@ MotionDialog {
                     + dialog.exporter.summary.files + " files packed, " + (dialog.exporter.summary.bytes / 1048576).toFixed(1) + " MiB"
                 : dialog.exporter.error
             color: dialog.exporter && dialog.exporter.state === "error" ? Colors.danger : dialog.exporter && dialog.exporter.state === "complete" ? Colors.success : Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             wrapMode: Text.Wrap
         }
         RowLayout {

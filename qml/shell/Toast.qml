@@ -34,7 +34,7 @@ Rectangle {
         anchors.centerIn: parent
         width: Math.min(implicitWidth, toast.availableWidth - 120)
         color: Colors.text
-        font.pixelSize: 14
+        font.pixelSize: Typography.control
         wrapMode: Text.Wrap
     }
     Timer {

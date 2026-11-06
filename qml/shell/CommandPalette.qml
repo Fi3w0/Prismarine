@@ -51,9 +51,10 @@ Popup {
             { title: "Refresh library", words: "reload refresh rescan", run: () => win.reloadLibrary() },
             { title: "Accounts and skins", words: "account skin cape microsoft profile", run: () => win.navigate("accounts") },
             { title: "Home", words: "home dashboard news playtime", run: () => win.navigate("home") },
-            { title: "Library", words: "library instances", run: () => win.navigate("library") },
-            { title: "Open Prism Launcher", words: "prism launcher window", run: () => win.instances.openPrism() }
+            { title: "Library", words: "library instances", run: () => win.navigate("library") }
         ];
+        if (win.prismShortcuts !== false)
+            actions.push({ title: "Open Prism Launcher", words: "prism launcher window", run: () => win.instances.openPrism() });
         for (const it of actions)
             add({ kind: "Action", title: it.title, detail: "", icon: "plus", run: it.run }, it.title + " " + it.words);
         // Titles that start with the query come first; otherwise the order above holds.
@@ -77,8 +78,8 @@ Popup {
     focus: true
     padding: 0
     Overlay.modal: Rectangle { color: Colors.light ? Qt.rgba(0.08, 0.14, 0.17, 0.32) : Qt.rgba(0.01, 0.03, 0.05, 0.62) }
-    enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Colors.animations ? 140 : 0 } }
-    exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Colors.animations ? 100 : 0 } }
+    enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Colors.animations ? Colors.motionFeedbackDuration : 0; easing.type: Easing.OutCubic } }
+    exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Colors.animations ? Colors.motionFeedbackDuration : 0; easing.type: Easing.InCubic } }
     background: Rectangle { radius: 16; color: Colors.surface; border.color: Colors.border }
     contentItem: ColumnLayout {
         spacing: 0
@@ -94,7 +95,7 @@ Popup {
                 placeholderText: "Search instances, worlds, servers, settings and actions…"
                 placeholderTextColor: Colors.subtext
                 color: Colors.text
-                font.pixelSize: 16
+                font.pixelSize: Typography.subtitle
                 background: Item {}
                 onTextChanged: palette.rebuild()
                 Keys.onDownPressed: { palette.current = Math.min(palette.current + 1, palette.results.length - 1); list.positionViewAtIndex(palette.current, ListView.Contain); }
@@ -103,7 +104,7 @@ Popup {
                 Keys.onEnterPressed: palette.run(palette.current)
                 Keys.onEscapePressed: palette.close()
             }
-            Text { text: "Esc"; color: Colors.subtext; font.pixelSize: 11 }
+            Text { text: "Esc"; color: Colors.subtext; font.pixelSize: Typography.caption }
         }
         Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Colors.border }
         ListView {
@@ -132,9 +133,9 @@ Popup {
                 contentItem: RowLayout {
                     spacing: 12
                     LineIcon { name: result.modelData.icon; tint: result.highlighted ? Colors.accent : Colors.subtext; implicitWidth: 18; implicitHeight: 18 }
-                    Text { text: result.modelData.title; color: Colors.text; font.pixelSize: 14; elide: Text.ElideRight; Layout.maximumWidth: list.width * 0.55 }
-                    Text { Layout.fillWidth: true; text: result.modelData.detail; color: Colors.subtext; font.pixelSize: 12; elide: Text.ElideRight }
-                    Text { text: result.modelData.kind.toUpperCase(); color: Colors.brass; font.pixelSize: 10; font.letterSpacing: 1.5 }
+                    Text { text: result.modelData.title; color: Colors.text; font.pixelSize: Typography.control; elide: Text.ElideRight; Layout.maximumWidth: list.width * 0.55 }
+                    Text { Layout.fillWidth: true; text: result.modelData.detail; color: Colors.subtext; font.pixelSize: Typography.bodySmall; elide: Text.ElideRight }
+                    Text { text: result.modelData.kind.toUpperCase(); color: Colors.brass; font.pixelSize: Typography.badge; font.letterSpacing: 1.5 }
                 }
             }
             Text {
@@ -142,7 +143,7 @@ Popup {
                 visible: !palette.results.length
                 text: "Nothing matches “" + field.text + "”"
                 color: Colors.subtext
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
             }
         }
     }

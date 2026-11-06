@@ -2,22 +2,20 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import QtCore
 
-// Chooses the picture on an instance's library card and on its banner (Home and
-// instance page): default, generated artwork, latest screenshot, a screenshot or an image.
 MotionDialog {
     id: dialog
     objectName: "artworkDialog"
     required property var controller
     property string instanceId: ""
-    // Which picture the options change: "card", "hero" or "both".
     property string target: "both"
     property var shots: []
     readonly property var info: controller.instances.getById(instanceId)
     readonly property var modes: [
-        { mode: "", label: "Default", hint: "Follows “Show screenshots” in Settings" },
-        { mode: "art", label: "Artwork", hint: "The generated cover in the instance's colour" },
-        { mode: "screenshot", label: "Latest screenshot", hint: "Always your newest screenshot" }
+        { mode: "", label: qsTr("Use settings"), hint: qsTr("Follow your screenshot preference") },
+        { mode: "art", label: qsTr("Water cover"), hint: qsTr("Generated for this instance") },
+        { mode: "screenshot", label: qsTr("Latest screenshot"), hint: qsTr("Update when you take a new one") }
     ]
     function openFor(id) {
         instanceId = id;
@@ -27,51 +25,54 @@ MotionDialog {
     }
     function apply(mode, url) {
         if (controller.preferences.setArtwork(instanceId, target, mode, url || ""))
-            controller.notify(target === "both" ? "Card and banner updated" : target === "card" ? "Card updated" : "Banner updated");
+            controller.notify(target === "both" ? qsTr("Card and banner updated") : target === "card" ? qsTr("Card updated") : qsTr("Banner updated"));
     }
     function modeOf(slot) { return controller.artworkOf(instanceId, slot).mode; }
-    // The option highlighted for the current target; mixed when card and banner differ.
     readonly property string activeMode: target === "both" ? (modeOf("card") === modeOf("hero") ? modeOf("card") : "mixed") : modeOf(target)
-    title: "Card & banner images"
+    title: qsTr("Instance artwork")
     subtitle: info.name || ""
-    width: Math.min(760, controller.width - 64)
+    width: Math.min(800, controller.width - 64)
+    height: Math.min(implicitHeight, controller.height - 64)
     modal: true
 
     component SlotPreview: AbstractButton {
         id: preview
         property string slot: "card"
         property string label: ""
-        readonly property bool chosen: dialog.target === slot || dialog.target === "both"
+        readonly property bool chosen: dialog.target === slot
         hoverEnabled: true
+        Accessible.name: qsTr("Edit %1 image").arg(label.toLowerCase())
         onClicked: dialog.target = dialog.target === slot ? "both" : slot
-        Accessible.name: "Edit the " + label.toLowerCase()
         contentItem: ColumnLayout {
-            spacing: 8
+            spacing: 10
+            RowLayout {
+                Layout.fillWidth: true
+                Text { text: preview.label; color: Colors.text; font.pixelSize: Typography.body; font.weight: Font.DemiBold }
+                Text {
+                    Layout.fillWidth: true
+                    text: ({ "": qsTr("Use settings"), art: qsTr("Water cover"), screenshot: qsTr("Latest screenshot"), image: qsTr("Custom image") })[dialog.modeOf(preview.slot)] || ""
+                    color: Colors.subtext
+                    font.pixelSize: Typography.caption
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideRight
+                }
+            }
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Loader {
-                    anchors.fill: parent
+                    id: picture
+                    anchors.centerIn: parent
+                    width: parent.width
+                    height: preview.slot === "card" ? Math.min(parent.height, width) : parent.height
                     sourceComponent: preview.slot === "card" ? cardPreview : heroPreview
                 }
                 Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: -4
-                    radius: 16
+                    anchors.fill: picture
+                    anchors.margins: -2
+                    radius: 14
                     color: "transparent"
-                    border.width: 2
-                    border.color: preview.chosen ? Colors.accent : preview.hovered ? Colors.border : "transparent"
-                }
-            }
-            RowLayout {
-                Layout.fillWidth: true
-                Text { text: preview.label; color: preview.chosen ? Colors.text : Colors.subtext; font.pixelSize: 13; font.weight: Font.DemiBold }
-                Text {
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignRight
-                    text: ({ "": "Default", art: "Artwork", screenshot: "Latest screenshot", image: "Custom image" })[dialog.modeOf(preview.slot)] || ""
-                    color: Colors.subtext
-                    font.pixelSize: 12
+                    border.color: preview.chosen || preview.visualFocus ? Colors.accent : preview.hovered ? Colors.outline : Colors.border
                 }
             }
         }
@@ -83,16 +84,6 @@ MotionDialog {
             screenshot: dialog.info.screenshot || ""
             cover: dialog.controller.coverFor(dialog.instanceId, "card")
             showScreenshot: dialog.controller.screenshotFor(dialog.instanceId, "card")
-            Text {
-                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12 }
-                text: dialog.info.name || ""
-                color: Colors.artText
-                font.family: Colors.displayFont
-                font.pixelSize: 16
-                wrapMode: Text.Wrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-            }
         }
     }
     Component {
@@ -103,147 +94,158 @@ MotionDialog {
             screenshot: dialog.info.screenshot || ""
             showScreenshot: dialog.controller.screenshotFor(dialog.instanceId, "hero")
             Text {
-                anchors { left: parent.left; bottom: parent.bottom; margins: 16 }
+                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 16 }
                 text: dialog.info.name || ""
+                textFormat: Text.PlainText
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 22
+                font.pixelSize: Typography.panelTitle
+                elide: Text.ElideRight
             }
         }
     }
-
-    contentItem: ColumnLayout {
-        spacing: 14
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 210
-            spacing: 18
-            SlotPreview { Layout.preferredWidth: 140; Layout.fillHeight: true; slot: "card"; label: "Card" }
-            SlotPreview { Layout.fillWidth: true; Layout.fillHeight: true; slot: "hero"; label: "Banner" }
-        }
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
-            Text { text: "CHANGE"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
-            Repeater {
-                model: [{ key: "both", label: "Both" }, { key: "card", label: "Card" }, { key: "hero", label: "Banner" }]
-                delegate: Chip {
-                    required property var modelData
-                    objectName: "artworkTarget_" + modelData.key
-                    interactive: true
-                    active: dialog.target === modelData.key
-                    tint: active ? Colors.accent : Colors.subtext
-                    text: modelData.label
-                    onClicked: dialog.target = modelData.key
-                }
-            }
-        }
-        GridLayout {
-            Layout.fillWidth: true
-            columns: dialog.width >= 700 ? 4 : 2
-            columnSpacing: 8
-            rowSpacing: 8
-            Repeater {
-                model: dialog.modes
-                delegate: AbstractButton {
-                    id: option
-                    required property var modelData
-                    readonly property bool chosen: dialog.activeMode === modelData.mode
-                    objectName: "artworkMode_" + (modelData.mode || "default")
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 1
-                    implicitHeight: 64
-                    padding: 12
-                    hoverEnabled: true
-                    enabled: modelData.mode !== "screenshot" || dialog.shots.length > 0
-                    onClicked: dialog.apply(modelData.mode)
-                    background: Rectangle {
-                        radius: 10
-                        color: option.chosen ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.12) : option.hovered ? Colors.surfaceHi : Colors.inset
-                        border.color: option.chosen || option.visualFocus ? Colors.accent : Colors.border
-                    }
-                    contentItem: ColumnLayout {
-                        spacing: 2
-                        opacity: option.enabled ? 1 : 0.45
-                        Text { Layout.fillWidth: true; text: option.modelData.label; color: Colors.text; font.pixelSize: 13; font.weight: Font.DemiBold; elide: Text.ElideRight }
-                        Text { Layout.fillWidth: true; text: option.enabled ? option.modelData.hint : "No screenshots yet"; color: Colors.subtext; font.pixelSize: 11; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }
-                    }
-                }
-            }
-            AbstractButton {
-                id: custom
-                objectName: "artworkChooseImage"
-                readonly property bool chosen: dialog.activeMode === "image"
-                Layout.fillWidth: true
-                Layout.preferredWidth: 1
-                implicitHeight: 64
-                padding: 12
-                hoverEnabled: true
-                onClicked: picker.open()
-                background: Rectangle {
-                    radius: 10
-                    color: custom.chosen ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.12) : custom.hovered ? Colors.surfaceHi : Colors.inset
-                    border.color: custom.chosen || custom.visualFocus ? Colors.accent : Colors.border
-                }
-                contentItem: ColumnLayout {
-                    spacing: 2
-                    Text { text: "Choose image…"; color: Colors.text; font.pixelSize: 13; font.weight: Font.DemiBold }
-                    Text { Layout.fillWidth: true; text: "PNG, JPG or WebP from your computer"; color: Colors.subtext; font.pixelSize: 11; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }
-                }
-            }
-        }
+    contentItem: ScrollView {
+        id: scroll
+        implicitHeight: body.implicitHeight
+        contentWidth: availableWidth
+        contentHeight: body.implicitHeight
+        clip: true
         ColumnLayout {
-            Layout.fillWidth: true
-            visible: dialog.shots.length > 0
-            spacing: 8
-            Text { text: "OR PICK A SCREENSHOT"; color: Colors.brass; font.family: Colors.displayFont; font.pixelSize: 12; font.letterSpacing: 2 }
-            ListView {
-                id: strip
+            id: body
+            width: scroll.availableWidth
+            spacing: 18
+            RowLayout {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 86
-                orientation: ListView.Horizontal
                 spacing: 8
-                clip: true
-                model: dialog.shots
-                ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AsNeeded }
-                delegate: AbstractButton {
-                    id: thumb
-                    required property var modelData
-                    width: 136
-                    height: 76
-                    hoverEnabled: true
-                    Accessible.name: "Use " + modelData.fileName
-                    onClicked: dialog.apply("image", modelData.url)
-                    ToolTip.visible: hovered
-                    ToolTip.delay: 500
-                    ToolTip.text: modelData.fileName
-                    background: Rectangle { radius: 8; color: Colors.surfaceHi; border.color: thumb.hovered || thumb.visualFocus ? Colors.accent : Colors.border; border.width: thumb.hovered ? 2 : 1 }
-                    contentItem: Image {
-                        source: thumb.modelData.url
-                        sourceSize.width: 272
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        clip: true
+                Text { text: qsTr("Apply to"); color: Colors.subtext; font.pixelSize: Typography.bodySmall; Layout.rightMargin: 6 }
+                Repeater {
+                    model: [{ key: "both", label: qsTr("Both images") }, { key: "card", label: qsTr("Card") }, { key: "hero", label: qsTr("Banner") }]
+                    delegate: Chip {
+                        required property var modelData
+                        objectName: "artworkTarget_" + modelData.key
+                        interactive: true
+                        active: dialog.target === modelData.key
+                        tint: active ? Colors.accent : Colors.subtext
+                        text: modelData.label
+                        onClicked: dialog.target = modelData.key
                     }
-                    padding: 2
+                }
+                Item { Layout.fillWidth: true }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 210
+                spacing: 24
+                SlotPreview { Layout.preferredWidth: 176; Layout.fillHeight: true; slot: "card"; label: qsTr("Card") }
+                SlotPreview { Layout.fillWidth: true; Layout.fillHeight: true; slot: "hero"; label: qsTr("Banner") }
+            }
+            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Colors.border }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                Text { text: qsTr("Image source"); color: Colors.text; font.pixelSize: Typography.body; font.weight: Font.DemiBold }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Repeater {
+                        model: dialog.modes
+                        delegate: AbstractButton {
+                            id: option
+                            required property var modelData
+                            readonly property bool chosen: dialog.activeMode === modelData.mode
+                            objectName: "artworkMode_" + (modelData.mode || "default")
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            implicitHeight: 70
+                            padding: 12
+                            hoverEnabled: true
+                            enabled: modelData.mode !== "screenshot" || dialog.shots.length > 0
+                            Accessible.name: modelData.label
+                            onClicked: dialog.apply(modelData.mode)
+                            background: Rectangle {
+                                radius: 10
+                                color: option.chosen ? Colors.surfaceHi : option.hovered ? Colors.inset : "transparent"
+                                border.color: option.chosen || option.visualFocus ? Colors.accent : Colors.border
+                            }
+                            contentItem: ColumnLayout {
+                                spacing: 4
+                                opacity: option.enabled ? 1 : 0.45
+                                Text { Layout.fillWidth: true; text: option.modelData.label; color: Colors.text; font.pixelSize: Typography.bodySmall; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                                Text { Layout.fillWidth: true; text: option.enabled ? option.modelData.hint : qsTr("No screenshots yet"); color: Colors.subtext; font.pixelSize: Typography.caption; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 70
+                radius: 10
+                color: Colors.inset
+                RowLayout {
+                    anchors { fill: parent; margins: 12 }
+                    spacing: 12
+                    LineIcon { Layout.preferredWidth: 22; Layout.maximumWidth: 22; name: "image"; tint: Colors.subtext }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+                        Text { Layout.fillWidth: true; text: dialog.activeMode === "image" ? qsTr("Custom image selected") : qsTr("Use your own image"); color: Colors.text; font.pixelSize: Typography.bodySmall; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                        Text { Layout.fillWidth: true; text: qsTr("PNG, JPEG or WebP"); color: Colors.subtext; font.pixelSize: Typography.caption; elide: Text.ElideRight }
+                    }
+                    ActionButton { objectName: "artworkChooseImage"; Layout.preferredWidth: 152; Layout.maximumWidth: 152; text: qsTr("Choose image…"); onClicked: picker.open() }
+                }
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                visible: dialog.shots.length > 0
+                spacing: 10
+                Text { text: qsTr("Screenshots"); color: Colors.text; font.pixelSize: Typography.body; font.weight: Font.DemiBold }
+                ListView {
+                    id: strip
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 106
+                    orientation: ListView.Horizontal
+                    spacing: 10
+                    clip: true
+                    model: dialog.shots
+                    ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AsNeeded }
+                    delegate: AbstractButton {
+                        id: thumb
+                        required property var modelData
+                        width: 144
+                        height: 94
+                        padding: 3
+                        hoverEnabled: true
+                        Accessible.name: qsTr("Use %1").arg(modelData.fileName)
+                        onClicked: dialog.apply("image", modelData.url)
+                        ToolTip.visible: hovered
+                        ToolTip.text: modelData.fileName
+                        background: Rectangle { radius: 8; color: Colors.inset; border.color: thumb.hovered || thumb.visualFocus ? Colors.accent : Colors.border }
+                        contentItem: ColumnLayout {
+                            spacing: 4
+                            Image { Layout.fillWidth: true; Layout.fillHeight: true; source: thumb.modelData.url; sourceSize.width: 288; fillMode: Image.PreserveAspectCrop; asynchronous: true; clip: true }
+                            Text { Layout.fillWidth: true; text: thumb.modelData.fileName; color: Colors.subtext; font.pixelSize: Typography.caption; elide: Text.ElideMiddle }
+                        }
+                    }
                 }
             }
         }
     }
     footer: DialogActions {
-        cancelText: "Reset to default"
-        confirmText: "Done"
-        confirmWidth: 120
-        onCancelled: {
-            dialog.controller.preferences.setArtwork(dialog.instanceId, "both", "");
-            dialog.controller.notify("Images reset");
-        }
+        cancelVisible: false
+        confirmText: qsTr("Done")
+        confirmName: "artworkDone"
+        confirmWidth: 112
         onConfirmed: dialog.close()
+        TextLink { objectName: "artworkReset"; text: qsTr("Reset to default"); tint: Colors.subtext; onClicked: dialog.apply("") }
+        Text { text: qsTr("Changes apply immediately"); color: Colors.subtext; font.pixelSize: Typography.caption }
     }
     FileDialog {
         id: picker
-        title: "Choose an image"
-        nameFilters: ["Images (*.png *.jpg *.jpeg *.webp)"]
+        objectName: "artworkFilePicker"
+        title: qsTr("Choose an image")
+        currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
+        nameFilters: [qsTr("Images (*.png *.jpg *.jpeg *.webp)")]
         onAccepted: dialog.apply("image", selectedFile)
     }
 }

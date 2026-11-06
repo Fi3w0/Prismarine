@@ -40,8 +40,8 @@ MotionDialog {
         contentItem: RowLayout {
             spacing: 12
             LineIcon { name: choice.glyph; tint: choice.current ? Colors.accent : Colors.subtext; implicitWidth: 18; implicitHeight: 18 }
-            Text { Layout.fillWidth: true; text: choice.text; color: Colors.text; font.pixelSize: 14; elide: Text.ElideRight }
-            Text { visible: choice.current; text: "Current"; color: Colors.accent; font.pixelSize: 12 }
+            Text { Layout.fillWidth: true; text: choice.text; color: Colors.text; font.pixelSize: Typography.control; elide: Text.ElideRight }
+            Text { visible: choice.current; text: "Current"; color: Colors.accent; font.pixelSize: Typography.bodySmall }
         }
     }
     contentItem: ColumnLayout {
