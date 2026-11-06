@@ -399,129 +399,6 @@ ApplicationWindow {
         applyPreferences();
         refresh();
     }
-    Connections {
-        target: appWindow.instances
-        function onAccountRequired() { dialogHost.accountNeeded.open(); }
-        function onCountChanged() {
-            const id = appWindow.current.instanceId;
-            for (let row = 0; row < appWindow.instances.count; ++row)
-                if (appWindow.instances.get(row).instanceId === id) {
-                    appWindow.selected = row;
-                    break;
-                }
-            appWindow.refresh();
-        }
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-    }
-    Connections {
-        target: appWindow.applicationTheme
-        function onSystemPaletteChanged() { Colors.systemMode = appWindow.applicationTheme.systemLight ? 1 : 2; }
-    }
-    Connections {
-        target: appWindow.preferences
-        function onChanged() {
-            appWindow.applyPreferences();
-        }
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-    }
-    Connections {
-        target: appWindow.details
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-    }
-    Connections {
-        target: appWindow.serverList
-        ignoreUnknownSignals: true
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-    }
-    Connections {
-        target: appWindow.creator
-        function onModified(id) {
-            if (appWindow.details.instanceId === id) appWindow.details.refresh();
-            if (appWindow.updater && appWindow.updater.instanceId === id) {
-                appWindow.updater.cancel();
-                appWindow.updater.check(id);
-            }
-        }
-    }
-    Connections {
-        target: appWindow.updater
-        ignoreUnknownSignals: true
-        function onUpdated(id, count) {
-            if (appWindow.details.instanceId === id)
-                appWindow.details.refresh();
-            appWindow.notify(count ? "Updated " + count + (count === 1 ? " file" : " files") : "No files were updated", !count);
-        }
-    }
-    // Checking happens once per opened instance; the result feeds the overview and Mods tab.
-    Connections {
-        target: appWindow.details
-        function onChanged() {
-            const u = appWindow.updater, id = appWindow.details.instanceId;
-            if (u && id && u.instanceId !== id && u.state !== "updating" && u.state !== "checking")
-                u.check(id);
-        }
-    }
-    Connections {
-        target: appWindow.session
-        ignoreUnknownSignals: true
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-        function onShared(url) {
-            appWindow.notify("Log uploaded · link copied");
-            Qt.openUrlExternally(url);
-        }
-    }
-    Connections {
-        target: appWindow.launchSettings
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-    }
-    Connections {
-        target: appWindow.accountManager
-        function onErrorOccurred(message) {
-            appWindow.notify(message, true);
-        }
-    }
-    Connections {
-        target: appWindow.installer
-        function onInstalled(id, count) {
-            if (appWindow.installingType) appWindow.downloads.clear(id, appWindow.installingType);
-            if (appWindow.details.instanceId === id)
-                appWindow.details.refresh();
-            appWindow.notify(count + " files installed");
-        }
-    }
-    Connections {
-        target: appWindow.drops
-        ignoreUnknownSignals: true
-        function onInstalled(id, count) {
-            if (appWindow.details.instanceId === id) appWindow.details.refresh();
-        }
-        function onErrorOccurred(message) { appWindow.notify(message, true); }
-    }
-    // The health check reruns only when the set of mod files changes.
-    property string healthSignature: ""
-    Connections {
-        target: appWindow.details
-        function onChanged() {
-            const d = appWindow.details, h = appWindow.modHealth;
-            if (!h || !d.instanceId || d.loading) return;
-            const signature = d.instanceId + "|" + d.mods.map(it => it.fileName).join("|");
-            if (signature === appWindow.healthSignature) return;
-            appWindow.healthSignature = signature;
-            h.check(d.instanceId);
-        }
-    }
     // "While playing": minimize or hide this window once the game window is up,
     // and bring it back when the game closes.
     property string awayForGame: ""
@@ -547,66 +424,6 @@ ApplicationWindow {
         if (mode === "keep") return;
         awayForGame = mode;
         if (mode === "hide") hide(); else showMinimized();
-    }
-    // The game's own log carries the launch screen from "Start Java" to the main menu.
-    Connections {
-        target: appWindow.session
-        ignoreUnknownSignals: true
-        function onChanged() {
-            appWindow.applyWhilePlaying();
-            const p = appWindow.launchProgress, s = appWindow.session;
-            // An aborted launch whose game still appears is stopped right away.
-            if (p && p.abortRequested && !appWindow.gameRunningAtLaunch && s.instanceId === p.instanceId && s.processFound && s.state !== "exited") s.stop();
-            if (!p || !p.active || s.instanceId !== p.instanceId || p.stage === "ready" || p.stage === "failed") return;
-            if (s.state === "exited") p.reach("failed", "The game closed while starting. Now playing has the log and a crash check.");
-            else if (s.menuReached) p.reach("ready", "In the main menu. Have fun!");
-            else if (s.graphicsReady) p.reach("game", "Opening the game window");
-            else if (s.processFound) p.reach("game", "Loading Minecraft and mods");
-        }
-    }
-    // A launch that stopped before its game appeared leaves nothing for Now playing to show.
-    Connections {
-        target: appWindow.launchProgress
-        ignoreUnknownSignals: true
-        function onChanged() {
-            const p = appWindow.launchProgress, s = appWindow.session;
-            if (p && p.stage === "failed" && !p.abortRequested && s && s.instanceId === p.instanceId)
-                dialogHost.launchOverlay.diagnosis = s.launchDiagnosis();
-            if (!p || p.stage !== "failed" || !s || s.instanceId !== p.instanceId || s.processFound || s.state !== "starting") return;
-            // A Prism that was already open may still start the game after an abort; the game is
-            // stopped when it appears, so wait a while before giving up on it.
-            if (p.abortRequested && p.prismWasRunning) abandonedLaunch.restart();
-            else s.dismiss();
-        }
-    }
-    Timer {
-        id: abandonedLaunch
-        interval: 90000
-        onTriggered: if (appWindow.session && appWindow.session.state === "starting" && !appWindow.session.processFound) appWindow.session.dismiss()
-    }
-    Connections {
-        target: appWindow.altLaunch
-        ignoreUnknownSignals: true
-        function onLaunched(altId, account) {
-            appWindow.notify("Launching as " + account + " · multi-account copy");
-            appWindow.followLaunch(altId);
-        }
-        function onErrorOccurred(message) { appWindow.notify(message, true); }
-    }
-    Connections {
-        target: appWindow.desktop
-        ignoreUnknownSignals: true
-        function onErrorOccurred(message) { appWindow.notify(message, true); }
-    }
-    Connections {
-        target: appWindow.network
-        ignoreUnknownSignals: true
-        function onErrorOccurred(message) { appWindow.notify(message, true); }
-    }
-    Connections {
-        target: appWindow.storage
-        ignoreUnknownSignals: true
-        function onErrorOccurred(message) { appWindow.notify(message, true); }
     }
     onDebugDialogChanged: Qt.callLater(function() {
         const id = current.instanceId || (instances.allInstances[0] || {}).instanceId || "";
@@ -779,38 +596,7 @@ ApplicationWindow {
         }
     }
 
-    Connections {
-        target: appWindow.social
-        function onErrorOccurred(message) { appWindow.notify(message, true); }
-        function onNotice(message) { appWindow.notify(message); }
-        function onJoinRequested(instanceId, address) {
-            if (appWindow.instances.launchServer(instanceId, address)) appWindow.followLaunch(instanceId);
-            else appWindow.notify("Could not join with this instance. Refresh the library and try again.", true);
-        }
-        function onPackReady(file) {
-            if (appWindow.packImporter.state === "extracting" || appWindow.packImporter.state === "downloading") {
-                appWindow.notify("Wait for the current import to finish.", true);
-                return;
-            }
-            appWindow.packImporter.importFile(file);
-            dialogHost.packImport.open();
-        }
-    }
 
-    Connections {
-        target: appWindow.packImporter
-        function onImported(id) {
-            appWindow.selectId(id);
-            appWindow.openInstance(id);
-            appWindow.notify("Pack imported");
-        }
-    }
-    Connections {
-        target: appWindow.packImporter
-        function onHandedOff(format) {
-            appWindow.notify(format + " pack opened in Prism's importer");
-        }
-    }
     FirstRunScreen {
         id: firstRun
         anchors.fill: parent
@@ -855,20 +641,13 @@ ApplicationWindow {
         active: windowDrop.containsDrag
         targetName: (appWindow.page === "instance" ? appWindow.instances.getById(appWindow.details.instanceId).name : appWindow.current.name) || ""
     }
-    Connections {
-        target: appWindow.launcherMode
-        function onInterfaceModeChanged() {
-            const handheld = appWindow.launcherMode.interfaceMode === "handheld";
-            appWindow.visibility = handheld ? Window.FullScreen : Window.Windowed;
-            appWindow.notify(handheld ? "Handheld preview on. Choose Desktop or press F11 to leave full screen." : "Desktop interface on");
-        }
-    }
     GamepadEditFrame {
         objectName: "gamepadEditFrame"
         target: appWindow.gamepadEditItem
         confirmLabel: appWindow.gamepad ? appWindow.gamepad.confirmLabel : "A"
         cancelLabel: appWindow.gamepad ? appWindow.gamepad.cancelLabel : "B"
     }
+    AppEvents { controller: appWindow }
     AppDialogs {
         id: dialogHost
         anchors.fill: parent
