@@ -38,7 +38,7 @@ ColumnLayout {
                 })[filesTab.category] || ""
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 28
+            font.pixelSize: Typography.contentTitle
         }
         Item {
             Layout.fillWidth: true
@@ -49,7 +49,7 @@ ColumnLayout {
             visible: filesTab.allFiles.length > 4
             Layout.preferredWidth: 240
             placeholderText: "Search " + filesTab.allFiles.length + " " + (({ resourcepacks: "packs", shaderpacks: "shaders", saves: "worlds", logs: "logs" })[filesTab.category] || "files") + "…"
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         ActionButton {
             objectName: "diagnoseButton"
@@ -96,7 +96,7 @@ ColumnLayout {
                     text: "Crash helper"
                     color: Colors.bone
                     font.family: Colors.displayFont
-                    font.pixelSize: 20
+                    font.pixelSize: Typography.sectionTitle
                 }
                 CrashHelp {
                     id: help
@@ -142,13 +142,13 @@ ColumnLayout {
                         Layout.fillWidth: true
                         text: fileRow.modelData.fileName
                         color: Colors.text
-                        font.pixelSize: 14
+                        font.pixelSize: Typography.control
                         elide: Text.ElideRight
                     }
                     Text {
                         text: fileRow.modelData.modified + " · " + fileRow.modelData.size
                         color: Colors.subtext
-                        font.pixelSize: 12
+                        font.pixelSize: Typography.bodySmall
                     }
                 }
                 ActionButton {
@@ -173,7 +173,7 @@ ColumnLayout {
                         logs: "text logs"
                     })[filesTab.category] || "files") + " found."
             color: Colors.subtext
-            font.pixelSize: 15
+            font.pixelSize: Typography.bodyLarge
         }
     }
     MotionDialog {
@@ -195,7 +195,7 @@ ColumnLayout {
                 readOnly: true
                 textFormat: TextEdit.PlainText
                 font.family: "monospace"
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 color: Colors.text
                 wrapMode: TextEdit.WrapAnywhere
             }

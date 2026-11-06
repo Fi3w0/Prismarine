@@ -83,14 +83,14 @@ ColumnLayout {
             text: "Mods"
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 28
+            font.pixelSize: Typography.contentTitle
             font.letterSpacing: 2
         }
         Text {
             Layout.alignment: Qt.AlignBaseline
             text: (modsTab.info.enabledMods || 0) + " enabled · " + (modsTab.info.disabledMods || 0) + " disabled"
             color: Colors.subtext
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         Item {
             Layout.fillWidth: true
@@ -136,7 +136,7 @@ ColumnLayout {
             objectName: "modSearch"
             Layout.preferredWidth: Math.min(320, modsTab.width * 0.4)
             placeholderText: "Search " + contents.mods.length + " mods…"
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         Repeater {
             model: [
@@ -191,7 +191,7 @@ ColumnLayout {
             Text {
                 text: modsTab.selectedFiles.length + " selected"
                 color: Colors.text
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 font.weight: Font.DemiBold
                 Layout.rightMargin: 6
             }
@@ -222,7 +222,7 @@ ColumnLayout {
                     danger: modelData.action === "remove"
                     implicitWidth: contentItem.implicitWidth + 28
                     implicitHeight: 30
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     enabled: !contents.loading && !modsTab.updating
                     onClicked: {
                         if (modelData.action === "remove")
@@ -265,7 +265,7 @@ ColumnLayout {
             text: "Name"
             font.family: Colors.displayFont
             color: Colors.brass
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
             font.letterSpacing: 1.5
         }
         Text {
@@ -273,7 +273,7 @@ ColumnLayout {
             text: "Version"
             font.family: Colors.displayFont
             color: Colors.brass
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
             font.letterSpacing: 1.5
         }
         Text {
@@ -281,7 +281,7 @@ ColumnLayout {
             text: "Side"
             font.family: Colors.displayFont
             color: Colors.brass
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
             font.letterSpacing: 1.5
         }
         Text {
@@ -289,7 +289,7 @@ ColumnLayout {
             text: "On"
             font.family: Colors.displayFont
             color: Colors.brass
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
             font.letterSpacing: 1.5
         }
     }
@@ -325,7 +325,7 @@ ColumnLayout {
             visible: !contents.loading && !modsTab.filteredMods.length
             text: modsTab.modState === "updates" ? "Everything is up to date." : contents.mods.length ? "No matching mods." : "No mods installed."
             color: Colors.subtext
-            font.pixelSize: 15
+            font.pixelSize: Typography.bodyLarge
         }
     }
     RowLayout {
@@ -333,7 +333,7 @@ ColumnLayout {
         Text {
             text: modsTab.filteredMods.length + " mods"
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
         }
         Item {
             Layout.fillWidth: true
@@ -384,26 +384,26 @@ ColumnLayout {
                 text: modsTab.selectedMod.name || ""
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 28
+                font.pixelSize: Typography.contentTitle
                 wrapMode: Text.Wrap
             }
             Text {
                 text: "Version " + (modsTab.selectedMod.version || "—")
                 color: Colors.accent
-                font.pixelSize: 14
+                font.pixelSize: Typography.control
             }
             Text {
                 Layout.fillWidth: true
                 text: modsTab.selectedMod.authors ? "By " + modsTab.selectedMod.authors : "Author not declared"
                 color: Colors.subtext
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 wrapMode: Text.Wrap
             }
             Text {
                 Layout.fillWidth: true
                 text: modsTab.selectedMod.description || "No description declared in this mod's metadata."
                 color: Colors.text
-                font.pixelSize: 14
+                font.pixelSize: Typography.control
                 wrapMode: Text.Wrap
                 textFormat: Text.PlainText
             }
@@ -411,7 +411,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 text: modsTab.selectedMod.fileName || ""
                 color: Colors.subtext
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 wrapMode: Text.WrapAnywhere
             }
         }

@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 Rectangle {
     id: panel
+    objectName: "instanceQuickSettings"
     required property var controller
     readonly property var contents: controller.details
     readonly property var settings: controller.launchSettings
@@ -50,7 +51,7 @@ Rectangle {
         Text {
             text: "Quick settings"
             font.family: Colors.displayFont
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             font.letterSpacing: 2
             color: Colors.bone
         }
@@ -59,7 +60,7 @@ Rectangle {
             Text {
                 text: "Max memory"
                 color: Colors.text
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
             }
             Item {
                 Layout.fillWidth: true
@@ -67,7 +68,7 @@ Rectangle {
             Text {
                 text: (memorySlider.value / 1024).toFixed(memorySlider.value % 1024 ? 1 : 0) + " GiB"
                 color: Colors.accent
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 font.weight: Font.Bold
             }
         }
@@ -79,17 +80,24 @@ Rectangle {
             to: Math.max(32768, panel.values.maxMemory || 4096)
             stepSize: 512
             value: panel.values.maxMemory || 4096
+            // Keys and controllers move in steps; save once they stop.
             onMoved: if (!pressed)
-                panel.save("maxMemory", value)
+                memorySave.restart()
             onPressedChanged: if (!pressed)
                 panel.save("maxMemory", value)
+            Timer {
+                id: memorySave
+                interval: 500
+                onTriggered: panel.save("maxMemory", memorySlider.value)
+            }
+            Component.onDestruction: if (memorySave.running) panel.save("maxMemory", value)
         }
         RowLayout {
             Layout.fillWidth: true
             Text {
                 text: "Play as"
                 color: Colors.text
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
             }
             Item {
                 Layout.fillWidth: true
@@ -107,7 +115,7 @@ Rectangle {
             Text {
                 text: "While playing"
                 color: Colors.text
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
             }
             Item {
                 Layout.fillWidth: true

@@ -23,32 +23,58 @@ Item {
         screenshot: hero.info.screenshot || ""
         showScreenshot: controller.screenshotFor(contents.instanceId, "hero")
     }
+    ActionButton {
+        id: backButton
+        objectName: "instanceBackButton"
+        anchors { left: parent.left; top: parent.top; leftMargin: 32; topMargin: hero.compact ? 14 : 24 }
+        implicitWidth: 100
+        implicitHeight: 36
+        text: qsTr("Back")
+        onClicked: {
+            if (hero.controller.canGoBack) hero.controller.back();
+            else if (hero.compact) hero.controller.instanceTab = "overview";
+            else hero.controller.navigate("library");
+        }
+        contentItem: Item {
+            implicitWidth: backContent.implicitWidth
+            implicitHeight: backContent.implicitHeight
+            RowLayout {
+                id: backContent
+                anchors.centerIn: parent
+                spacing: 6
+                LineIcon { name: "back"; implicitWidth: 16; implicitHeight: 16; tint: Colors.text }
+                Text { text: backButton.text; color: Colors.text; font.pixelSize: Typography.body; verticalAlignment: Text.AlignVCenter }
+            }
+        }
+    }
     RowLayout {
         visible: hero.compact
         anchors {
-            left: parent.left
+            left: backButton.right
             right: parent.right
             verticalCenter: parent.verticalCenter
-            margins: 32
+            leftMargin: 12
+            rightMargin: 32
         }
         spacing: 8
         TextLink {
+            Layout.maximumWidth: Math.max(120, hero.width * 0.42)
             text: hero.info.name || ""
             tint: Colors.subtext
             underline: false
-            pixelSize: 13
+            pixelSize: Typography.body
             Accessible.name: "Back to instance overview"
             onClicked: hero.controller.openTab("overview")
         }
         Text {
             text: "/"
             color: Colors.subtext
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         Text {
             text: ({ mods: "Mods", resourcepacks: "Resource packs", shaders: "Shaders", worlds: "Worlds", servers: "Servers", screenshots: "Screenshots", logs: "Logs" })[controller.instanceTab] || ""
             color: Colors.text
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         Item {
             Layout.fillWidth: true
@@ -57,20 +83,6 @@ Item {
             text: "Instance settings"
             onClicked: controller.editSettings(contents.instanceId)
         }
-    }
-    TextLink {
-        anchors {
-            left: parent.left
-            top: parent.top
-            leftMargin: 36
-            topMargin: 24
-        }
-        visible: !hero.compact
-        text: "← Back"
-        tint: Colors.subtext
-        underline: false
-        pixelSize: 13
-        onClicked: controller.back()
     }
     RowLayout {
         visible: !hero.compact
@@ -96,7 +108,7 @@ Item {
                 text: hero.info.name || "Instance unavailable"
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: hero.compact ? 32 : 44
+                font.pixelSize: hero.compact ? Typography.heroCompact : Typography.hero
                 font.letterSpacing: 1
                 elide: Text.ElideRight
                 RenameTarget { onRenameRequested: hero.controller.renameInstance(contents.instanceId) }
@@ -105,14 +117,14 @@ Item {
                 Layout.fillWidth: true
                 text: "Minecraft " + (hero.info.version || "?") + " · " + (hero.info.loader || "") + " " + (hero.info.loaderVersion || "") + " · " + (hero.info.mods || 0) + " mods"
                 color: Colors.subtext
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 elide: Text.ElideRight
             }
         }
         ActionButton {
             text: controller.preferences.favorites.indexOf(contents.instanceId) >= 0 ? "★" : "☆"
             compact: true
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             Accessible.name: "Toggle favorite"
             ToolTip.visible: hovered
             ToolTip.text: "Favorite"
@@ -147,7 +159,7 @@ Item {
         ActionButton {
             compact: true
             text: "⋯"
-            font.pixelSize: 18
+            font.pixelSize: Typography.titleSmall
             Accessible.name: "Instance settings"
             ToolTip.visible: hovered
             ToolTip.text: "Instance settings"
@@ -159,6 +171,7 @@ Item {
                 ThemedMenuItem { text: "Rename instance"; onTriggered: controller.renameInstance(contents.instanceId) }
                 ThemedMenuItem { text: "Minecraft & loader"; onTriggered: controller.editVersions(contents.instanceId) }
                 ThemedMenuItem { text: "Duplicate instance"; onTriggered: controller.duplicateInstance(contents.instanceId) }
+                ThemedMenuItem { text: "Open in Prism Launcher…"; visible: controller.prismShortcuts !== false; height: visible ? implicitHeight : 0; onTriggered: controller.instances.editInPrism(contents.instanceId) }
                 ThemedMenuItem { text: "Move to group…"; onTriggered: controller.moveToGroup(contents.instanceId) }
             }
         }

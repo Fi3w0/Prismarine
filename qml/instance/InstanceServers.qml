@@ -34,14 +34,14 @@ ColumnLayout {
             text: "Servers"
             color: Colors.bone
             font.family: Colors.displayFont
-            font.pixelSize: 28
+            font.pixelSize: Typography.contentTitle
             font.letterSpacing: 2
         }
         Text {
             Layout.alignment: Qt.AlignBaseline
             text: serversTab.list ? serversTab.list.servers.length + " in the multiplayer list" : ""
             color: Colors.subtext
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         Item {
             Layout.fillWidth: true
@@ -52,7 +52,7 @@ ColumnLayout {
             visible: !!serversTab.list && serversTab.list.servers.length > 4
             Layout.preferredWidth: 220
             placeholderText: "Search servers…"
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
         }
         ActionButton {
             text: "↻ Refresh"
@@ -111,7 +111,7 @@ ColumnLayout {
                         text: (row.modelData.name || "?").charAt(0).toUpperCase()
                         color: Colors.subtext
                         font.family: Colors.pixelFont
-                        font.pixelSize: 20
+                        font.pixelSize: Typography.sectionTitle
                     }
                 }
                 ColumnLayout {
@@ -122,20 +122,20 @@ ColumnLayout {
                         Text {
                             text: row.modelData.name || "Minecraft Server"
                             color: Colors.text
-                            font.pixelSize: 14
+                            font.pixelSize: Typography.control
                             font.weight: Font.DemiBold
                         }
                         Text {
                             text: row.modelData.address
                             color: Colors.subtext
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                         }
                     }
                     Text {
                         Layout.fillWidth: true
                         text: row.online ? (row.status.motd || "A Minecraft server") : row.status.state === "pinging" ? "Pinging…" : (row.status.reason || "Offline")
                         color: row.online ? Colors.text : Colors.subtext
-                        font.pixelSize: 12
+                        font.pixelSize: Typography.bodySmall
                         elide: Text.ElideRight
                         maximumLineCount: 1
                     }
@@ -143,7 +143,7 @@ ColumnLayout {
                         visible: row.online && !!row.status.version
                         text: row.status.version || ""
                         color: Colors.subtext
-                        font.pixelSize: 10
+                        font.pixelSize: Typography.badge
                     }
                 }
                 ColumnLayout {
@@ -152,7 +152,7 @@ ColumnLayout {
                         Layout.alignment: Qt.AlignRight
                         text: row.online ? row.status.players + " / " + row.status.max : "—"
                         color: Colors.text
-                        font.pixelSize: 13
+                        font.pixelSize: Typography.body
                         font.weight: Font.DemiBold
                     }
                     Row {
@@ -175,7 +175,7 @@ ColumnLayout {
                         visible: row.online
                         text: (row.status.latency || 0) + " ms"
                         color: Colors.subtext
-                        font.pixelSize: 10
+                        font.pixelSize: Typography.badge
                     }
                 }
                 ActionButton {
@@ -194,7 +194,7 @@ ColumnLayout {
                     primary: true
                     implicitWidth: 88
                     implicitHeight: 36
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                     onClicked: if (serversTab.list.join(row.modelData.index)) {
                         serversTab.controller.notify("Joining " + (row.modelData.name || row.modelData.address) + "…");
                         serversTab.controller.followLaunch(serversTab.contents.instanceId);
@@ -220,7 +220,7 @@ ColumnLayout {
             horizontalAlignment: Text.AlignHCenter
             text: "No servers yet.\nAdd one here or in Minecraft's multiplayer screen."
             color: Colors.subtext
-            font.pixelSize: 14
+            font.pixelSize: Typography.control
         }
     }
     ConfirmDialog {
@@ -255,7 +255,7 @@ ColumnLayout {
                 text: "Add server"
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 20
+                font.pixelSize: Typography.sectionTitle
             }
             InputField {
                 id: serverName

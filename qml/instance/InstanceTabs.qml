@@ -63,7 +63,7 @@ RowLayout {
                     text: tab.modelData.title
                     color: tab.checked ? Colors.bone : tab.hovered ? Colors.text : Colors.subtext
                     font.family: Colors.displayFont
-                    font.pixelSize: 14
+                    font.pixelSize: Typography.control
                     font.letterSpacing: 1.5
                 }
                 Rectangle {
@@ -78,7 +78,7 @@ RowLayout {
                         anchors.centerIn: parent
                         text: tab.count
                         color: Colors.subtext
-                        font.pixelSize: 10
+                        font.pixelSize: Typography.badge
                     }
                 }
             }
@@ -99,15 +99,5 @@ RowLayout {
                 }
             }
         }
-    }
-    Item {
-        Layout.fillWidth: true
-    }
-    TextLink {
-        text: "Edit in Prism dialog ↗"
-        tint: Colors.subtext
-        underline: false
-        visible: !!controller.details.instanceId && parent.width > 1080
-        onClicked: controller.instances.editInPrism(controller.details.instanceId)
     }
 }

@@ -25,7 +25,7 @@ GridView {
             objectName: "screenshotSearch"
             width: Math.min(320, parent.width)
             placeholderText: "Search " + contents.screenshots.length + " screenshots by date or name…"
-            font.pixelSize: 13
+            font.pixelSize: Typography.body
             onTextChanged: screenshots.query = text.trim()
         }
     }
@@ -38,26 +38,39 @@ GridView {
         width: screenshots.cellWidth - 16
         height: screenshots.cellHeight - 16
         spacing: 8
-        Image {
+        AbstractButton {
+            id: shotButton
             Layout.fillWidth: true
             Layout.fillHeight: true
-            source: shot.modelData.url
-            sourceSize.width: 600
-            fillMode: Image.PreserveAspectCrop
-            clip: true
-            asynchronous: true
-            TapHandler {
-                onTapped: {
-                    screenshots.selectedShot = shot.modelData;
-                    shotPreview.open();
-                }
+            implicitWidth: 100
+            implicitHeight: 100
+            padding: 0
+            Accessible.name: qsTr("View screenshot from %1").arg(shot.modelData.date)
+            onClicked: {
+                screenshots.selectedShot = shot.modelData;
+                shotPreview.open();
+            }
+            background: Item {}
+            contentItem: Image {
+                source: shot.modelData.url
+                sourceSize.width: 600
+                fillMode: Image.PreserveAspectCrop
+                clip: true
+                asynchronous: true
+            }
+            Rectangle {
+                anchors.fill: parent
+                color: "transparent"
+                border.width: 2
+                border.color: Colors.accent
+                visible: shotButton.visualFocus
             }
         }
         Text {
             Layout.fillWidth: true
             text: modelData.date
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
         }
         ActionButton {
             Layout.fillWidth: true
@@ -74,7 +87,7 @@ GridView {
         text: "Take a screenshot in Minecraft with F2.\nIt will appear here."
         color: Colors.subtext
         horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: 15
+        font.pixelSize: Typography.bodyLarge
     }
     MotionDialog {
         id: shotPreview

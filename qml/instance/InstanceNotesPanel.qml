@@ -22,13 +22,13 @@ Rectangle {
         Text {
             text: "Notes"
             font.family: Colors.displayFont
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             font.letterSpacing: 2
             color: Colors.bone
         }
         Text {
             text: "Private notes for this instance"
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             color: Colors.subtext
         }
         ScrollView {
@@ -42,11 +42,11 @@ Rectangle {
                 color: Colors.text
                 placeholderTextColor: Colors.subtext
                 wrapMode: TextEdit.Wrap
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 background: Rectangle {
                     radius: 8
                     color: Colors.mantle
-                    border.color: notes.activeFocus ? Colors.accent : Colors.border
+                    border.color: notes.activeFocus ? Colors.accent : Colors.outline
                 }
                 onTextChanged: if (!contents.loading)
                     controller.preferences.setNote(contents.instanceId, text)

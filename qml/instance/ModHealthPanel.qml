@@ -47,7 +47,7 @@ Rectangle {
                 visible: !(panel.current && panel.health.checking)
                 text: "!"
                 color: panel.tone
-                font.pixelSize: 16
+                font.pixelSize: Typography.subtitle
                 font.weight: Font.Black
             }
             Text {
@@ -58,20 +58,20 @@ Rectangle {
                       + (panel.health.warnings ? panel.health.warnings + (panel.health.warnings === 1 ? " warning" : " warnings") : "")
                       + (panel.health.errors ? " — the game will likely fail to start" : "")
                 color: Colors.text
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
             TextLink {
                 text: "Check again"
-                pixelSize: 12
+                pixelSize: Typography.bodySmall
                 enabled: panel.current && !panel.health.checking
                 onClicked: panel.health.recheck()
             }
             TextLink {
                 visible: panel.issues.length > 0
                 text: panel.expanded ? "Hide" : "Show"
-                pixelSize: 12
+                pixelSize: Typography.bodySmall
                 onClicked: panel.expanded = !panel.expanded
             }
         }
@@ -100,7 +100,7 @@ Rectangle {
                             anchors.centerIn: parent
                             text: issue.modelData.severity === "error" ? "ERROR" : "WARNING"
                             color: parent.tone
-                            font.pixelSize: 10
+                            font.pixelSize: Typography.badge
                             font.weight: Font.Bold
                             font.letterSpacing: 1
                         }
@@ -109,8 +109,8 @@ Rectangle {
                         Layout.fillWidth: true
                         spacing: 2
                         Layout.minimumWidth: 160
-                        Text { Layout.fillWidth: true; text: issue.modelData.title; color: Colors.text; font.pixelSize: 13; font.weight: Font.DemiBold; elide: Text.ElideRight }
-                        Text { Layout.fillWidth: true; text: issue.modelData.detail; color: Colors.subtext; font.pixelSize: 12; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }
+                        Text { Layout.fillWidth: true; text: issue.modelData.title; color: Colors.text; font.pixelSize: Typography.body; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                        Text { Layout.fillWidth: true; text: issue.modelData.detail; color: Colors.subtext; font.pixelSize: Typography.bodySmall; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }
                     }
                     Repeater {
                         model: issue.modelData.fixes
@@ -121,7 +121,7 @@ Rectangle {
                             implicitHeight: 32
                             implicitWidth: Math.min(220, contentItem.implicitWidth + 28)
                             Layout.minimumWidth: implicitWidth
-                            font.pixelSize: 12
+                            font.pixelSize: Typography.bodySmall
                             primary: index === 0
                             onClicked: panel.apply(modelData)
                         }
@@ -132,7 +132,7 @@ Rectangle {
         TextLink {
             visible: panel.expanded && panel.issues.length > panel.previewCount
             text: panel.showAll ? "Show fewer" : "Show all " + panel.issues.length + " problems"
-            pixelSize: 12
+            pixelSize: Typography.bodySmall
             onClicked: panel.showAll = !panel.showAll
         }
     }

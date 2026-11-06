@@ -20,6 +20,7 @@ ItemDelegate {
     onClicked: inspectRequested(modelData)
     background: Rectangle {
         radius: 0
+        border.color: modRow.visualFocus ? Colors.accent : "transparent"
         color: modRow.selected ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.08) : modRow.hovered ? Colors.surfaceHi : index % 2 ? Colors.rowAlt : Colors.surface
     }
     contentItem: RowLayout {
@@ -41,7 +42,7 @@ ItemDelegate {
                 Layout.fillWidth: true
                 text: modRow.modelData.name
                 color: modRow.modelData.enabled ? Colors.text : Colors.subtext
-                font.pixelSize: 14
+                font.pixelSize: Typography.control
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -49,7 +50,7 @@ ItemDelegate {
                 Layout.fillWidth: true
                 text: modRow.modelData.fileName
                 color: Colors.subtext
-                font.pixelSize: 11
+                font.pixelSize: Typography.caption
                 elide: Text.ElideRight
             }
         }
@@ -57,7 +58,7 @@ ItemDelegate {
             Layout.preferredWidth: 160
             text: modRow.availableUpdate ? modRow.modelData.version + " → " + modRow.availableUpdate.version : modRow.modelData.version
             color: modRow.availableUpdate ? Colors.accent : Colors.text
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
             elide: Text.ElideRight
             ToolTip.visible: modRow.availableUpdate && versionHover.hovered
             ToolTip.text: modRow.availableUpdate ? "Update available: " + modRow.availableUpdate.newFileName : ""
@@ -67,7 +68,7 @@ ItemDelegate {
             Layout.preferredWidth: 100
             text: modRow.modelData.side
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
         }
         ToggleSwitch {
             Layout.preferredWidth: 66

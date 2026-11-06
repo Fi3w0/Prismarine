@@ -26,7 +26,7 @@ Rectangle {
             Text {
                 text: "Installed mods"
                 font.family: Colors.displayFont
-                font.pixelSize: 20
+                font.pixelSize: Typography.sectionTitle
                 font.letterSpacing: 2
                 color: Colors.bone
             }
@@ -69,14 +69,14 @@ Rectangle {
                                 Layout.fillWidth: true
                                 text: modelData.name
                                 color: Colors.text
-                                font.pixelSize: 12
+                                font.pixelSize: Typography.bodySmall
                                 font.weight: Font.DemiBold
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: modelData.version
                                 color: Colors.subtext
-                                font.pixelSize: 11
+                                font.pixelSize: Typography.caption
                             }
                         }
                     }
@@ -87,7 +87,7 @@ Rectangle {
             visible: !contents.loading && !contents.mods.length
             text: "No mods installed. Browse content to find your next addition."
             color: Colors.subtext
-            font.pixelSize: 12
+            font.pixelSize: Typography.bodySmall
         }
     }
 }

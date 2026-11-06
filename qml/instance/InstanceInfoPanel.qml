@@ -4,11 +4,13 @@ import QtQuick.Layouts
 
 Rectangle {
     id: panel
+    objectName: "instanceInfoPanel"
     required property var controller
     readonly property var contents: controller.details
     readonly property var info: contents.info
     property real panelWidth: width
     Layout.fillWidth: true
+    Layout.fillHeight: true
     // Grows when the update row appears, so nothing spills past the border.
     Layout.preferredHeight: Math.max(292, rows.implicitHeight + 36)
     radius: 12
@@ -24,7 +26,7 @@ Rectangle {
         Text {
             text: "Ready to play"
             font.family: Colors.displayFont
-            font.pixelSize: 20
+            font.pixelSize: Typography.sectionTitle
             font.letterSpacing: 2
             color: Colors.bone
         }
@@ -66,19 +68,19 @@ Rectangle {
                     Text {
                         text: modelData.mark
                         color: modelData.mark === "✓" ? Colors.success : Colors.brass
-                        font.pixelSize: 14
+                        font.pixelSize: Typography.control
                     }
                     Text {
                         Layout.fillWidth: true
                         text: modelData.text
                         color: Colors.text
-                        font.pixelSize: 13
+                        font.pixelSize: Typography.body
                         elide: Text.ElideRight
                     }
                     Text {
                         text: modelData.detail
                         color: Colors.subtext
-                        font.pixelSize: 11
+                        font.pixelSize: Typography.caption
                         visible: panel.width > 660
                     }
                 }
@@ -102,13 +104,13 @@ Rectangle {
                 Text {
                     text: "↑"
                     color: Colors.accent
-                    font.pixelSize: 14
+                    font.pixelSize: Typography.control
                 }
                 Text {
                     Layout.fillWidth: true
                     text: parent.parent.count + (parent.parent.count === 1 ? " mod has an update" : " mods have updates") + " on Modrinth"
                     color: Colors.text
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                     elide: Text.ElideRight
                 }
                 TextLink {
