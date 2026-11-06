@@ -15,7 +15,7 @@ set(QML_SOURCES
      qml/browse/BrowseSidebar.qml qml/browse/CurseForgeKeyDialog.qml
     qml/browse/InstallReviewDialog.qml
     qml/accounts/SkinPreview.qml qml/shell/PackImportDialog.qml
-    qml/Main.qml  qml/theme/Colors.qml 
+    qml/Main.qml qml/theme/ColorPalette.qml qml/theme/Colors.qml qml/theme/Typography.qml
     qml/shell/NavigationRail.qml  qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
     qml/pages/HomePage.qml qml/pages/LibraryPage.qml qml/pages/InstancePage.qml
     qml/pages/SettingsPage.qml qml/pages/AccountsPage.qml qml/pages/BrowsePage.qml
@@ -66,6 +66,7 @@ foreach(file IN LISTS QML_SOURCES)
     set_source_files_properties("${file}" PROPERTIES QT_RESOURCE_ALIAS "${name}")
 endforeach()
 set_source_files_properties(qml/theme/Colors.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(qml/theme/Typography.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(prismarine URI Prismarine VERSION 1.0 QML_FILES ${QML_SOURCES})
 set(LOGO_ASSETS assets/logos/shard-o.svg assets/logos/shard-k.svg assets/logos/desktop.svg)
 set(PROFILE_ASSETS  )
