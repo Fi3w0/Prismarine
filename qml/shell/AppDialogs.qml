@@ -104,7 +104,7 @@ Item {
         confirmText: "I understand, launch"
         danger: true
         onConfirmed: {
-            dialogs.controller.multiAccountAccepted = true;
+            dialogs.controller.launching.multiAccountAccepted = true;
             dialogs.controller.launchAs(instanceId, account);
         }
     }

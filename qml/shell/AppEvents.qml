@@ -136,7 +136,7 @@ Item {
             events.controller.applyWhilePlaying();
             const p = events.controller.launchProgress, s = events.controller.session;
             // An aborted launch whose game still appears is stopped right away.
-            if (p && p.abortRequested && !events.controller.gameRunningAtLaunch && s.instanceId === p.instanceId && s.processFound && s.state !== "exited") s.stop();
+            if (p && p.abortRequested && !events.controller.launching.gameRunningAtLaunch && s.instanceId === p.instanceId && s.processFound && s.state !== "exited") s.stop();
             if (!p || !p.active || s.instanceId !== p.instanceId || p.stage === "ready" || p.stage === "failed") return;
             if (s.state === "exited") p.reach("failed", "The game closed while starting. Now playing has the log and a crash check.");
             else if (s.menuReached) p.reach("ready", "In the main menu. Have fun!");

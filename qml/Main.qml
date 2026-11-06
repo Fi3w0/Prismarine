@@ -145,17 +145,6 @@ ApplicationWindow {
         const current = details.profiles.find(it => it.current);
         dialogHost.profilePrompt.ask(current ? current.name : "");
     }
-    property bool multiAccountAccepted: false
-    function launchAs(id, account) {
-        if (!altLaunch || !preferences.multiAccount) return;
-        if (!multiAccountAccepted) {
-            dialogHost.multiAccountWarning.instanceId = id;
-            dialogHost.multiAccountWarning.account = account;
-            dialogHost.multiAccountWarning.open();
-            return;
-        }
-        if (altLaunch.launchAs(id, account)) notify("Preparing a copy for " + account + "…");
-    }
     // Dragging an instance (card, row or sidebar entry) onto a sidebar group header.
     property string draggingId: ""
     property string draggingName: ""
@@ -295,26 +284,6 @@ ApplicationWindow {
             details.refresh();
         notify("Library refreshed");
     }
-    // Known mod errors (from the last health check of this instance) ask before launching.
-    function play(id, name, force = false) {
-        if (!force && modHealth && modHealth.instanceId === id && !modHealth.checking && modHealth.errors > 0) {
-            dialogHost.launchWarning.instanceId = id;
-            dialogHost.launchWarning.name = name;
-            dialogHost.launchWarning.open();
-            return;
-        }
-        // Prism can run an instance only once; offer the useful choices instead.
-        if (id && instances.isRunning(id)) {
-            dialogHost.alreadyRunning.instanceId = id;
-            dialogHost.alreadyRunning.name = name;
-            dialogHost.alreadyRunning.open();
-            return;
-        }
-        if (!id || !instances.launch(id))
-            return;
-        notify("Launching " + name + "…");
-        followLaunch(id);
-    }
     // Opens Browse for an instance with a search already typed, e.g. a missing dependency.
     property string pendingBrowseQuery: ""
     function browseFor(id, text) {
@@ -325,26 +294,6 @@ ApplicationWindow {
     }
     function exportInstance(id) {
         dialogHost.exportPack.openFor(id);
-    }
-    // Stops the launch shown on the launch screen: the game if it is already running,
-    // otherwise the Prism process started for it (see LaunchProgress::abort).
-    // Set when a launch starts; Abort never stops a game that was already running then.
-    property bool gameRunningAtLaunch: false
-    function abortLaunch() {
-        if (!launchProgress || !launchProgress.active) return;
-        if (!gameRunningAtLaunch && session && session.instanceId === launchProgress.instanceId && session.processFound && session.state !== "exited")
-            session.stop();
-        launchProgress.abort();
-        notify("Launch aborted");
-    }
-    function followLaunch(id) {
-        gameRunningAtLaunch = instances.isRunning(id);
-        if (launchProgress) {
-            launchProgress.start(id);
-            dialogHost.launchOverlay.open();
-        }
-        if (session && session.start(id))
-            navigate("session");
     }
     function select(row) {
         if (!instances.count)
@@ -398,32 +347,6 @@ ApplicationWindow {
         page = preferences.startPage;
         applyPreferences();
         refresh();
-    }
-    // "While playing": minimize or hide this window once the game window is up,
-    // and bring it back when the game closes.
-    property string awayForGame: ""
-    function applyWhilePlaying() {
-        const s = session;
-        if (!s || !s.active) return;
-        if (s.state === "exited") {
-            if (awayForGame) {
-                const wasHidden = awayForGame === "hide";
-                awayForGame = "";
-                if (wasHidden) show();
-                showNormal();
-                raise();
-                requestActivate();
-            }
-            return;
-        }
-        if (awayForGame || !(s.graphicsReady || s.menuReached)) return;
-        const info = instances.getById(s.instanceId).instanceId ? instances.getById(s.instanceId) : (instances.copies().find(it => it.instanceId === s.instanceId) || {});
-        let mode = preferences.whilePlayingFor(info.altOf || s.instanceId);
-        // Hiding needs reliable exit detection, or the window could not come back.
-        if (mode === "hide" && !s.tracksProcess) mode = "minimize";
-        if (mode === "keep") return;
-        awayForGame = mode;
-        if (mode === "hide") hide(); else showMinimized();
     }
     onDebugDialogChanged: Qt.callLater(function() {
         const id = current.instanceId || (instances.allInstances[0] || {}).instanceId || "";
@@ -647,6 +570,13 @@ ApplicationWindow {
         confirmLabel: appWindow.gamepad ? appWindow.gamepad.confirmLabel : "A"
         cancelLabel: appWindow.gamepad ? appWindow.gamepad.cancelLabel : "B"
     }
+    LaunchActions { id: launchActions; controller: appWindow }
+    readonly property alias launching: launchActions
+    function play(id, name, force = false) { launchActions.play(id, name, force); }
+    function launchAs(id, account) { launchActions.launchAs(id, account); }
+    function abortLaunch() { launchActions.abortLaunch(); }
+    function followLaunch(id) { launchActions.followLaunch(id); }
+    function applyWhilePlaying() { launchActions.applyWhilePlaying(); }
     AppEvents { controller: appWindow }
     AppDialogs {
         id: dialogHost
