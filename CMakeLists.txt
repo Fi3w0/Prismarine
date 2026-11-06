@@ -44,6 +44,9 @@ if(PRISMARINE_PACKAGE_CHECK)
 endif()
 
 include(CTest)
+if(BUILD_TESTING)
+    include(cmake/Checks.cmake)
+endif()
 # Additional private suites are available in local checkouts with tests/.
 if(BUILD_TESTING AND EXISTS "${PROJECT_SOURCE_DIR}/tests")
     include(cmake/Tests.cmake)
