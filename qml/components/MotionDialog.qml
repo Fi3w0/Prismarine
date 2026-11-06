@@ -13,7 +13,7 @@ Dialog {
     bottomPadding: 20
     Overlay.modal: Rectangle {
         color: Colors.light ? Qt.rgba(0.08, 0.14, 0.17, 0.32) : Qt.rgba(0.01, 0.03, 0.05, 0.62)
-        Behavior on opacity { NumberAnimation { duration: Colors.animations ? 180 : 0 } }
+        Behavior on opacity { NumberAnimation { duration: Colors.animations ? Colors.motionExitDuration : 0; easing.type: Easing.OutCubic } }
     }
     background: Rectangle {
         color: Colors.surface
@@ -40,7 +40,7 @@ Dialog {
                 text: control.title
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 24
+                font.pixelSize: Typography.emptyTitle
                 font.letterSpacing: 1
                 elide: Text.ElideRight
             }
@@ -49,7 +49,7 @@ Dialog {
                 visible: !!control.subtitle
                 text: control.subtitle
                 color: Colors.subtext
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 wrapMode: Text.Wrap
                 lineHeight: 1.2
             }
@@ -61,7 +61,7 @@ Dialog {
             height: 34
             Accessible.name: "Close"
             onClicked: control.reject()
-            background: Rectangle { radius: 17; color: parent.hovered ? Colors.surfaceHi : "transparent" }
+            background: Rectangle { border.color: parent.visualFocus ? Colors.accent : "transparent"; radius: 17; color: parent.hovered ? Colors.surfaceHi : "transparent" }
             contentItem: LineIcon { name: "close"; tint: Colors.subtext; implicitWidth: 16; implicitHeight: 16 }
         }
     }
@@ -81,14 +81,14 @@ Dialog {
     }
     enter: Transition {
         ParallelAnimation {
-            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Colors.animations ? 240 : 0; easing.type: Easing.OutCubic }
-            NumberAnimation { property: "scale"; from: 0.96; to: 1; duration: Colors.animations ? 320 : 0; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Colors.animations ? Colors.motionEnterDuration : 0; easing.type: Easing.OutCubic }
+            NumberAnimation { property: "scale"; from: 0.985; to: 1; duration: Colors.animations ? Colors.motionEnterDuration : 0; easing.type: Easing.OutCubic }
         }
     }
     exit: Transition {
         ParallelAnimation {
-            NumberAnimation { property: "opacity"; to: 0; duration: Colors.animations ? 180 : 0; easing.type: Easing.InCubic }
-            NumberAnimation { property: "scale"; to: 0.98; duration: Colors.animations ? 180 : 0 }
+            NumberAnimation { property: "opacity"; to: 0; duration: Colors.animations ? Colors.motionExitDuration : 0; easing.type: Easing.InCubic }
+            NumberAnimation { property: "scale"; to: 0.99; duration: Colors.animations ? Colors.motionExitDuration : 0; easing.type: Easing.InCubic }
         }
     }
 }
