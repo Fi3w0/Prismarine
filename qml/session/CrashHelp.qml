@@ -15,7 +15,7 @@ ColumnLayout {
         visible: !help.findings.length
         text: help.diagnosis && help.diagnosis.crashed === false ? "No crash found in the latest log." : "No common cause was found. Share the log to ask for help."
         color: Colors.subtext
-        font.pixelSize: 12
+        font.pixelSize: Typography.bodySmall
         wrapMode: Text.Wrap
     }
     Repeater {
@@ -41,7 +41,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     text: item.modelData.title
                     color: Colors.text
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                     font.weight: Font.DemiBold
                     wrapMode: Text.Wrap
                 }
@@ -49,7 +49,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     text: item.modelData.detail
                     color: Colors.subtext
-                    font.pixelSize: 11
+                    font.pixelSize: Typography.caption
                     wrapMode: Text.Wrap
                     maximumLineCount: 6
                     elide: Text.ElideRight

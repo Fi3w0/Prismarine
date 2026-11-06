@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "gamemonitor.h"
 #include "gamesession.h"
 #include "../library/instancemodel.h"
@@ -153,7 +154,17 @@ void GameMonitor::sampleSystem()
         gpu.insert("history", history);
         value = gpu;
     }
-    m_system = {{"cpuPercent", qBound(0.0, cpuPercent, 100.0)}, {"cores", QThread::idealThreadCount()}, {"ramUsedMiB", usedMiB},
+    // Prismarine's own footprint: resident memory and share of one core since the last sample.
+    const Sys::Process self = Sys::process(QCoreApplication::applicationPid(), m_procRoot);
+    const double selfMiB = self.residentBytes > 0 ? double(self.residentBytes) / (1024.0 * 1024.0) : 0;
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    double selfCpu = 0;
+    if (self.cpuMs >= 0 && m_lastSelfCpuMs >= 0 && now > m_lastSelfSampleMs)
+        selfCpu = qMax(0.0, 100.0 * double(self.cpuMs - m_lastSelfCpuMs) / double(now - m_lastSelfSampleMs));
+    m_lastSelfCpuMs = self.cpuMs;
+    m_lastSelfSampleMs = now;
+    if (selfMiB > 0) push(m_selfHistory, selfMiB);
+    m_system = {{"selfMiB", selfMiB}, {"selfCpuPercent", selfCpu}, {"selfHistory", m_selfHistory}, {"cpuPercent", qBound(0.0, cpuPercent, 100.0)}, {"cores", QThread::idealThreadCount()}, {"ramUsedMiB", usedMiB},
                 {"ramTotalMiB", memory.totalMiB}, {"cpuHistory", m_cpuHistory}, {"ramHistory", m_ramHistory}, {"gpus", gpus}};
 }
 

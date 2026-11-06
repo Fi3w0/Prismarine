@@ -48,14 +48,14 @@ Flickable {
                     text: meter.title
                     color: Colors.bone
                     font.family: Colors.displayFont
-                    font.pixelSize: 18
+                    font.pixelSize: Typography.titleSmall
                     font.letterSpacing: 1.5
                     elide: Text.ElideRight
                 }
                 Text {
                     text: meter.value
                     color: meter.tint
-                    font.pixelSize: 20
+                    font.pixelSize: Typography.sectionTitle
                     font.weight: Font.Bold
                 }
             }
@@ -69,7 +69,7 @@ Flickable {
                 Layout.fillWidth: true
                 text: meter.detail
                 color: Colors.subtext
-                font.pixelSize: 11
+                font.pixelSize: Typography.caption
                 elide: Text.ElideRight
             }
         }
@@ -101,6 +101,15 @@ Flickable {
                 ceiling: view.system.ramTotalMiB || 0
                 tint: Colors.series[2]
             }
+            Meter {
+                objectName: "selfMeter"
+                visible: (view.system.selfMiB || 0) > 0
+                title: "Prismarine"
+                value: Math.round(view.system.selfMiB || 0) + " MiB"
+                detail: (view.system.selfCpuPercent || 0).toFixed(1) + "% of one core · this app only"
+                samples: view.system.selfHistory
+                tint: Colors.series[1]
+            }
             Repeater {
                 model: view.system.gpus || []
                 delegate: Meter {
@@ -130,14 +139,14 @@ Flickable {
                     text: "Running games"
                     color: Colors.bone
                     font.family: Colors.displayFont
-                    font.pixelSize: 18
+                    font.pixelSize: Typography.titleSmall
                     font.letterSpacing: 1.5
                 }
                 Text {
                     visible: view.games.length === 0
                     text: "No game is running right now."
                     color: Colors.subtext
-                    font.pixelSize: 13
+                    font.pixelSize: Typography.body
                 }
                 Repeater {
                     model: view.games
@@ -149,6 +158,12 @@ Flickable {
                         implicitHeight: 58
                         radius: 10
                         color: hover.hovered ? Colors.inset : "transparent"
+                        border.color: activeFocus ? Colors.accent : "transparent"
+                        activeFocusOnTab: true
+                        Accessible.role: Accessible.Button
+                        Accessible.name: qsTr("Open %1").arg(modelData.name)
+                        Keys.onSpacePressed: view.openGame(row.modelData.instanceId)
+                        Keys.onReturnPressed: view.openGame(row.modelData.instanceId)
                         HoverHandler { id: hover }
                         TapHandler { onTapped: view.openGame(row.modelData.instanceId) }
                         RowLayout {
@@ -162,7 +177,7 @@ Flickable {
                                     Layout.fillWidth: true
                                     text: row.modelData.name + (row.modelData.altOf ? "  ·  copy" : "")
                                     color: Colors.text
-                                    font.pixelSize: 14
+                                    font.pixelSize: Typography.control
                                     font.weight: Font.DemiBold
                                     elide: Text.ElideRight
                                 }
@@ -170,7 +185,7 @@ Flickable {
                                     text: (row.modelData.account ? "as " + row.modelData.account + " · " : "") + (row.modelData.state === "exited" ? "ended" : view.clock(row.modelData.elapsedSecs))
                                           + (row.modelData.pid ? " · pid " + row.modelData.pid : "")
                                     color: Colors.subtext
-                                    font.pixelSize: 12
+                                    font.pixelSize: Typography.bodySmall
                                 }
                             }
                             Repeater {
@@ -182,11 +197,11 @@ Flickable {
                                     required property var modelData
                                     spacing: 0
                                     Layout.preferredWidth: 76
-                                    Text { text: modelData.label; color: Colors.subtext; font.pixelSize: 11 }
-                                    Text { text: modelData.value; color: Colors.text; font.pixelSize: 15; font.weight: Font.Bold }
+                                    Text { text: modelData.label; color: Colors.subtext; font.pixelSize: Typography.caption }
+                                    Text { text: modelData.value; color: Colors.text; font.pixelSize: Typography.bodyLarge; font.weight: Font.Bold }
                                 }
                             }
-                            Text { text: "›"; color: Colors.subtext; font.pixelSize: 20 }
+                            Text { text: "›"; color: Colors.subtext; font.pixelSize: Typography.sectionTitle }
                         }
                         // How much of the used memory this game holds.
                         Rectangle {
@@ -206,7 +221,7 @@ Flickable {
             text: "Sampled every 2 seconds. Game CPU is a share of the whole machine."
                   + ((view.system.gpus || []).length ? "" : " This system does not report GPU load here.")
             color: Colors.subtext
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
             wrapMode: Text.Wrap
         }
     }

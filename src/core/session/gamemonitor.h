@@ -45,7 +45,8 @@ private:
     QHash<QString, GameSession *> m_sessions;
     QHash<qint64, quint64> m_lastProcTicks; // CPU milliseconds per game process at the last sample
     quint64 m_lastTotal = 0, m_lastBusy = 0; // machine CPU time: total and busy at the last sample
-    QVariantList m_games, m_cpuHistory, m_ramHistory;
+    QVariantList m_games, m_cpuHistory, m_ramHistory, m_selfHistory;
+    qint64 m_lastSelfCpuMs = -1, m_lastSelfSampleMs = 0;
     QVariantMap m_system;
     QVariantList m_nvidia;
     QHash<QString, QVariantList> m_gpuHistory, m_gameCpu;

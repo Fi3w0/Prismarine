@@ -48,44 +48,66 @@ Item {
             property bool closable: false
             readonly property bool selected: screen.current === key
             signal closeRequested
-            implicitWidth: Math.min(260, chipRow.implicitWidth + 28)
+            implicitWidth: Math.min(260, openButton.implicitWidth + (closable ? closeButton.width : 0))
             implicitHeight: 40
             radius: 10
             color: selected ? Qt.rgba(Colors.accent.r, Colors.accent.g, Colors.accent.b, 0.16) : chipHover.hovered ? Colors.inset : Colors.surface
-            border.color: selected ? Colors.accent : Colors.border
+            border.width: openButton.visualFocus ? 2 : 1
+            border.color: selected || openButton.visualFocus ? Colors.accent : Colors.border
             HoverHandler { id: chipHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { onTapped: screen.tab = chip.key }
-            RowLayout {
-                id: chipRow
-                anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
-                spacing: 8
-                Rectangle {
-                    implicitWidth: 8
-                    implicitHeight: 8
-                    radius: 4
-                    color: chip.live ? Colors.accent : Colors.subtext
-                    visible: chip.key !== "all"
+            AbstractButton {
+                id: openButton
+                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: chip.closable ? closeButton.left : parent.right }
+                leftPadding: 14
+                rightPadding: chip.closable ? 4 : 14
+                Accessible.name: chip.label
+                onClicked: screen.tab = chip.key
+                background: Item {}
+                contentItem: RowLayout {
+                    spacing: 8
+                    Rectangle {
+                        implicitWidth: 8
+                        implicitHeight: 8
+                        radius: 4
+                        color: chip.live ? Colors.accent : Colors.subtext
+                        visible: chip.key !== "all"
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: chip.label
+                        color: chip.selected ? Colors.text : Colors.subtext
+                        font.pixelSize: Typography.body
+                        font.weight: chip.selected ? Font.DemiBold : Font.Normal
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        visible: !!chip.sub
+                        text: chip.sub
+                        color: Colors.subtext
+                        font.pixelSize: Typography.caption
+                    }
                 }
-                Text {
-                    Layout.fillWidth: true
-                    text: chip.label
-                    color: chip.selected ? Colors.text : Colors.subtext
-                    font.pixelSize: 13
-                    font.weight: chip.selected ? Font.DemiBold : Font.Normal
-                    elide: Text.ElideRight
+            }
+            AbstractButton {
+                id: closeButton
+                visible: chip.closable
+                anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
+                width: 30
+                Accessible.name: qsTr("Close %1").arg(chip.label)
+                onClicked: chip.closeRequested()
+                background: Rectangle {
+                    anchors.margins: 4
+                    anchors.fill: parent
+                    radius: 7
+                    color: closeButton.hovered ? Colors.surfaceHi : "transparent"
+                    border.color: closeButton.visualFocus ? Colors.accent : "transparent"
                 }
-                Text {
-                    visible: !!chip.sub
-                    text: chip.sub
-                    color: Colors.subtext
-                    font.pixelSize: 11
-                }
-                Text {
-                    visible: chip.closable
+                contentItem: Text {
                     text: "✕"
                     color: Colors.subtext
-                    font.pixelSize: 11
-                    TapHandler { onTapped: chip.closeRequested() }
+                    font.pixelSize: Typography.caption
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                 }
             }
         }
@@ -123,13 +145,13 @@ Item {
         width: Math.min(560, parent.width - 64)
         visible: !screen.session.active && !screen.hardware
         spacing: 16
-        Text { Layout.alignment: Qt.AlignHCenter; text: "Nothing running"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: 30 }
+        Text { Layout.alignment: Qt.AlignHCenter; text: "Nothing running"; color: Colors.bone; font.family: Colors.displayFont; font.pixelSize: Typography.pageTitle }
         Text {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
             text: "Start an instance and its live log, memory use and launch steps appear here."
             color: Colors.subtext
-            font.pixelSize: 14
+            font.pixelSize: Typography.control
             wrapMode: Text.Wrap
         }
         Repeater {
@@ -148,8 +170,8 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 0
-                        Text { Layout.fillWidth: true; text: modelData.name; color: Colors.text; font.pixelSize: 14; font.weight: Font.DemiBold; elide: Text.ElideRight }
-                        Text { text: modelData.loader + " · " + modelData.version + " · " + modelData.lastPlayed; color: Colors.subtext; font.pixelSize: 12 }
+                        Text { Layout.fillWidth: true; text: modelData.name; color: Colors.text; font.pixelSize: Typography.control; font.weight: Font.DemiBold; elide: Text.ElideRight }
+                        Text { text: modelData.loader + " · " + modelData.version + " · " + modelData.lastPlayed; color: Colors.subtext; font.pixelSize: Typography.bodySmall }
                     }
                     ActionButton { text: "▶ Play"; primary: true; implicitWidth: 96; implicitHeight: 36; onClicked: screen.controller.play(modelData.instanceId, modelData.name) }
                 }
@@ -195,7 +217,7 @@ Item {
                             text: screen.exited ? (screen.session.diagnosis.crashed ? "CRASHED" : "SESSION ENDED") : screen.session.state === "starting" ? "STARTING" : "NOW PLAYING"
                             color: Colors.brass
                             font.family: Colors.displayFont
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                             font.letterSpacing: 2
                         }
                     }
@@ -204,7 +226,7 @@ Item {
                         text: screen.session.name
                         color: Colors.bone
                         font.family: Colors.displayFont
-                        font.pixelSize: 30
+                        font.pixelSize: Typography.pageTitle
                         font.letterSpacing: 1
                         elide: Text.ElideRight
                     }
@@ -223,12 +245,12 @@ Item {
                         Text {
                             text: modelData.label
                             color: Colors.subtext
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                         }
                         Text {
                             text: modelData.value
                             color: Colors.text
-                            font.pixelSize: 19
+                            font.pixelSize: Typography.cardTitle
                             font.weight: Font.Bold
                         }
                     }
@@ -279,7 +301,7 @@ Item {
                             text: "Launch"
                             color: Colors.bone
                             font.family: Colors.displayFont
-                            font.pixelSize: 20
+                            font.pixelSize: Typography.sectionTitle
                             font.letterSpacing: 2
                             Layout.bottomMargin: 4
                         }
@@ -291,14 +313,14 @@ Item {
                                 Text {
                                     text: modelData.done ? "✓" : "·"
                                     color: modelData.done ? Colors.accent : Colors.subtext
-                                    font.pixelSize: 13
+                                    font.pixelSize: Typography.body
                                     Layout.preferredWidth: 10
                                 }
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData.title
                                     color: modelData.done ? Colors.text : Colors.subtext
-                                    font.pixelSize: 13
+                                    font.pixelSize: Typography.body
                                     elide: Text.ElideRight
                                 }
                             }
@@ -322,7 +344,7 @@ Item {
                             text: "Crash helper"
                             color: Colors.bone
                             font.family: Colors.displayFont
-                            font.pixelSize: 20
+                            font.pixelSize: Typography.sectionTitle
                             font.letterSpacing: 2
                         }
                         CrashHelp {
@@ -352,13 +374,13 @@ Item {
                                 text: "Memory"
                                 color: Colors.bone
                                 font.family: Colors.displayFont
-                                font.pixelSize: 20
+                                font.pixelSize: Typography.sectionTitle
                                 font.letterSpacing: 2
                             }
                             Text {
                                 text: screen.session.memoryMiB ? (screen.session.memoryMiB / 1024).toFixed(1) + " GiB" + (screen.session.maxMemoryMiB ? " of " + (screen.session.maxMemoryMiB / 1024).toFixed(0) + " GiB" : "") : "—"
                                 color: Colors.subtext
-                                font.pixelSize: 11
+                                font.pixelSize: Typography.caption
                             }
                         }
                         MemoryGraph {
@@ -369,7 +391,7 @@ Item {
                             Layout.fillWidth: true
                             text: "Resident memory of the game process, sampled every few seconds."
                             color: Colors.subtext
-                            font.pixelSize: 11
+                            font.pixelSize: Typography.caption
                             wrapMode: Text.Wrap
                         }
                     }
@@ -394,13 +416,13 @@ Item {
                                 text: "CPU"
                                 color: Colors.bone
                                 font.family: Colors.displayFont
-                                font.pixelSize: 20
+                                font.pixelSize: Typography.sectionTitle
                                 font.letterSpacing: 2
                             }
                             Text {
                                 text: screen.stats ? screen.stats.cpuPercent.toFixed(1) + "% of the machine" : ""
                                 color: Colors.subtext
-                                font.pixelSize: 11
+                                font.pixelSize: Typography.caption
                             }
                         }
                         MemoryGraph {
@@ -409,7 +431,7 @@ Item {
                         }
                         TextLink {
                             text: "Whole machine and GPUs →"
-                            pixelSize: 11
+                            pixelSize: Typography.caption
                             onClicked: screen.tab = "all"
                         }
                     }
@@ -440,12 +462,12 @@ Item {
                                 Text {
                                     text: modelData.label
                                     color: Colors.subtext
-                                    font.pixelSize: 11
+                                    font.pixelSize: Typography.caption
                                 }
                                 Text {
                                     text: modelData.value
                                     color: modelData.tint
-                                    font.pixelSize: 17
+                                    font.pixelSize: Typography.valueSmall
                                     font.weight: Font.Bold
                                 }
                             }

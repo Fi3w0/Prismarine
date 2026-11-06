@@ -26,7 +26,7 @@ Rectangle {
                 text: "Live log"
                 color: Colors.bone
                 font.family: Colors.displayFont
-                font.pixelSize: 20
+                font.pixelSize: Typography.sectionTitle
                 font.letterSpacing: 2
                 Layout.rightMargin: 8
             }
@@ -50,7 +50,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 70
                 implicitHeight: 32
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 placeholderText: "Filter log"
                 onTextChanged: panel.session.log.text = text
             }
@@ -68,7 +68,7 @@ Rectangle {
                 text: "Copy"
                 implicitWidth: 64
                 implicitHeight: 32
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 onClicked: {
                     panel.session.copyLog();
                     panel.controller.notify("Log copied");
@@ -78,7 +78,7 @@ Rectangle {
                 text: panel.session.sharing ? "Uploading…" : panel.narrow ? "Share" : "Share (mclo.gs)"
                 implicitWidth: panel.narrow ? 72 : 120
                 implicitHeight: 32
-                font.pixelSize: 12
+                font.pixelSize: Typography.bodySmall
                 enabled: !panel.session.sharing
                 onClicked: panel.shareRequested()
             }
@@ -120,7 +120,7 @@ Rectangle {
                     text: row.text
                     color: row.level === "ERROR" ? Colors.danger : row.level === "WARN" ? Colors.warning : row.level === "DEBUG" ? Colors.subtext : Colors.text
                     font.family: "monospace"
-                    font.pixelSize: 12
+                    font.pixelSize: Typography.bodySmall
                     wrapMode: Text.WrapAnywhere
                     maximumLineCount: 6
                     elide: Text.ElideRight
@@ -135,7 +135,7 @@ Rectangle {
                 wrapMode: Text.Wrap
                 text: panel.session.log.text || panel.session.log.level ? "No lines match this filter." : "Waiting for the game to write its log…"
                 color: Colors.subtext
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
             }
         }
         Text {
@@ -145,7 +145,7 @@ Rectangle {
             text: "▌ " + (panel.follow ? "following live output" : "paused · scroll to the end or press Follow")
             color: Colors.accent
             font.family: "monospace"
-            font.pixelSize: 11
+            font.pixelSize: Typography.caption
         }
     }
 }
