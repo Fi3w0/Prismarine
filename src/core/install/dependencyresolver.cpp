@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QDateTime>
 
 ContentInstaller::ContentInstaller(InstanceModel *model, QObject *parent, const QUrl &apiRoot, const QUrl &curseApi)
     : QObject(parent), m_model(model), m_apiRoot(apiRoot), m_curseApi(curseApi) {}
@@ -23,6 +24,40 @@ void ContentInstaller::fail(const QString &error)
 void ContentInstaller::prepare(const QString &id, const QVariantMap &version, const QString &type, const QString &world)
 {
     prepareMany(id, {version}, type, world);
+}
+void ContentInstaller::prepareProject(const QString &id, const QString &project)
+{
+    cancel();
+    const auto info = m_model->getById(id);
+    const QString game = info.value("version").toString(), loader = info.value("loader").toString().toLower();
+    m_id = id;
+    m_world.clear();
+    if (info.isEmpty() || game.isEmpty() || !QStringList{"fabric", "quilt", "forge", "neoforge"}.contains(loader)
+        || project.isEmpty()) {
+        fail("Select an instance with a Minecraft version and mod loader before installing a fix."); return;
+    }
+    if (m_model->isRunning(id)) { fail("Stop this instance before installing a fix."); return; }
+    m_state = "resolving";
+    emit changed();
+    QUrl url(m_apiRoot.toString() + "/project/" + QString::fromUtf8(QUrl::toPercentEncoding(project)) + "/version");
+    QUrlQuery query;
+    query.addQueryItem("game_versions", QString::fromUtf8(QJsonDocument(QJsonArray{game}).toJson(QJsonDocument::Compact)));
+    query.addQueryItem("loaders", QString::fromUtf8(QJsonDocument(QJsonArray{loader}).toJson(QJsonDocument::Compact)));
+    url.setQuery(query);
+    getJson(url, [this, id, game, loader](const QJsonDocument &doc) {
+        QVariantMap selected;
+        QDateTime newest;
+        for (const auto &entry : doc.array()) {
+            const auto version = entry.toObject();
+            if (version.value("version_type").toString() != "release"
+                || !version.value("game_versions").toArray().contains(game)
+                || !version.value("loaders").toArray().contains(loader)) continue;
+            const auto published = QDateTime::fromString(version.value("date_published").toString(), Qt::ISODate);
+            if (selected.isEmpty() || published > newest) { selected = version.toVariantMap(); newest = published; }
+        }
+        if (selected.isEmpty()) { fail("No compatible release was found. Choose a version in Browse instead."); return; }
+        prepare(id, selected, "mod");
+    });
 }
 void ContentInstaller::prepareMany(const QString &id, const QVariantList &versions, const QString &type, const QString &world)
 {

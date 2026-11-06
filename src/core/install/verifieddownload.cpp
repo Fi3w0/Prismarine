@@ -7,6 +7,7 @@
 void ContentInstaller::install()
 {
     if (m_state != "ready" || m_plan.isEmpty()) return;
+    if (m_model->isRunning(m_id)) { fail("Stop this instance before installing content."); return; }
     if (Prism::contentDir(m_model->instancePath(m_id), m_type, m_world) != m_target) { fail("The destination changed. Review the installation again."); return; }
     if (!QDir().mkpath(m_target)) { fail("Cannot create the content folder."); return; }
     m_staging = std::make_unique<QTemporaryDir>(m_target + "/.prismarine-install-XXXXXX");
@@ -48,6 +49,7 @@ void ContentInstaller::downloadNext()
 }
 void ContentInstaller::commit()
 {
+    if (m_model->isRunning(m_id)) { fail("The instance started during the download. No files were installed."); return; }
     if (Prism::contentDir(m_model->instancePath(m_id), m_type, m_world) != m_target) { fail("The destination changed. No files were installed."); return; }
     QStringList added;
     int count = 0;

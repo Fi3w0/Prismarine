@@ -2,6 +2,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QRegularExpression>
 #include "../prism/paths.h"
 #include "../prism/launcherbridge.h"
@@ -40,7 +42,10 @@ int LaunchProgress::rank(const QString &stage)
 double LaunchProgress::progress() const
 {
     static const QHash<QString, double> values{{"waiting", 0.06}, {"signin", 0.22}, {"files", 0.45}, {"java", 0.64}, {"game", 0.84}, {"ready", 1.0}};
-    return values.value(m_stage, 0.0);
+    const QString stage = m_stage == "failed" ? m_lastStage : m_stage;
+    // The engine reports real download progress: fill the space between sign-in and Java.
+    if (stage == "files" && m_filesFraction >= 0) return values.value("signin") + m_filesFraction * (values.value("java") - values.value("signin"));
+    return values.value(stage, 0.0);
 }
 
 qint64 LaunchProgress::elapsedSecs() const
@@ -80,6 +85,7 @@ void LaunchProgress::start(const QString &instanceId)
 {
     m_instanceId = instanceId;
     m_stage = "waiting";
+    m_lastStage = m_stage;
     m_detail = "Asking Prism Launcher to start the game";
     m_partial.clear();
     m_startedMs = QDateTime::currentMSecsSinceEpoch();
@@ -91,6 +97,9 @@ void LaunchProgress::start(const QString &instanceId)
     const QString path = logPath();
     m_offset = QFileInfo(path).size();
     m_logIdentity = identity(path);
+    m_eventOffset = QFileInfo(Prism::engineEventsPath(m_dataDir)).size();
+    m_partialEvent.clear();
+    m_filesFraction = -1;
     m_timer.start();
     emit changed();
 }
@@ -106,6 +115,7 @@ void LaunchProgress::advance(const QString &stage, const QString &detail)
     // Steps only move forward; a later account refresh must not rewind the display.
     if (rank(stage) < rank(m_stage)) return;
     m_stage = stage;
+    m_lastStage = stage;
     if (!detail.isEmpty()) m_detail = detail;
 }
 
@@ -138,13 +148,40 @@ void LaunchProgress::dismiss()
     m_timer.stop();
     m_instanceId.clear();
     m_stage.clear();
+    m_lastStage.clear();
     m_detail.clear();
     emit changed();
+}
+
+void LaunchProgress::readEngineEvents()
+{
+    QFile file(Prism::engineEventsPath(m_dataDir));
+    if (!file.open(QIODevice::ReadOnly)) return;
+    if (file.size() < m_eventOffset) m_eventOffset = 0;
+    if (!file.seek(m_eventOffset)) return;
+    const QByteArray data = file.read(512 * 1024);
+    m_eventOffset += data.size();
+    QList<QByteArray> lines = (m_partialEvent + data).split('\n');
+    m_partialEvent = lines.takeLast();
+    for (const QByteArray &line : lines) {
+        const QJsonObject event = QJsonDocument::fromJson(line).object();
+        if (event.value("instance").toString() != m_instanceId) continue;
+        const QString stage = event.value("stage").toString();
+        QString detail = event.value("detail").toString().left(200);
+        // Never echo anything token-like, as with Prism's log.
+        if (detail.contains("token", Qt::CaseInsensitive)) detail = "Fetching Minecraft access";
+        if (stage != "failed" && rank(stage) < 0) continue;
+        if (stage == "files" && rank(m_stage) <= rank(stage) && event.contains("fraction")) m_filesFraction = event.value("fraction").toDouble();
+        advance(stage, detail);
+        if (m_stage == "failed") return;
+    }
 }
 
 void LaunchProgress::poll()
 {
     if (!active()) return;
+    readEngineEvents();
+    if (m_stage == "failed") { emit changed(); return; }
     const QString path = logPath();
     if (const qint64 current = identity(path); current != m_logIdentity) {
         // Prism started fresh and rotated its log: read the new file from the start.

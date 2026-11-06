@@ -166,12 +166,18 @@ void GameSession::finish()
 {
     m_state = QStringLiteral("exited");
     m_endedMs = QDateTime::currentMSecsSinceEpoch();
+    m_diagnosis = launchDiagnosis();
+    m_timer.stop();
+    emit changed();
+}
+
+QVariantMap GameSession::launchDiagnosis() const
+{
+    if (!active()) return {};
     QString report;
     const QString text = CrashAnalyzer::collect(m_gameDir, m_startedMs, &report);
     const bool crashed = CrashAnalyzer::crashed(text);
-    m_diagnosis = {{"crashed", crashed}, {"findings", crashed ? CrashAnalyzer::analyze(text) : QVariantList()}, {"report", report}};
-    m_timer.stop();
-    emit changed();
+    return {{"crashed", crashed}, {"findings", crashed ? CrashAnalyzer::analyze(text) : QVariantList()}, {"report", report}};
 }
 
 QVariantMap GameSession::diagnose(const QString &instanceId) const

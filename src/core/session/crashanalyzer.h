@@ -5,6 +5,7 @@
 
 // Reads a game log or crash report and explains the usual causes of a crash in plain words.
 // Each finding: {kind, title, detail, mods (ids), action: "mods" | "settings" | "browse" | "", query}.
+// An optional project names a known Modrinth project for a missing-dependency installation review.
 namespace CrashAnalyzer {
 QVariantList analyze(const QString &text);
 // True when the text shows the game actually crashed, not just warnings.

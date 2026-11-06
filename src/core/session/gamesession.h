@@ -58,6 +58,8 @@ public:
     QVariantMap diagnosis() const { return m_diagnosis; }
     // Explains the newest log and crash report of any instance, for the Logs tab.
     Q_INVOKABLE QVariantMap diagnose(const QString &instanceId) const;
+    // Current launch only: never reuse a previous session's crash report.
+    Q_INVOKABLE QVariantMap launchDiagnosis() const;
     Q_INVOKABLE bool openReport(const QString &path) const;
 
     // Begins following an instance after Prism accepted its launch request.

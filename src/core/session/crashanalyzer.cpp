@@ -103,7 +103,26 @@ QVariantList CrashAnalyzer::analyze(const QString &text)
             }
         QString detail = lines.isEmpty() ? QStringLiteral("Some installed mods do not work together.") : lines.join('\n');
         detail.replace(QRegularExpression(QStringLiteral("(^|\n)- ")), QStringLiteral("\\1"));
-        add(finding("incompatible", "Some mods need different versions", detail, mods, "mods"));
+        static const QRegularExpression absent(QStringLiteral(
+            R"(requires [^\n]+? of (?:mod '([^']+)' \(([a-z0-9_\-]+)\)|([a-z0-9_\-]+)), which is missing!)"));
+        bool missingFound = false, otherIssues = false;
+        for (const QString &line : lines) {
+            const auto match = absent.match(line);
+            if (!match.hasMatch()) {
+                if (!line.trimmed().startsWith("- Install") && !line.trimmed().startsWith("Install")) otherIssues = true;
+                continue;
+            }
+            missingFound = true;
+            const QString id = match.captured(2).isEmpty() ? match.captured(3) : match.captured(2);
+            const QString name = id == "fabric-api" ? QStringLiteral("Fabric API")
+                : match.captured(1).isEmpty() ? id : match.captured(1);
+            auto item = finding("dependency", name + " is missing", line, {id}, "browse", id);
+            // Mod ids are not generally Modrinth slugs. Only known exact projects get an install action.
+            if (id == "fabric-api") item.insert("project", "fabric-api");
+            add(item);
+        }
+        if (!missingFound || otherIssues)
+            add(finding("incompatible", "Some mods need different versions", detail, mods, "mods"));
     }
 
     // NeoForge / Forge: "Mod ID: 'x', Requested by: 'y', Expected range: '[..]', Actual version: '[MISSING]'".

@@ -32,6 +32,8 @@ public:
     QString instanceId() const { return m_id; }
     QString world() const { return m_world; }
     Q_INVOKABLE void prepare(const QString &instanceId, const QVariantMap &version, const QString &type, const QString &world = {});
+    // Resolve a known Modrinth project to a compatible release, then show the usual plan.
+    Q_INVOKABLE void prepareProject(const QString &instanceId, const QString &projectId);
     Q_INVOKABLE void prepareMany(const QString &instanceId, const QVariantList &versions, const QString &type, const QString &world = {});
     Q_INVOKABLE void install();
     Q_INVOKABLE void cancel();

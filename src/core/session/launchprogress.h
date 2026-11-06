@@ -13,6 +13,7 @@ class LaunchProgress : public QObject {
     Q_PROPERTY(QString instanceId READ instanceId NOTIFY changed)
     // waiting, signin, files, java, game, ready, failed
     Q_PROPERTY(QString stage READ stage NOTIFY changed)
+    Q_PROPERTY(QString lastStage READ lastStage NOTIFY changed)
     Q_PROPERTY(QString detail READ detail NOTIFY changed)
     Q_PROPERTY(double progress READ progress NOTIFY changed)
     Q_PROPERTY(qint64 elapsedSecs READ elapsedSecs NOTIFY changed)
@@ -24,6 +25,7 @@ public:
     bool active() const { return !m_instanceId.isEmpty(); }
     QString instanceId() const { return m_instanceId; }
     QString stage() const { return m_stage; }
+    QString lastStage() const { return m_lastStage; }
     QString detail() const { return m_detail; }
     double progress() const;
     qint64 elapsedSecs() const;
@@ -45,9 +47,12 @@ signals:
 private:
     QString logPath() const;
     void advance(const QString &stage, const QString &detail);
-    QString m_dataDir, m_instanceId, m_stage, m_detail, m_partial;
+    void readEngineEvents();
+    QString m_dataDir, m_instanceId, m_stage, m_lastStage, m_detail, m_partial;
     QTimer m_timer;
-    qint64 m_offset = 0, m_startedMs = 0, m_logIdentity = 0;
+    qint64 m_offset = 0, m_startedMs = 0, m_logIdentity = 0, m_eventOffset = 0;
+    double m_filesFraction = -1;
+    QByteArray m_partialEvent;
     bool m_prismWasRunning = false, m_abort = false;
     qint64 m_ownPrism = 0;
 };
