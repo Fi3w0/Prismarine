@@ -1,4 +1,6 @@
 #include "apppreferences.h"
+#include "../servers/serverlist.h"
+#include <QRegularExpression>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
@@ -17,6 +19,74 @@ AppPreferences::AppPreferences(const QString &file, QObject *parent)
           : file, QSettings::IniFormat)
     , m_hadSettings(!m_settings.allKeys().isEmpty())
 {}
+namespace {
+QVariantMap normalizedPalette(const QVariantMap &input, bool *valid)
+{
+    static const QStringList roles{"rail", "base", "mantle", "surface", "surfaceHi", "rowAlt", "inset", "hero", "heroLine",
+        "border", "outline", "text", "subtext", "bone", "brass", "accentInk", "warning", "danger", "success"};
+    QVariantMap result;
+    *valid = true;
+    for (auto theme = input.cbegin(); theme != input.cend(); ++theme) {
+        if (theme.key() != "deep" && theme.key() != "light") { *valid = false; return {}; }
+        if (!theme.value().canConvert<QVariantMap>()) { *valid = false; return {}; }
+        const auto colours = theme.value().toMap();
+        QVariantMap cleaned;
+        for (auto role = colours.cbegin(); role != colours.cend(); ++role) {
+            const QColor colour(role.value().toString());
+            if (!roles.contains(role.key()) || !colour.isValid() || colour.alpha() != 255) { *valid = false; return {}; }
+            cleaned.insert(role.key(), colour.name());
+        }
+        if (!cleaned.isEmpty()) result.insert(theme.key(), cleaned);
+    }
+    return result;
+}
+}
+QVariantMap AppPreferences::paletteOverrides() const
+{
+    bool valid = false;
+    return normalizedPalette(QJsonDocument::fromJson(m_settings.value("interface/paletteOverrides").toByteArray()).object().toVariantMap(), &valid);
+}
+void AppPreferences::setPaletteOverrides(const QVariantMap &value)
+{
+    bool valid = false;
+    const auto normalized = normalizedPalette(value, &valid);
+    if (!valid) { emit errorOccurred("Use opaque colours for the supported Deep sea and Light palette roles."); return; }
+    if (normalized == paletteOverrides()) return;
+    save("interface/paletteOverrides", QJsonDocument(QJsonObject::fromVariantMap(normalized)).toJson(QJsonDocument::Compact));
+}
+QString AppPreferences::cornerStyle() const { return m_settings.value("interface/corners").toString() == "angular" ? "angular" : "rounded"; }
+void AppPreferences::setCornerStyle(const QString &value) { if (value == "rounded" || value == "angular") save("interface/corners", value); }
+int AppPreferences::coverSize() const { const int value = m_settings.value("library/coverSize", 0).toInt(); return value == 170 || value == 220 || value == 280 ? value : 0; }
+void AppPreferences::setCoverSize(int value) { if (value == 0 || value == 170 || value == 220 || value == 280) save("library/coverSize", value); }
+bool AppPreferences::showCoverBadges() const { return m_settings.value("library/badges", true).toBool(); }
+void AppPreferences::setShowCoverBadges(bool value) { save("library/badges", value); }
+int AppPreferences::interfaceSize() const {
+    const int value = m_settings.value("interface/size", 100).toInt();
+    return value == 90 || value == 115 ? value : 100;
+}
+void AppPreferences::setInterfaceSize(int value) {
+    if (value == 90 || value == 100 || value == 115) save("interface/size", value);
+}
+QString AppPreferences::libraryDensity() const {
+    const QString value = m_settings.value("library/density", "comfortable").toString();
+    return value == "compact" ? value : QStringLiteral("comfortable");
+}
+void AppPreferences::setLibraryDensity(const QString &value) {
+    if (value == "compact" || value == "comfortable") save("library/density", value);
+}
+QStringList AppPreferences::homeSections() const {
+    const QStringList allowed{"recent", "servers", "worlds", "stats", "news", "playtime"};
+    const auto stored = m_settings.value("home/sections", allowed).toStringList();
+    QStringList result;
+    for (const auto &key : allowed) if (stored.contains(key)) result.append(key);
+    return result;
+}
+void AppPreferences::setHomeSections(const QStringList &value) {
+    const QStringList allowed{"recent", "servers", "worlds", "stats", "news", "playtime"};
+    QStringList filtered;
+    for (const auto &key : allowed) if (value.contains(key)) filtered.append(key);
+    save("home/sections", filtered);
+}
 int AppPreferences::sidebarWidth() const { return qBound(190, m_settings.value("library/sidebarWidth", 248).toInt(), 420); }
 void AppPreferences::setSidebarWidth(int value) {
     value = qBound(190, value, 420);
@@ -155,6 +225,31 @@ void AppPreferences::sync()
 
 bool AppPreferences::multiAccount() const { return m_settings.value("experimental/multiAccount", false).toBool(); }
 void AppPreferences::setMultiAccount(bool v) { save("experimental/multiAccount", v); }
+int AppPreferences::scrollSpeed() const
+{
+    const int value = m_settings.value("interface/scrollSpeed", 2).toInt();
+    return value >= 1 && value <= 3 ? value : 2;
+}
+void AppPreferences::setScrollSpeed(int value)
+{
+    if (value >= 1 && value <= 3) save("interface/scrollSpeed", value);
+}
+bool AppPreferences::controllerEnabled() const { return m_settings.value("features/controller", true).toBool(); }
+void AppPreferences::setControllerEnabled(bool v) { save("features/controller", v); }
+bool AppPreferences::friendsEnabled() const { return m_settings.value("features/friends", false).toBool(); }
+bool AppPreferences::hasFriendsChoice() const { return m_settings.contains("features/friends"); }
+void AppPreferences::setFriendsEnabled(bool v) { save("features/friends", v); }
+bool AppPreferences::prismShortcuts() const { return m_settings.value("features/prismShortcuts", true).toBool(); }
+void AppPreferences::setPrismShortcuts(bool v) { save("features/prismShortcuts", v); }
+QString AppPreferences::startInterface() const
+{
+    const QString value = m_settings.value("interface/startInterface", "desktop").toString();
+    return value == "handheld" ? value : QStringLiteral("desktop");
+}
+void AppPreferences::setStartInterface(const QString &value)
+{
+    if (value == "desktop" || value == "handheld") save("interface/startInterface", value);
+}
 
 QVariantList AppPreferences::serverFavorites() const
 {
@@ -168,6 +263,24 @@ bool AppPreferences::isServerFavorite(const QString &instanceId, const QString &
         if (entry.value("instanceId") == instanceId && entry.value("address").toString().compare(address, Qt::CaseInsensitive) == 0) return true;
     }
     return false;
+}
+
+bool AppPreferences::addServerFavorite(const QString &instanceId, const QString &name, const QString &input)
+{
+    const QString address = input.trimmed();
+    static const QRegularExpression port(QStringLiteral(":([0-9]+)$"));
+    const auto match = port.match(address);
+    if (instanceId.isEmpty() || !ServerList::validAddress(address)
+        || (match.hasMatch() && (match.captured(1).toUInt() == 0 || match.captured(1).toUInt() > 65535))) {
+        emit errorOccurred("Enter a valid server address and select an instance.");
+        return false;
+    }
+    if (isServerFavorite(instanceId, address)) return true;
+    auto list = QJsonArray::fromVariantList(serverFavorites());
+    list.append(QJsonObject{{"instanceId", instanceId}, {"name", name.trimmed().isEmpty() ? address : name.trimmed().left(120)}, {"address", address}});
+    m_settings.setValue("home/serverFavorites", QJsonDocument(list).toJson(QJsonDocument::Compact));
+    emit serverFavoritesChanged();
+    return true;
 }
 
 void AppPreferences::toggleServerFavorite(const QString &instanceId, const QString &name, const QString &address)
