@@ -5,6 +5,9 @@
 #include <QCommandLineParser>
 #include <QRegularExpression>
 #include <QGuiApplication>
+#ifdef PRISMARINE_HAS_WIDGETS
+#include <QApplication>
+#endif
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
@@ -26,6 +29,7 @@
 #include "core/news/newsfeed.h"
 #include "core/session/gamesession.h"
 #include "core/install/modupdater.h"
+#include "core/settings/launchermode.h"
 #include "core/servers/serverlist.h"
 #include "core/packs/packexporter.h"
 #include "core/library/playtimehistory.h"
@@ -39,14 +43,49 @@
 #include "core/settings/desktopintegration.h"
 #include "core/session/gamemonitor.h"
 #include "core/prism/launcherbridge.h"
+#include "ui/applicationtheme.h"
 
 int main(int argc, char *argv[])
 {
+    QCoreApplication::setApplicationName("Prismarine");
+    QCoreApplication::setOrganizationName("Prismarine");
+    const int interfaceSize = [&] {
+        QString file;
+        for (int i = 1; i < argc; ++i) {
+            const auto argument = QString::fromLocal8Bit(argv[i]);
+            if (argument == "--") break;
+            if (argument == "--preferences" && i + 1 < argc) file = QString::fromLocal8Bit(argv[++i]);
+            else if (argument.startsWith("--preferences=")) file = argument.mid(14);
+        }
+        return AppPreferences(file).interfaceSize();
+    }();
+    const bool inheritedScaleSet = qEnvironmentVariableIsSet("QT_SCALE_FACTOR");
+    const QByteArray inheritedScale = qgetenv("QT_SCALE_FACTOR");
+    if (interfaceSize != 100) {
+        bool valid = false;
+        const double inherited = inheritedScale.toDouble(&valid);
+        qputenv("QT_SCALE_FACTOR", QByteArray::number((valid && inherited > 0 ? inherited : 1.0) * interfaceSize / 100.0));
+    }
+#ifdef PRISMARINE_HAS_WIDGETS
+    QApplication app(argc, argv);
+#else
     QGuiApplication app(argc, argv);
+#endif
+    // Keep Prism, Minecraft and other child processes on their original scaling.
+    if (interfaceSize != 100) {
+        if (inheritedScaleSet) qputenv("QT_SCALE_FACTOR", inheritedScale);
+        else qunsetenv("QT_SCALE_FACTOR");
+    }
     app.setApplicationName("Prismarine");
     app.setApplicationVersion(PRISMARINE_VERSION);
     app.setOrganizationName("Prismarine");
-    app.setDesktopFileName("io.github.fi3w0.Prismarine");
+    // Qt registers this ID with the desktop portal, which fails with a warning unless the
+    // desktop entry is installed, as when running from a build folder.
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+    if (qEnvironmentVariableIsSet("APPIMAGE")
+        || !QStandardPaths::locate(QStandardPaths::ApplicationsLocation, QStringLiteral("io.github.fi3w0.Prismarine.desktop")).isEmpty())
+#endif
+        app.setDesktopFileName("io.github.fi3w0.Prismarine");
     QQuickStyle::setStyle("Basic");
 
     QCommandLineParser parser;
@@ -62,6 +101,7 @@ int main(int argc, char *argv[])
     parser.addOption({"tab", "Instance detail tab to open.", "tab"});
     parser.addOption({"dialog", "Open a dialog for checking its layout, e.g. new-instance, import, rename, drop, group, storage.", "name"});
     parser.addOption({"section", "Settings section to open.", "name"});
+    parser.addOption({"interface", "Start in the desktop or handheld interface for this run.", "mode"});
     parser.process(app);
     // Keep a real QtSvg dependency so macdeployqt/windeployqt include SVG support.
     // Vector logos require QtSvg to be shipped with the app.
@@ -77,8 +117,15 @@ int main(int argc, char *argv[])
     app.setFont(font);
 
     AppPreferences preferences(parser.value("preferences"));
+    ApplicationTheme applicationTheme(preferences);
     // Known before the data folder is looked up: a portable Prism keeps its data beside it.
     Prism::setLauncherProgram(preferences.prismProgram());
+    const QString interfaceMode = parser.isSet("interface") ? parser.value("interface") : preferences.startInterface();
+    if (!LauncherMode::validInterface(interfaceMode)) {
+        qCritical() << "Interface must be desktop or handheld.";
+        return 1;
+    }
+    LauncherMode launcherMode({}, interfaceMode);
     InstanceModel instances(nullptr, parser.value("prism-data"));
     InstanceDetails details(&instances);
     ModCatalog catalog;
@@ -87,6 +134,12 @@ int main(int argc, char *argv[])
     InstanceCreator creator(&instances);
     AccountManager accountManager(&instances);
     SocialManager social(&accountManager);
+    // Friends starts hidden, but people who already saved friends keep the tab.
+    const auto keepFriendsTab = [&] {
+        if (!preferences.hasFriendsChoice() && !social.friends().isEmpty()) preferences.setFriendsEnabled(true);
+    };
+    QObject::connect(&social, &SocialManager::changed, &preferences, keepFriendsTab);
+    keepFriendsTab();
     ContentInstaller installer(&instances);
     QObject::connect(&catalog, &ModCatalog::credentialsChanged, &installer, [&] { installer.setCurseForgeKey(catalog.curseForgeKey()); });
     installer.setCurseForgeKey(catalog.curseForgeKey());
@@ -119,13 +172,13 @@ int main(int argc, char *argv[])
 #else
     const QString compiler = QStringLiteral("unknown");
 #endif
-    const QVariantMap appInfo{{"qtRuntime", QString::fromLatin1(qVersion())}, {"qtBuild", QStringLiteral(QT_VERSION_STR)},
+    const QVariantMap appInfo{{"interfaceSize", interfaceSize}, {"qtRuntime", QString::fromLatin1(qVersion())}, {"qtBuild", QStringLiteral(QT_VERSION_STR)},
         // Some os-release files quote PRETTY_NAME with single quotes, which Qt keeps.
         {"system", QSysInfo::prettyProductName().remove('\'')}, {"kernel", QSysInfo::kernelType() + " " + QSysInfo::kernelVersion()},
         {"architecture", QSysInfo::currentCpuArchitecture()}, {"compiler", compiler},
         {"appData", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)}};
     QQmlApplicationEngine engine;
-    engine.setInitialProperties({{"instances", QVariant::fromValue(&instances)}, {"javaManager", QVariant::fromValue(&javaManager)},
+    engine.setInitialProperties({{"applicationTheme", QVariant::fromValue(&applicationTheme)}, {"instances", QVariant::fromValue(&instances)}, {"launcherMode", QVariant::fromValue(&launcherMode)}, {"javaManager", QVariant::fromValue(&javaManager)},
         {"preferences", QVariant::fromValue(&preferences)}, {"details", QVariant::fromValue(&details)},
         {"catalog", QVariant::fromValue(&catalog)}, {"launchSettings", QVariant::fromValue(&launchSettings)},
         {"creator", QVariant::fromValue(&creator)}, {"accountManager", QVariant::fromValue(&accountManager)},
@@ -144,6 +197,7 @@ int main(int argc, char *argv[])
     auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().value(0));
     if (!window)
         return 1;
+    if (launcherMode.interfaceMode() == QLatin1String("handheld")) window->showFullScreen();
     if (parser.isSet("window-size")) {
         const auto match = QRegularExpression("^(\\d+)x(\\d+)$").match(parser.value("window-size"));
         if (!match.hasMatch() || match.captured(1).toInt() < 960 || match.captured(2).toInt() < 640) {

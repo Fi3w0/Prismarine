@@ -37,7 +37,7 @@ set(QML_SOURCES
     qml/home/HomeStats.qml
     qml/home/HomeWorlds.qml
     qml/home/RecentInstances.qml
-    qml/settings/AboutPanel.qml qml/settings/LauncherModeSettings.qml qml/components/FullModeBadge.qml  qml/components/RoundAvatar.qml 
+    qml/settings/AboutPanel.qml qml/settings/LauncherModeSettings.qml qml/components/FullModeBadge.qml qml/components/PageDecor.qml qml/components/RoundAvatar.qml 
     qml/settings/AccentPicker.qml
     qml/settings/ThemePicker.qml
     qml/settings/AppearancePreview.qml

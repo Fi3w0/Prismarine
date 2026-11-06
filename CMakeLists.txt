@@ -26,8 +26,12 @@ if(Qt6Widgets_FOUND)
 else()
     message(STATUS "Qt Widgets not found: building without the Prism quiet-launch plugin")
 endif()
-qt_add_executable(prismarine src/main.cpp)
+qt_add_executable(prismarine src/main.cpp src/ui/applicationtheme.cpp src/ui/applicationtheme.h)
 target_link_libraries(prismarine PRIVATE prismarine_core Qt6::Quick Qt6::QuickControls2 Qt6::Quick3D Qt6::Svg)
+if(Qt6Widgets_FOUND)
+    target_link_libraries(prismarine PRIVATE Qt6::Widgets)
+    target_compile_definitions(prismarine PRIVATE PRISMARINE_HAS_WIDGETS=1)
+endif()
 include(cmake/Ui.cmake)
 include(cmake/Packaging.cmake)
 
@@ -40,7 +44,7 @@ if(PRISMARINE_PACKAGE_CHECK)
 endif()
 
 include(CTest)
-# The tests folder is kept out of the public repository; builds without it skip the tests.
+# Additional private suites are available in local checkouts with tests/.
 if(BUILD_TESTING AND EXISTS "${PROJECT_SOURCE_DIR}/tests")
     include(cmake/Tests.cmake)
 endif()

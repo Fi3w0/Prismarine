@@ -15,6 +15,7 @@ ApplicationWindow {
     required property var packImporter
     required property var installer
     // Optional services: tests run without network news or game tracking.
+    property var applicationTheme: null
     property var javaManager: null
     property var news: null
     property var session: null
@@ -32,6 +33,19 @@ ApplicationWindow {
     property var appInfo: ({})
     property var launchProgress: null
     property var desktop: null
+    property var launcherMode: null
+    property var gamepad: null
+    // True while a controller action is delivered as a key.
+    property bool gamepadKey: false
+    // The control a controller is adjusting right now.
+    property var gamepadEditItem: null
+    readonly property bool friendsEnabled: preferences.friendsEnabled
+    onFriendsEnabledChanged: {
+        if (friendsEnabled) return;
+        if (social) social.setDiscovering(false);
+        if (page === "friends") navigate("home");
+    }
+    readonly property bool prismShortcuts: preferences.prismShortcuts
     property var games: null
     // Command-line helpers for checking layouts: --dialog and --section.
     property string debugDialog: ""
@@ -52,7 +66,12 @@ ApplicationWindow {
     palette.highlight: Colors.accent
     palette.highlightedText: Colors.base
     palette.placeholderText: Colors.subtext
-    property string page: preferences.startPage
+    // Basic sliders, progress bars and busy indicators draw with these roles.
+    palette.dark: Colors.accent
+    palette.midlight: Colors.outline
+    palette.mid: Colors.outline
+    palette.light: Colors.surfaceHi
+    property string page: "library"
     property bool showFirstRun: !preferences.firstRunSeen
     property string instanceTab: "overview"
     // Now playing's first tab: "" follows the launched game, "all" shows the hardware view.
@@ -75,6 +94,23 @@ ApplicationWindow {
     readonly property bool canGoBack: history.canGoBack
     function navigate(page) { history.visit(page); }
     function back() { history.back(); }
+    // Controller buttons that act on the page rather than the focused control.
+    function gamepadAction(action) {
+        if (action === "back") { if (canGoBack) back(); return; }
+        if (action === "menu") {
+            if (hasSelection) play(current.instanceId, current.name); else navigate("library");
+            return;
+        }
+        if (action === "details") { if (hasSelection) openInstance(current.instanceId); return; }
+        if (action === "context") {
+            if (page === "library" && hasSelection) showInstanceMenu(current.instanceId, current.name, activeFocusItem);
+            return;
+        }
+        const pages = ["home", "library", "browse"].concat(social && friendsEnabled ? ["friends"] : []).concat(session ? ["session"] : []).concat(["settings"]);
+        const index = pages.indexOf(page);
+        const step = action === "nextPage" ? 1 : -1;
+        navigate(pages[index < 0 ? 0 : (index + step + pages.length) % pages.length]);
+    }
     function openTab(tab) { openInstance(details.instanceId, tab); }
     function editSettings(id) {
         launchSettings.load(id);
@@ -138,8 +174,10 @@ ApplicationWindow {
     }
     // Settings sections with search words, shared by the Settings sidebar and Ctrl+K.
     readonly property var settingsSections: [
-        { group: "Prismarine", name: "Interface", words: "theme accent colour color dark light system animations frames start page" },
-        { group: "Prismarine", name: "Library & covers", words: "covers rows list sort screenshots sidebar view" },
+        { group: "Prismarine", name: "Interface", words: "friends hide tab scroll speed wheel mouse theme accent colour color dark light system animations motion size scale start page home sections background palette surfaces rail text contrast hue hsv hex while playing minimize hide console" },
+        { group: "Prismarine", name: "Library & covers", words: "covers rows list sort screenshots sidebar view density frames cover size badges" },
+        { group: "Launcher", name: "Launcher mode", words: "full stable mode engine update remove delete uninstall prism handheld shortcuts" },
+        { group: "Launcher", name: "Prism integration", words: "classic prism progress desktop window rule program executable" },
         { group: "Launcher", name: "Java & game", words: "java memory ram jvm arguments runtime temurin wrapper launch command" },
         { group: "Launcher", name: "Network", words: "proxy socks http downloads parallel timeout retries token modrinth curseforge key user agent metadata mirror" },
         { group: "Launcher", name: "Storage", words: "disk space clean cleanup logs cache worlds trash shared duplicates hard links" },
@@ -167,7 +205,7 @@ ApplicationWindow {
         navigate("settings");
         if (page === "settings" && pageLoader.item) pageLoader.item.section = section;
     }
-    function showInstanceMenu(id, name) { instanceMenu.openFor(id, name); }
+    function showInstanceMenu(id, name, anchor) { instanceMenu.openFor(id, name, anchor); }
     function moveToGroup(id) { moveGroupDialog.openFor(id); }
     function newGroup(instanceId) { groupNameDialog.openFor("", instanceId || ""); }
     function renameGroup(name) { groupNameDialog.openFor(name, ""); }
@@ -208,13 +246,32 @@ ApplicationWindow {
     function installPackVersion(version) { packImporter.importVersion(version); packImport.open(); }
     function browseDatapacks(id, world) { details.load(id); pendingBrowseType = "datapack"; pendingBrowseWorld = world; navigate("browse"); }
     function reviewSelection(id, type, world) {
+        installReview.retryInstanceId = "";
         installingType = type;
         installer.prepareMany(id, downloads.items(id, type).map(it => it.version), type, world || "");
         installReview.open();
     }
-    function reviewInstall(id, version, type) {
-        installer.prepare(id, version, type);
+    function reviewInstall(id, version, type, world) {
+        if (instanceBusy(id)) return;
+        installReview.retryInstanceId = "";
+        installingType = "";
+        installer.prepare(id, version, type, world || "");
         installReview.open();
+    }
+    function reviewLaunchFix(id, project) {
+        if (instanceBusy(id)) return false;
+        if (instances.isRunning(id) || ["resolving", "ready", "downloading"].indexOf(installer.state) >= 0) {
+            notify("Stop the game and finish any content installation before installing a fix.", true);
+            return false;
+        }
+        // A repair does not consume the user's separate Browse selection.
+        installingType = "";
+        installReview.retryInstanceId = id;
+        installReview.repairProject = project;
+        installReview.repairDetail = launchOverlay.finding.detail || "";
+        installer.prepareProject(id, project);
+        installReview.open();
+        return true;
     }
     function refresh() {
         selected = instances.count > 0 ? Math.max(0, Math.min(selected, instances.count - 1)) : -1;
@@ -325,6 +382,9 @@ ApplicationWindow {
     function applyPreferences() {
         Colors.userAccent = preferences.accentColor;
         Colors.theme = preferences.theme;
+        Colors.cornerStyle = preferences.cornerStyle;
+        Colors.overrides = preferences.paletteOverrides;
+        Colors.systemMode = applicationTheme ? (applicationTheme.systemLight ? 1 : 2) : 0;
         Colors.animations = preferences.animations;
         Colors.decoFrames = preferences.decoFrames;
         instances.setPrismConsole(preferences.prismConsole);
@@ -336,11 +396,13 @@ ApplicationWindow {
     onSelectedChanged: refresh()
     onClosing: preferences.sync()
     Component.onCompleted: {
+        page = preferences.startPage;
         applyPreferences();
         refresh();
     }
     Connections {
         target: appWindow.instances
+        function onAccountRequired() { accountNeeded.open(); }
         function onCountChanged() {
             const id = appWindow.current.instanceId;
             for (let row = 0; row < appWindow.instances.count; ++row)
@@ -353,6 +415,10 @@ ApplicationWindow {
         function onErrorOccurred(message) {
             appWindow.notify(message, true);
         }
+    }
+    Connections {
+        target: appWindow.applicationTheme
+        function onSystemPaletteChanged() { Colors.systemMode = appWindow.applicationTheme.systemLight ? 1 : 2; }
     }
     Connections {
         target: appWindow.preferences
@@ -430,7 +496,7 @@ ApplicationWindow {
     Connections {
         target: appWindow.installer
         function onInstalled(id, count) {
-            appWindow.downloads.clear(id, appWindow.installingType);
+            if (appWindow.installingType) appWindow.downloads.clear(id, appWindow.installingType);
             if (appWindow.details.instanceId === id)
                 appWindow.details.refresh();
             appWindow.notify(count + " files installed");
@@ -505,6 +571,8 @@ ApplicationWindow {
         ignoreUnknownSignals: true
         function onChanged() {
             const p = appWindow.launchProgress, s = appWindow.session;
+            if (p && p.stage === "failed" && !p.abortRequested && s && s.instanceId === p.instanceId)
+                launchOverlay.diagnosis = s.launchDiagnosis();
             if (!p || p.stage !== "failed" || !s || s.instanceId !== p.instanceId || s.processFound || s.state !== "starting") return;
             // A Prism that was already open may still start the game after an abort; the game is
             // stopped when it appears, so wait a while before giving up on it.
@@ -575,6 +643,10 @@ ApplicationWindow {
         }
     })
     Shortcut {
+        sequence: "F11"
+        onActivated: appWindow.visibility = appWindow.visibility === Window.FullScreen ? Window.Windowed : Window.FullScreen
+    }
+    Shortcut {
         sequences: ["Ctrl+K", "Ctrl+Shift+P"]
         onActivated: appWindow.openPalette()
     }
@@ -622,6 +694,11 @@ ApplicationWindow {
             appWindow.handleDrop(drop.urls, "");
         }
     }
+    PageDecor {
+        anchors { fill: parent; leftMargin: 76 }
+        // Only pages with open space: the waves must not run behind forms and lists.
+        visible: Colors.decoFrames && ["session", "accounts", "friends"].indexOf(appWindow.page) >= 0
+    }
     RowLayout {
         anchors.fill: parent
         spacing: 0
@@ -638,6 +715,9 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 0
+        TopBar {
+            controller: appWindow
+        }
         MotionLoader {
             backwards: history.backwards
             id: pageLoader
@@ -792,7 +872,7 @@ ApplicationWindow {
                 width: Math.min(implicitWidth, 220)
                 text: appWindow.draggingName
                 color: Colors.text
-                font.pixelSize: 13
+                font.pixelSize: Typography.body
                 elide: Text.ElideRight
             }
         }
@@ -801,6 +881,23 @@ ApplicationWindow {
         id: dropOverlay
         active: windowDrop.containsDrag
         targetName: (appWindow.page === "instance" ? appWindow.instances.getById(appWindow.details.instanceId).name : appWindow.current.name) || ""
+    }
+    Connections {
+        target: appWindow.launcherMode
+        function onInterfaceModeChanged() {
+            const handheld = appWindow.launcherMode.interfaceMode === "handheld";
+            appWindow.visibility = handheld ? Window.FullScreen : Window.Windowed;
+            appWindow.notify(handheld ? "Handheld preview on. Choose Desktop or press F11 to leave full screen." : "Desktop interface on");
+        }
+    }
+    ConfirmDialog {
+        id: accountNeeded
+        objectName: "accountNeeded"
+        anchors.centerIn: Overlay.overlay
+        title: "Add an account first"
+        message: "Minecraft needs a Microsoft account to start. Add one in Accounts, then press Play again."
+        confirmText: "Go to Accounts"
+        onConfirmed: appWindow.navigate("accounts")
     }
     ConfirmDialog {
         id: alreadyRunning
