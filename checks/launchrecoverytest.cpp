@@ -317,7 +317,7 @@ private slots:
         const QString installed = root.path() + "/instances/fixture/.minecraft/mods/chosen.jar";
         QVERIFY(!QFile::exists(installed)); // Resolving a fix never installs without confirmation.
         installer.install();
-        QTRY_COMPARE(api.urls.size(), 2); api.respond(1, tamper ? "tampered" : bytes);
+        QTRY_COMPARE(api.urls.size(), 2); api.respond(1, tamper ? QByteArray("tampered") : bytes);
         QTRY_COMPARE(installer.state(), tamper ? "error" : "complete");
         QCOMPARE(QFile::exists(installed), !tamper);
     }
