@@ -6,6 +6,13 @@ Testing/
 compile_commands.json
 CMakeUserPresets.json
 .cache/
+# CMake run from the source folder by accident
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+__pycache__/
+*.pyc
+*.log
 
 # Packaging output (CI and local)
 AppDir/
@@ -23,6 +30,9 @@ dmg/
 # Private: tests and agent notes stay on this machine
 tests/
 Agent/
+/TODO.md
+/HANDOFF.md
+/.design-reference/
 
 # Editors and systems
 .vscode/
