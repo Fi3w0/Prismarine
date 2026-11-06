@@ -48,7 +48,7 @@ void ContentInstaller::prepareMany(const QString &id, const QVariantList &versio
 void ContentInstaller::getJson(const QUrl &url, std::function<void(const QJsonDocument &)> done)
 {
     const auto generation = m_generation;
-    QNetworkRequest request(url); request.setTransferTimeout(20000); request.setRawHeader("User-Agent", "Prismarine/0.4.0");
+    QNetworkRequest request(url); request.setTransferTimeout(20000); request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION);
     if (url.toString().startsWith(m_curseApi.toString() + "/")) {
         request.setRawHeader("x-api-key", m_curseKey);
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);

@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
     app.setApplicationName("Prismarine");
-    app.setApplicationVersion("0.4.0");
+    app.setApplicationVersion(PRISMARINE_VERSION);
     app.setOrganizationName("Prismarine");
     app.setDesktopFileName("io.github.fi3w0.Prismarine");
     QQuickStyle::setStyle("Basic");

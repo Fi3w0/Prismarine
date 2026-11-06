@@ -1,6 +1,6 @@
 # Template file for 'prismarine'
 pkgname=prismarine
-version=0.4.0
+version=0.5.0
 revision=1
 _commit=f5e9febe4b5504d8a8d54894fd62990171e4ce01
 wrksrc="Prismarine-${_commit}"

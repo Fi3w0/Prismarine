@@ -3,7 +3,7 @@
 set(QML_SOURCES
     qml/pages/FriendsPage.qml qml/social/SocialIdentityCard.qml qml/social/SocialFriendsCard.qml qml/social/SocialInvitesCard.qml
     qml/accounts/SkinParts.js qml/accounts/SkinMesh.qml qml/accounts/SkinScene.qml qml/accounts/FlatSkin.qml qml/accounts/ProfileDetails.qml qml/accounts/SkinLibrary.qml
-    qml/library/LibraryFact.qml qml/library/LibraryAction.qml
+    qml/library/LibraryFact.qml qml/library/LibraryAction.qml 
     qml/accounts/SkinAvatar.qml qml/accounts/AccountSwitcher.qml
     qml/browse/DownloadSelection.qml qml/browse/DownloadQueueBar.qml qml/browse/ProjectContent.qml
     qml/components/ContentIcon.qml qml/components/SideNavItem.qml qml/components/TextLink.qml qml/components/ConfirmDialog.qml
@@ -12,11 +12,11 @@ set(QML_SOURCES
     qml/components/MotionLoader.qml qml/components/MotionDialog.qml
     qml/components/RenameTarget.qml qml/shell/RenameInstanceDialog.qml
     qml/settings/LaunchSettingsForm.qml qml/settings/JavaRuntimePicker.qml qml/settings/InstanceSettingsDialog.qml
-    qml/browse/BrowseSidebar.qml qml/browse/CurseForgeKeyDialog.qml
+     qml/browse/BrowseSidebar.qml qml/browse/CurseForgeKeyDialog.qml
     qml/browse/InstallReviewDialog.qml
     qml/accounts/SkinPreview.qml qml/shell/PackImportDialog.qml
-    qml/Main.qml qml/theme/Colors.qml
-    qml/shell/NavigationRail.qml qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
+    qml/Main.qml  qml/theme/Colors.qml 
+    qml/shell/NavigationRail.qml  qml/shell/NewInstanceDialog.qml qml/shell/DuplicateDialog.qml qml/shell/Toast.qml qml/shell/FirstRunScreen.qml
     qml/pages/HomePage.qml qml/pages/LibraryPage.qml qml/pages/InstancePage.qml
     qml/pages/SettingsPage.qml qml/pages/AccountsPage.qml qml/pages/BrowsePage.qml
     qml/components/ToggleSwitch.qml qml/components/InputField.qml qml/components/SelectBox.qml
@@ -31,17 +31,17 @@ set(QML_SOURCES
     qml/instance/InstanceScreenshots.qml qml/instance/InstanceFiles.qml qml/instance/DatapackDialog.qml qml/instance/ContentUpdates.qml
     qml/instance/InstanceInfoPanel.qml qml/instance/InstanceQuickSettings.qml
     qml/instance/InstalledModsPanel.qml qml/instance/InstanceNotesPanel.qml
-    qml/home/HomeHero.qml
+    qml/home/HomeHero.qml 
     qml/home/HomeNews.qml
     qml/home/HomePlaytime.qml
     qml/home/HomeStats.qml
     qml/home/HomeWorlds.qml
     qml/home/RecentInstances.qml
-    qml/settings/AboutPanel.qml
+    qml/settings/AboutPanel.qml     
     qml/settings/AccentPicker.qml
     qml/settings/ThemePicker.qml
     qml/settings/AppearancePreview.qml
-    qml/settings/AppearanceSwitches.qml
+    qml/settings/AppearanceSwitches.qml              
     qml/settings/LibraryPreferences.qml
     qml/settings/SettingsSidebar.qml
     qml/library/InstanceSearch.qml
@@ -68,8 +68,9 @@ endforeach()
 set_source_files_properties(qml/theme/Colors.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(prismarine URI Prismarine VERSION 1.0 QML_FILES ${QML_SOURCES})
 set(LOGO_ASSETS assets/logos/shard-o.svg assets/logos/shard-k.svg assets/logos/desktop.svg)
+set(PROFILE_ASSETS  )
 # Outfit ships as static weights: Qt registers the variable font only as "Outfit Thin".
 set(FONT_ASSETS assets/fonts/Outfit-Regular.ttf assets/fonts/Outfit-Medium.ttf
     assets/fonts/Outfit-SemiBold.ttf assets/fonts/Outfit-Bold.ttf
     assets/fonts/MarcellusSC.ttf assets/fonts/Silkscreen.ttf)
-qt_add_resources(prismarine branding PREFIX "/" FILES ${FONT_ASSETS} ${LOGO_ASSETS})
+qt_add_resources(prismarine branding PREFIX "/" FILES ${FONT_ASSETS} ${LOGO_ASSETS} ${PROFILE_ASSETS})

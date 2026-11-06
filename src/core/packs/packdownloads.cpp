@@ -10,7 +10,7 @@ void PackImporter::downloadNext()
 {
     if (m_index >= m_plan.files.size()) { finish(); return; }
     const auto file = m_plan.files[m_index].toMap(); const auto generation = m_generation;
-    QNetworkRequest req(file.value("url").toUrl()); req.setRawHeader("User-Agent", "Prismarine/0.4.0"); req.setTransferTimeout(30000);
+    QNetworkRequest req(file.value("url").toUrl()); req.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION); req.setTransferTimeout(30000);
     auto *reply = m_network.get(req); m_reply = reply;
     auto bytes = std::make_shared<QByteArray>();
     connect(reply, &QNetworkReply::readyRead, this, [reply, bytes] { bytes->append(reply->readAll()); if (bytes->size() > 256 * 1024 * 1024) reply->abort(); });
@@ -58,7 +58,7 @@ void PackImporter::importVersion(const QVariantMap &version)
     auto count = std::make_shared<qint64>(0);
     const auto generation = m_generation;
     m_state = "fetching"; emit changed();
-    QNetworkRequest request(url); request.setTransferTimeout(30000); request.setRawHeader("User-Agent", "Prismarine/0.4.0");
+    QNetworkRequest request(url); request.setTransferTimeout(30000); request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION);
     auto *reply = m_network.get(request); m_reply = reply;
     connect(reply, &QNetworkReply::readyRead, this, [reply, output, hash, count] {
         const auto bytes = reply->readAll(); *count += bytes.size();

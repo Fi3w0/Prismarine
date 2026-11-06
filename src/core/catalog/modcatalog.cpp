@@ -10,7 +10,7 @@ ModCatalog::ModCatalog(QObject *parent, const QUrl &apiRoot, const QUrl &curseAp
 QNetworkRequest ModCatalog::request(const QUrl &url) const
 {
     QNetworkRequest req(url);
-    req.setRawHeader("User-Agent", "Prismarine/0.4.0 (Qt desktop UI)");
+    req.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION " (Qt desktop UI)");
     req.setRawHeader("Accept", "application/json");
     req.setTransferTimeout(15000);
     return req;

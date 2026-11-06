@@ -81,7 +81,7 @@ void ModUpdater::check(const QString &instanceId, const QString &type, const QSt
         if (QStringList{"fabric", "forge", "neoforge", "quilt", "datapack"}.contains(loader)) body.insert("loaders", QJsonArray{loader});
         QNetworkRequest request(QUrl(m_apiRoot.toString() + "/version_files/update"));
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        request.setRawHeader("User-Agent", "Prismarine/0.4.0 (Qt desktop UI)");
+        request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION " (Qt desktop UI)");
         request.setTransferTimeout(20000);
         auto *reply = m_network.post(request, QJsonDocument(body).toJson(QJsonDocument::Compact));
         m_reply = reply;
@@ -151,7 +151,7 @@ void ModUpdater::downloadNext()
     if (url.scheme() != "https" && !(m_apiRoot.scheme() == "http" && url.scheme() == "http")) { fail("Modrinth returned an unsafe download link."); return; }
     const quint64 generation = m_generation;
     QNetworkRequest request(url);
-    request.setRawHeader("User-Agent", "Prismarine/0.4.0 (Qt desktop UI)");
+    request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION " (Qt desktop UI)");
     request.setTransferTimeout(30000);
     auto *reply = m_network.get(request);
     m_reply = reply;

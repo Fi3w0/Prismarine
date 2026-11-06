@@ -121,7 +121,7 @@ void JavaManager::download(int major)
     m_busy = true; m_progress = 0; m_message = "Finding Eclipse Temurin " + QString::number(major) + "…"; emit changed();
     QUrl url(m_api.toString() + "/assets/latest/" + QString::number(major) + "/hotspot");
     QUrlQuery query; query.addQueryItem("architecture", arch); query.addQueryItem("os", os); query.addQueryItem("image_type", "jre"); query.addQueryItem("vendor", "eclipse"); url.setQuery(query);
-    QNetworkRequest request(url); request.setTransferTimeout(20000); request.setRawHeader("User-Agent", "Prismarine/0.4.0");
+    QNetworkRequest request(url); request.setTransferTimeout(20000); request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION);
     auto *reply = m_network.get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply, major] {
         reply->deleteLater();
@@ -135,7 +135,7 @@ void JavaManager::download(int major)
         if (!staging->isValid() || !file->open(QIODevice::WriteOnly)) { finish("Cannot prepare the Java download."); return; }
         auto hash = std::make_shared<QCryptographicHash>(QCryptographicHash::Sha256);
         auto bytes = std::make_shared<qint64>(0);
-        QNetworkRequest req(link); req.setTransferTimeout(30000); req.setRawHeader("User-Agent", "Prismarine/0.4.0");
+        QNetworkRequest req(link); req.setTransferTimeout(30000); req.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION);
         auto *download = m_network.get(req); m_message = "Downloading Eclipse Temurin…"; emit changed();
         connect(download, &QNetworkReply::readyRead, this, [download, file, hash, bytes] {
             const auto data = download->readAll(); *bytes += data.size();

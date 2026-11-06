@@ -23,7 +23,7 @@ void InstanceCreator::fetch(const QString &uid, std::function<void(const QJsonAr
     const auto generation = ++m_generation;
     m_loading = true; m_error.clear(); emit changed();
     QNetworkRequest req(QUrl(m_metadata.toString() + "/" + uid + "/index.json"));
-    req.setTransferTimeout(15000); req.setRawHeader("User-Agent", "Prismarine/0.4.0");
+    req.setTransferTimeout(15000); req.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION);
     auto *reply = m_network.get(req);
     connect(reply, &QNetworkReply::finished, this, [this, reply, generation, done] {
         if (generation == m_generation) {

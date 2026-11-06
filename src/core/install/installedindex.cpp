@@ -23,7 +23,7 @@ void ContentInstaller::indexInstalled(const QJsonArray &selected)
         if (hashes.isEmpty()) { appendSelection(selected); return; }
         QNetworkRequest request(QUrl(m_apiRoot.toString() + "/version_files"));
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        request.setRawHeader("User-Agent", "Prismarine/0.4.0"); request.setTransferTimeout(20000);
+        request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION); request.setTransferTimeout(20000);
         auto *reply = m_network.post(request, QJsonDocument(QJsonObject{{"hashes", hashes}, {"algorithm", "sha512"}}).toJson());
         m_reply = reply;
         connect(reply, &QNetworkReply::finished, this, [this, reply, selected, generation] {

@@ -42,7 +42,7 @@ void ContentInstaller::indexCurseForge(const QJsonArray &selected)
         const auto fingerprints = found.value("fingerprints").toArray(), hashes = found.value("sha1").toArray();
         if (fingerprints.isEmpty()) { appendSelection(selected); return; }
         QNetworkRequest request(QUrl(m_curseApi.toString() + "/fingerprints/432"));
-        request.setTransferTimeout(20000); request.setRawHeader("User-Agent", "Prismarine/0.4.0"); request.setRawHeader("x-api-key", m_curseKey);
+        request.setTransferTimeout(20000); request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION); request.setRawHeader("x-api-key", m_curseKey);
         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         auto *reply = m_network.post(request, QJsonDocument(QJsonObject{{"fingerprints", fingerprints}}).toJson()); m_reply = reply;

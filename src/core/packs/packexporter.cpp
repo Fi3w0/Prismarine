@@ -175,7 +175,7 @@ void PackExporter::lookUp(QList<ExportFile> files)
     const quint64 generation = m_generation;
     QNetworkRequest request(QUrl(m_apiRoot.toString() + "/version_files"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("User-Agent", "Prismarine/0.4.0 (Qt desktop UI)");
+    request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION " (Qt desktop UI)");
     request.setTransferTimeout(30000);
     auto *reply = m_network.post(request, QJsonDocument(QJsonObject{{"hashes", hashes}, {"algorithm", "sha512"}}).toJson(QJsonDocument::Compact));
     m_reply = reply;

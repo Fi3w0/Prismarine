@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation {
   pname = "prismarine";
-  version = "0.4.0";
+  version = "0.5.0";
   src = lib.cleanSource ../..;
 
   nativeBuildInputs = [ cmake ninja pkg-config qt6.wrapQtAppsHook ];

@@ -229,7 +229,7 @@ void GameSession::share()
     const QByteArray body = "content=" + QUrl::toPercentEncoding(QString::fromUtf8(file.readAll()));
     QNetworkRequest request(m_shareEndpoint);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    request.setRawHeader("User-Agent", "Prismarine/0.4.0 (Qt desktop UI)");
+    request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION " (Qt desktop UI)");
     request.setTransferTimeout(30000);
     m_sharing = true;
     emit changed();

@@ -31,7 +31,7 @@ body:
     id: version
     attributes:
       label: Prismarine version or commit
-      placeholder: "0.4.0, Nightly commit abc1234, or a local build"
+      placeholder: "0.5.0, Nightly commit abc1234, or a local build"
     validations:
       required: true
   - type: input

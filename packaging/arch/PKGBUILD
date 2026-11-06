@@ -1,7 +1,7 @@
 # Arch Linux package, built by CI from the checked-out source (makepkg in packaging/arch).
 # For the AUR, replace `source` with a release tarball and add its checksum.
 pkgname=prismarine
-pkgver=0.4.0
+pkgver=0.5.0
 pkgrel=1
 pkgdesc="Minecraft library and instance manager for Prism Launcher"
 arch=('x86_64' 'aarch64')

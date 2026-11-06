@@ -19,7 +19,7 @@ void ContentInstaller::downloadNext()
     const auto file = m_plan.at(m_downloadIndex).toMap();
     const auto generation = m_generation;
     QNetworkRequest request(file.value("url").toUrl()); request.setTransferTimeout(30000);
-    request.setRawHeader("User-Agent", "Prismarine/0.4.0");
+    request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION);
     auto *reply = m_network.get(request); m_reply = reply;
     auto bytes = std::make_shared<QByteArray>();
     connect(reply, &QNetworkReply::readyRead, this, [reply, bytes] {

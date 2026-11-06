@@ -14,7 +14,7 @@ void NewsFeed::load()
     m_error.clear();
     emit changed();
     QNetworkRequest request(m_feed);
-    request.setRawHeader("User-Agent", "Prismarine/0.4.0 (Qt desktop UI)");
+    request.setRawHeader("User-Agent", "Prismarine/" PRISMARINE_VERSION " (Qt desktop UI)");
     request.setTransferTimeout(15000);
     auto *reply = m_network.get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply] {
