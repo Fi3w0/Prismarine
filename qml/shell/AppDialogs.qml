@@ -143,4 +143,38 @@ Item {
         danger: true
         onConfirmed: if (dialogs.controller.instances.deleteGroup(group)) dialogs.controller.afterGroupEdit("Group deleted")
     }
+    // --dialog on the command line, for checking layouts.
+    function openForLayoutCheck(name) {
+        const c = dialogs.controller;
+        const id = c.current.instanceId || (c.instances.allInstances[0] || {}).instanceId || "";
+        switch (name) {
+        case "new-instance": c.createInstance(); break;
+        case "versions": c.editVersions(id); break;
+        case "import": c.importPack(); break;
+        case "rename": c.renameInstance(id); break;
+        case "duplicate": c.duplicateInstance(id); break;
+        case "export": c.exportInstance(id); break;
+        case "settings": c.editSettings(id); break;
+        case "group": c.newGroup(""); break;
+        case "move-group": c.moveToGroup(id); break;
+        case "delete-group": c.deleteGroup(c.instances.groupNames()[0] || "Group"); break;
+        case "menu": instanceMenu.x = 300; instanceMenu.y = 200; instanceMenu.instanceId = id; instanceMenu.open(); break;
+        case "drop":
+            drop.openFor([
+                { url: "file:///tmp/sodium-fabric-0.6.0.jar", fileName: "sodium-fabric-0.6.0.jar", name: "Sodium", kind: "mod", loaders: ["Fabric"] },
+                { url: "file:///tmp/create-1.21.1.jar", fileName: "create-1.21.1-6.0.jar", name: "Create", kind: "mod", loaders: ["NeoForge"] },
+                { url: "file:///tmp/Faithful.zip", fileName: "Faithful 32x.zip", name: "Faithful 32x", kind: "resourcepack", loaders: [] },
+                { url: "file:///tmp/BSL.zip", fileName: "BSL_v8.4.zip", name: "BSL_v8.4", kind: "shader", loaders: [] },
+                { url: "file:///tmp/pack.mrpack", fileName: "Fabulously Optimized.mrpack", name: "Fabulously Optimized", kind: "modpack", loaders: [] },
+                { url: "file:///tmp/notes.zip", fileName: "notes.zip", name: "notes", kind: "unknown", loaders: [] }
+            ], id); break;
+        case "palette": c.openPalette(); break;
+        case "artwork": c.editArtwork(id); break;
+        case "launch":
+            if (c.launchProgress) { c.launchProgress.start(id); c.launchProgress.reach("signin", "Getting authorization to access Mojang services"); launchOverlay.open(); }
+            break;
+        case "profile": c.saveModProfile(); break;
+        case "multi-account": c.launchAs(id, (c.instances.accounts[0] || {}).name || "Steve"); break;
+        }
+    }
 }

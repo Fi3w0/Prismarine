@@ -280,72 +280,10 @@ ApplicationWindow {
         applyPreferences();
         refresh();
     }
-    onDebugDialogChanged: Qt.callLater(function() {
-        const id = current.instanceId || (instances.allInstances[0] || {}).instanceId || "";
-        switch (debugDialog) {
-        case "new-instance": createInstance(); break;
-        case "versions": editVersions(id); break;
-        case "import": importPack(); break;
-        case "rename": renameInstance(id); break;
-        case "duplicate": duplicateInstance(id); break;
-        case "export": exportInstance(id); break;
-        case "settings": editSettings(id); break;
-        case "group": newGroup(""); break;
-        case "move-group": moveToGroup(id); break;
-        case "delete-group": deleteGroup(instances.groupNames()[0] || "Group"); break;
-        case "menu": dialogHost.instanceMenu.x = 300; dialogHost.instanceMenu.y = 200; dialogHost.instanceMenu.instanceId = id; dialogHost.instanceMenu.open(); break;
-        case "drop":
-            dialogHost.drop.openFor([
-                { url: "file:///tmp/sodium-fabric-0.6.0.jar", fileName: "sodium-fabric-0.6.0.jar", name: "Sodium", kind: "mod", loaders: ["Fabric"] },
-                { url: "file:///tmp/create-1.21.1.jar", fileName: "create-1.21.1-6.0.jar", name: "Create", kind: "mod", loaders: ["NeoForge"] },
-                { url: "file:///tmp/Faithful.zip", fileName: "Faithful 32x.zip", name: "Faithful 32x", kind: "resourcepack", loaders: [] },
-                { url: "file:///tmp/BSL.zip", fileName: "BSL_v8.4.zip", name: "BSL_v8.4", kind: "shader", loaders: [] },
-                { url: "file:///tmp/pack.mrpack", fileName: "Fabulously Optimized.mrpack", name: "Fabulously Optimized", kind: "modpack", loaders: [] },
-                { url: "file:///tmp/notes.zip", fileName: "notes.zip", name: "notes", kind: "unknown", loaders: [] }
-            ], id); break;
-        case "drop-overlay": dropOverlay.active = true; break;
-        case "palette": openPalette(); break;
-        case "artwork": editArtwork(id); break;
-        case "launch":
-            if (launchProgress) { launchProgress.start(id); launchProgress.reach("signin", "Getting authorization to access Mojang services"); dialogHost.launchOverlay.open(); }
-            break;
-        case "profile": saveModProfile(); break;
-        case "multi-account": launchAs(id, (instances.accounts[0] || {}).name || "Steve"); break;
-        }
+    onDebugDialogChanged: Qt.callLater(() => {
+        if (debugDialog === "drop-overlay") dropOverlay.active = true;
+        else dialogHost.openForLayoutCheck(debugDialog);
     })
-    Shortcut {
-        sequence: "F11"
-        onActivated: appWindow.visibility = appWindow.visibility === Window.FullScreen ? Window.Windowed : Window.FullScreen
-    }
-    Shortcut {
-        sequences: ["Ctrl+K", "Ctrl+Shift+P"]
-        onActivated: appWindow.openPalette()
-    }
-    Shortcut {
-        sequence: "Ctrl+F"
-        onActivated: {
-            appWindow.navigate("library");
-            if (pageLoader.item)
-                pageLoader.item.focusSearch();
-        }
-    }
-    Shortcut {
-        sequence: "F2"
-        enabled: !dialogHost.rename.visible && ((appWindow.page === "library" && appWindow.hasSelection) || (appWindow.page === "instance" && !!appWindow.details.instanceId))
-        onActivated: appWindow.renameInstance(appWindow.page === "instance" ? appWindow.details.instanceId : appWindow.current.instanceId)
-    }
-    Shortcut {
-        sequence: "Ctrl+R"
-        onActivated: appWindow.reloadLibrary()
-    }
-    Shortcut {
-        sequence: "F5"
-        onActivated: appWindow.reloadLibrary()
-    }
-    Shortcut {
-        sequence: "Alt+Left"
-        onActivated: appWindow.back()
-    }
     Timer {
         id: reefCrownTimer
         interval: 12000
@@ -521,6 +459,7 @@ ApplicationWindow {
     function browsePacks() { contentActions.browsePacks(); }
     function browseDatapacks(id, world) { contentActions.browseDatapacks(id, world); }
     function browseFor(id, text) { contentActions.browseFor(id, text); }
+    AppShortcuts { controller: appWindow }
     AppEvents { controller: appWindow }
     AppDialogs {
         id: dialogHost
